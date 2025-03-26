@@ -12,9 +12,33 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Get allowed origins based on environment
+const getAllowedOrigins = () => {
+  const origins = [
+    'http://localhost:5173',  // Vite dev server
+    'http://localhost:5174',
+    'http://localhost:3000',  // Next.js dev server
+    'http://localhost:4173',  // Vite preview
+    'http://localhost:5000',  // Express server
+    'http://localhost:5001'   // Express server alternate port
+  ];
+  
+  // Add Vercel deployment URL if in production
+  if (process.env.VERCEL_URL) {
+    origins.push(`https://${process.env.VERCEL_URL}`);
+  }
+  
+  // Allow all origins in development
+  if (process.env.NODE_ENV !== 'production') {
+    return '*';
+  }
+  
+  return origins;
+};
+
 // Update the CORS middleware configuration
 app.use(cors({
-  origin: '*',  // Allow all origins during development
+  origin: getAllowedOrigins(),
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
