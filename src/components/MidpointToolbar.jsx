@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { findMidpoint } from '../api/embedding';
+import { getApiServerUrl } from '../utils/environment';
 
 const MidpointToolbar = ({ 
   words, 
-  serverUrl, 
+  serverUrl = getApiServerUrl(), 
   setMidpointClusters, 
   setLoading, 
   setError 

@@ -2,6 +2,10 @@ import embeddingService from '../server/services/embeddingService.js';
 import { performPCA } from '../server/utils/mathHelpers.js';
 
 export default async function handler(req, res) {
+  console.log(`[API] getVectorCoordinates called with method: ${req.method}`);
+  console.log(`[API] Request origin: ${req.headers.origin || 'unknown'}`);
+  console.log(`[API] Request body:`, JSON.stringify(req.body));
+  
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,22 +17,29 @@ export default async function handler(req, res) {
   
   // Handle OPTIONS method for preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('[API] Responding to OPTIONS request');
     return res.status(200).end();
   }
   
   if (req.method !== 'POST') {
+    console.log(`[API] Method not allowed: ${req.method}`);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     // Initialize embeddings
+    console.log('[API] Loading embeddings...');
     await embeddingService.loadEmbeddings();
+    console.log('[API] Embeddings loaded successfully');
     
     const { words, dimensions = 2 } = req.body;
     
     if (!words || !Array.isArray(words) || words.length === 0) {
+      console.log('[API] Invalid words array:', words);
       return res.status(400).json({ error: 'Invalid words array' });
     }
+    
+    console.log(`[API] Processing words: ${JSON.stringify(words)}`);
     
     // Validate dimensions
     const projectionDimensions = dimensions === 3 ? 3 : 2;

@@ -5,12 +5,13 @@ import VectorGraph2D from './visualization/VectorGraph2D';
 import VectorGraph3D from './visualization/VectorGraph3D';
 import LoadingOverlay from './visualization/LoadingOverlay';
 import ErrorOverlay from './visualization/ErrorOverlay';
+import { getApiServerUrl } from '../utils/environment';
 
 const VectorGraph = ({ 
   words, 
   midpointWords, 
   numMidpoints, 
-  serverUrl = 'http://localhost:5001', 
+  serverUrl = getApiServerUrl(), 
   viewMode = '2D', 
   setViewMode,
   rulerActive // Receive as prop instead of managing state

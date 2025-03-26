@@ -1,6 +1,10 @@
 import embeddingService from '../server/services/embeddingService.js';
 
 export default async function handler(req, res) {
+  console.log(`[API] checkWord called with method: ${req.method}`);
+  console.log(`[API] Request origin: ${req.headers.origin || 'unknown'}`);
+  console.log(`[API] Request body:`, JSON.stringify(req.body));
+  
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,22 +16,29 @@ export default async function handler(req, res) {
   
   // Handle OPTIONS method for preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('[API] Responding to OPTIONS request');
     return res.status(200).end();
   }
   
   if (req.method !== 'POST') {
+    console.log(`[API] Method not allowed: ${req.method}`);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     // Initialize embeddings
+    console.log('[API] Loading embeddings...');
     await embeddingService.loadEmbeddings();
+    console.log('[API] Embeddings loaded successfully');
     
     const { word } = req.body;
     
     if (!word) {
+      console.log('[API] Word is required but missing');
       return res.status(400).json({ error: 'Word is required' });
     }
+    
+    console.log(`[API] Checking word: "${word}"`);
     
     // Check if word exists in embeddings
     const wordExists = embeddingService.wordExists(word);

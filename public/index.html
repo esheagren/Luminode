@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/luminode.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VectorMind - Word Embedding Visualization</title>
+  <meta name="description" content="Visualize semantic relationships between words using vector embeddings" />
+  <script type="module" crossorigin>
+    // Redirect to Vercel deployed app if directly accessed via the /public/index.html URL
+    if (window.location.pathname.includes('/public/index.html')) {
+      window.location.href = '/';
+    }
+  </script>
+</head>
+<body>
+  <div id="root">
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; color: #333; font-family: Arial, sans-serif;">
+      <div>
+        <h1>Loading VectorMind</h1>
+        <p>If you continue to see this message, please ensure JavaScript is enabled in your browser.</p>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html> 

@@ -1,22 +1,11 @@
 import axios from 'axios';
-
-// Determine the server URL based on the environment
-const getServerUrl = () => {
-  // If we're in a browser environment
-  if (typeof window !== 'undefined') {
-    // For production (Vercel deployment)
-    if (window.location.hostname.includes('vercel.app') || !window.location.hostname.includes('localhost')) {
-      return ''; // Use relative URL in production
-    }
-    // For local development
-    return 'http://localhost:5001';
-  }
-  // If we're in a Node.js environment (like during SSR)
-  return 'http://localhost:5001';
-};
+import { getApiServerUrl } from '../utils/environment';
 
 // Default server URL - dynamically determined
-const DEFAULT_SERVER_URL = getServerUrl();
+const DEFAULT_SERVER_URL = getApiServerUrl();
+
+// Log the determined server URL
+console.log('API Service using server URL:', DEFAULT_SERVER_URL || '[relative URL]');
 
 /**
  * Find nearest neighbors for a word
