@@ -2,9 +2,22 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import hnsw from 'hnswlib-node';
+import axios from 'axios';
+import { promisify } from 'util';
+import stream from 'stream';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Helper to pipe download to file
+const pipeline = promisify(stream.pipeline);
+
+// URLs to embedding files (replace with your actual URLs)
+const EMBEDDING_FILES = {
+  index: process.env.EMBEDDING_INDEX_URL || 'https://your-bucket.s3.amazonaws.com/hnsw_index.bin',
+  wordToId: process.env.WORD_TO_ID_URL || 'https://your-bucket.s3.amazonaws.com/word_to_id.json',
+  idToWord: process.env.ID_TO_WORD_URL || 'https://your-bucket.s3.amazonaws.com/id_to_word.json'
+};
 
 class EmbeddingService {
   constructor() {
@@ -31,21 +44,31 @@ class EmbeddingService {
 
     this.loading = new Promise(async (resolve, reject) => {
       try {
-        // Check if index exists
+        // File paths
         const indexPath = join(__dirname, '../embeddings/hnsw_index.bin');
         const wordMapPath = join(__dirname, '../embeddings/word_to_id.json');
         const idMapPath = join(__dirname, '../embeddings/id_to_word.json');
         
-        if (!fs.existsSync(indexPath) || !fs.existsSync(wordMapPath) || !fs.existsSync(idMapPath)) {
-          throw new Error('Index files not found. Please run the build-index script first.');
+        // Create embeddings directory if it doesn't exist
+        const embeddingsDir = join(__dirname, '../embeddings');
+        if (!fs.existsSync(embeddingsDir)) {
+          console.log('Creating embeddings directory...');
+          fs.mkdirSync(embeddingsDir, { recursive: true });
         }
         
+        // Check if files exist and download if necessary
+        await this.ensureFileExists(indexPath, EMBEDDING_FILES.index);
+        await this.ensureFileExists(wordMapPath, EMBEDDING_FILES.wordToId);
+        await this.ensureFileExists(idMapPath, EMBEDDING_FILES.idToWord);
+        
         // Load word mappings first
+        console.log('Loading word mappings...');
         const wordToIdArray = JSON.parse(fs.readFileSync(wordMapPath, 'utf8'));
         this.wordToId = new Map(wordToIdArray);
         this.idToWord = JSON.parse(fs.readFileSync(idMapPath, 'utf8'));
         
         // Initialize the index with the correct parameters
+        console.log('Initializing HNSW index...');
         this.index = new hnsw.HierarchicalNSW('l2', this.dimensions);
         
         // We need to initialize the index before reading it
@@ -54,6 +77,7 @@ class EmbeddingService {
         this.index.initIndex(numElements, 16, 200);
         
         // Now read the index from file
+        console.log('Reading index from file...');
         this.index.readIndex(indexPath);
         
         // Set search parameters
@@ -70,6 +94,29 @@ class EmbeddingService {
     });
 
     return this.loading;
+  }
+  
+  // Helper to ensure a file exists, downloading it if necessary
+  async ensureFileExists(filePath, url) {
+    if (fs.existsSync(filePath)) {
+      console.log(`File already exists: ${filePath}`);
+      return;
+    }
+    
+    console.log(`Downloading file from ${url} to ${filePath}...`);
+    try {
+      const response = await axios({
+        method: 'GET',
+        url: url,
+        responseType: 'stream'
+      });
+      
+      await pipeline(response.data, fs.createWriteStream(filePath));
+      console.log(`Downloaded file successfully: ${filePath}`);
+    } catch (error) {
+      console.error(`Error downloading file from ${url}:`, error);
+      throw new Error(`Failed to download embedding file: ${error.message}`);
+    }
   }
 
   getWordVector(word) {
