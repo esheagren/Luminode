@@ -4,7 +4,33 @@
     { "src": "package.json", "use": "@vercel/static-build" }
   ],
   "routes": [
+    {
+      "src": "/assets/(.*)\\.js",
+      "headers": { "content-type": "application/javascript" },
+      "dest": "/assets/$1.js"
+    },
+    {
+      "src": "/assets/(.*)\\.css",
+      "headers": { "content-type": "text/css" },
+      "dest": "/assets/$1.css"
+    },
+    {
+      "src": "/assets/(.*)\\.(woff|woff2)",
+      "headers": { "content-type": "application/font-woff" },
+      "dest": "/assets/$1.$2"
+    },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
+      ]
+    }
   ]
 }
