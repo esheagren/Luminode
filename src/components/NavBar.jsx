@@ -21,6 +21,11 @@ const NavBar = () => {
               Learn
             </Link>
           </li>
+          <li className="nav-item">
+            <Link to="/api-test" className="nav-link">
+              API Test
+            </Link>
+          </li>
         </ul>
       </div>
       

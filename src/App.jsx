@@ -1,8 +1,8 @@
-import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import NavBar from './components/NavBar.jsx'
 import HomePage from './components/HomePage.jsx'
 import AboutPage from './components/about/AboutPage.jsx'
+import ApiTest from './components/ApiTest.jsx'
 import Footer from './components/Footer.jsx'
 import './App.css'
 
@@ -30,6 +30,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/api-test" element={<ApiTest />} />
               <Route path="/contact" element={<div className="content-page"><h2>Contact</h2></div>} />
             </Routes>
           </div>

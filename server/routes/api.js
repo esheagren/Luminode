@@ -4,6 +4,15 @@ import { performPCA } from '../utils/mathHelpers.js';
 
 const router = express.Router();
 
+// Simple test endpoint to verify API connectivity
+router.get('/test', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'API is working correctly',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Endpoint to check if words exist and get their vectors
 // router.post('/submit', async (req, res) => {
 //   console.log('Received request to /submit with body:', req.body);

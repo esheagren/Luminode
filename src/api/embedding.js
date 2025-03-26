@@ -1,7 +1,22 @@
 import axios from 'axios';
 
-// Default server URL - should be configurable
-const DEFAULT_SERVER_URL = 'http://localhost:5001';
+// Use relative URLs in production, localhost in development
+const getServerUrl = () => {
+  // Check if we're running in a browser environment
+  if (typeof window !== 'undefined') {
+    // If the URL includes localhost, use the default localhost URL
+    if (window.location.hostname === 'localhost') {
+      return 'http://localhost:5001';
+    }
+    // In production (Vercel), use relative URLs
+    return '';
+  }
+  // Fallback for non-browser environments
+  return 'http://localhost:5001';
+};
+
+// Get the server URL once at module load time
+const DEFAULT_SERVER_URL = getServerUrl();
 
 /**
  * Find nearest neighbors for a word

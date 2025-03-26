@@ -10,11 +10,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
-// Update the CORS middleware configuration
+// Update the CORS middleware configuration for Vercel
 app.use(cors({
-  origin: '*',  // Allow all origins during development
+  origin: true, // This will reflect the request origin as allowed
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
@@ -26,21 +26,17 @@ app.use(express.urlencoded({ extended: true }));
 // API routes
 app.use('/api', apiRoutes);
 
-// Serve static assets in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(join(__dirname, '../client/build')));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(join(__dirname, '../client/build/index.html'));
-  });
-}
-
 // Check if embeddings directory exists
 const embeddingsDir = join(__dirname, 'embeddings');
 if (!fs.existsSync(embeddingsDir)) {
-  fs.mkdirSync(embeddingsDir, { recursive: true });
-  console.log(`Created embeddings directory at ${embeddingsDir}`);
-  console.log('Please place glove.6B.200d.txt file in this directory before starting the server.');
+  try {
+    fs.mkdirSync(embeddingsDir, { recursive: true });
+    console.log(`Created embeddings directory at ${embeddingsDir}`);
+  } catch (error) {
+    console.error('Error creating embeddings directory:', error);
+    // In serverless environments, we might not have write access
+    // So we'll continue even if this fails
+  }
 }
 
 // Function to start server with port fallback
@@ -69,5 +65,10 @@ const startServer = (port) => {
   });
 };
 
-// Start the server
-startServer(PORT); 
+// Only start the server in a non-serverless environment
+if (process.env.NODE_ENV !== 'production') {
+  startServer(PORT);
+}
+
+// For serverless environments like Vercel, we need to export the app
+export default app; 
