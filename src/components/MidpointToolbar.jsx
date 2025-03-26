@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { findMidpoint } from '../api/embedding';
-import { getApiServerUrl } from '../utils/environment';
 
 const MidpointToolbar = ({ 
   words, 
-  serverUrl = getApiServerUrl(), 
   setMidpointClusters, 
   setLoading, 
   setError 
@@ -30,8 +28,7 @@ const MidpointToolbar = ({
         word2, 
         5,
         recursionDepth,
-        useExactSearch,
-        serverUrl
+        useExactSearch
       );
       
       // Process results for visualization

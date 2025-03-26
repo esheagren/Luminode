@@ -1,14 +1,37 @@
 {
   "version": 2,
   "builds": [
+    { "src": "server/server.js", "use": "@vercel/node" },
     { "src": "api/*.js", "use": "@vercel/node" },
-    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
+    { "src": "package.json", "use": "@vercel/static-build" }
   ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept"
+      },
+      "dest": "/api/$1.js",
+      "continue": true
+    },
     { "src": "/api/getVectorCoordinates", "dest": "/api/getVectorCoordinates.js" },
     { "src": "/api/checkWord", "dest": "/api/checkWord.js" },
-    { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/(.*)", "dest": "/$1", "continue": true },
-    { "src": "/(.*)", "dest": "/index.html", "status": 200 }
+    { "src": "/api", "dest": "/api/index.js" },
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/(.+\\.[a-z]+)$", "dest": "/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
+      ]
+    }
   ]
 } 

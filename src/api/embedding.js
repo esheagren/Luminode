@@ -1,30 +1,25 @@
 import axios from 'axios';
-import { getApiServerUrl } from '../utils/environment';
-
-// Default server URL - dynamically determined
-const DEFAULT_SERVER_URL = getApiServerUrl();
+import { getApiServerUrl, getApiUrl } from '../utils/environment';
 
 // Log the determined server URL
-console.log('API Service using server URL:', DEFAULT_SERVER_URL || '[relative URL]');
+console.log('API Service using server URL:', getApiServerUrl());
 
 /**
  * Find nearest neighbors for a word
  * @param {string} word - Word to find neighbors for
  * @param {number} numResults - Number of neighbors to return
  * @param {boolean} useExactSearch - Whether to use exact search (slower but more accurate)
- * @param {string} serverUrl - Server URL
  * @returns {Promise<Object>} - Nearest neighbors
  */
 export const findNeighbors = async (
   word, 
   numResults = 5, 
-  useExactSearch = false, 
-  serverUrl = DEFAULT_SERVER_URL
+  useExactSearch = false
 ) => {
   try {
     console.log(`Finding neighbors for "${word}" with ${useExactSearch ? 'exact' : 'approximate'} search`);
     
-    const response = await axios.post(`${serverUrl}/api/findNeighbors`, {
+    const response = await axios.post(getApiUrl('/api/findNeighbors'), {
       word,
       numResults,
       useExactSearch
@@ -44,7 +39,6 @@ export const findNeighbors = async (
  * @param {number} numResults - Number of neighbors to return
  * @param {number} recursionDepth - How many levels of midpoints to find
  * @param {boolean} useExactSearch - Whether to use exact search
- * @param {string} serverUrl - Server URL
  * @returns {Promise<Object>} - Midpoint search results
  */
 export const findMidpoint = async (
@@ -52,13 +46,12 @@ export const findMidpoint = async (
   word2,
   numResults = 5,
   recursionDepth = 0,
-  useExactSearch = true,
-  serverUrl = DEFAULT_SERVER_URL
+  useExactSearch = true
 ) => {
   try {
     console.log(`Finding midpoint between "${word1}" and "${word2}" with ${useExactSearch ? 'exact' : 'approximate'} search`);
     
-    const response = await axios.post(`${serverUrl}/api/findMidpoint`, {
+    const response = await axios.post(getApiUrl('/api/findMidpoint'), {
       word1,
       word2,
       numResults,
@@ -80,7 +73,6 @@ export const findMidpoint = async (
  * @param {string} word3 - Third word in the analogy
  * @param {number} numResults - Number of results to return
  * @param {boolean} useExactSearch - Whether to use exact search
- * @param {string} serverUrl - Server URL
  * @returns {Promise<Object>} - Object containing analogy formula and results
  */
 export const findAnalogy = async (
@@ -88,13 +80,12 @@ export const findAnalogy = async (
   word2,
   word3,
   numResults = 5,
-  useExactSearch = true,
-  serverUrl = DEFAULT_SERVER_URL
+  useExactSearch = true
 ) => {
   try {
     console.log(`Finding analogy ${word1}:${word2}::${word3}:? with ${useExactSearch ? 'exact' : 'approximate'} search`);
     
-    const response = await axios.post(`${serverUrl}/api/findAnalogy`, {
+    const response = await axios.post(getApiUrl('/api/findAnalogy'), {
       word1,
       word2,
       word3,
@@ -113,16 +104,14 @@ export const findAnalogy = async (
  * Get vector coordinates for visualization
  * @param {Array<string>} words - Words to get coordinates for
  * @param {number} dimensions - Number of dimensions (2 or 3)
- * @param {string} serverUrl - Server URL
  * @returns {Promise<Array>} - Coordinates for visualization
  */
 export const getVectorCoordinates = async (
   words,
-  dimensions = 2,
-  serverUrl = DEFAULT_SERVER_URL
+  dimensions = 2
 ) => {
   try {
-    const response = await axios.post(`${serverUrl}/api/getVectorCoordinates`, {
+    const response = await axios.post(getApiUrl('/api/getVectorCoordinates'), {
       words,
       dimensions
     });
@@ -137,15 +126,11 @@ export const getVectorCoordinates = async (
 /**
  * Check if a word exists and get its vector
  * @param {string} word - Word to check
- * @param {string} serverUrl - Server URL
  * @returns {Promise<Object>} - Word info including vector
  */
-export const checkWord = async (
-  word,
-  serverUrl = DEFAULT_SERVER_URL
-) => {
+export const checkWord = async (word) => {
   try {
-    const response = await axios.post(`${serverUrl}/api/checkWord`, { word });
+    const response = await axios.post(getApiUrl('/api/checkWord'), { word });
     return response.data.data;
   } catch (error) {
     console.error(`Error checking word "${word}":`, error);

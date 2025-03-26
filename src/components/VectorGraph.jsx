@@ -5,13 +5,12 @@ import VectorGraph2D from './visualization/VectorGraph2D';
 import VectorGraph3D from './visualization/VectorGraph3D';
 import LoadingOverlay from './visualization/LoadingOverlay';
 import ErrorOverlay from './visualization/ErrorOverlay';
-import { getApiServerUrl } from '../utils/environment';
+import { getApiUrl } from '../utils/environment';
 
 const VectorGraph = ({ 
   words, 
   midpointWords, 
   numMidpoints, 
-  serverUrl = getApiServerUrl(), 
   viewMode = '2D', 
   setViewMode,
   rulerActive // Receive as prop instead of managing state
@@ -54,7 +53,7 @@ const VectorGraph = ({
         console.log(`Fetching ${viewMode} coordinates for words:`, uniqueWords);
         
         // Get the vector coordinates for visualization
-        const response = await axios.post(`${serverUrl}/api/getVectorCoordinates`, { 
+        const response = await axios.post(getApiUrl('/api/getVectorCoordinates'), { 
           words: uniqueWords,
           dimensions: viewMode === '3D' ? 3 : 2
         });
@@ -62,7 +61,7 @@ const VectorGraph = ({
         // Now fetch the actual vector data for each word for the tooltips
         const vectorPromises = uniqueWords.map(async (word) => {
           try {
-            const vectorResponse = await axios.post(`${serverUrl}/api/checkWord`, { word });
+            const vectorResponse = await axios.post(getApiUrl('/api/checkWord'), { word });
             return {
               word,
               vector: vectorResponse.data.data.word.vector
@@ -113,7 +112,7 @@ const VectorGraph = ({
     };
     
     fetchCoordinates();
-  }, [words, midpointWords, serverUrl, viewMode]);
+  }, [words, midpointWords, viewMode]);
   
   // Add transition animation when switching view modes
   useEffect(() => {
