@@ -1,4 +1,4 @@
-This project visualizes semantic relationships between words by recursively finding midpoints between their embedding vectors, revealing intermediate semantic connections and demonstrating how closely concepts relate in language. It iteratively computes midpoint embeddings between two given words, identifies the nearest existing word embeddings, and recursively repeats this process to map semantic spaces!
+This project visualizes semantic relationships between words by recursively finding midpoints between their embedding vectors, revealing intermediate semantic connections and demonstrating how closely concepts relate in language. It iteratively computes midpoint embeddings between two given words, identifies the nearest existing word embeddings, and recursively repeats this process to map semantic spaces.
 ￼
 🔧 High-Level System Architecture
 	•	Frontend:
