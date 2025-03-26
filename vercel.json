@@ -1,28 +1,31 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "package.json", "use": "@vercel/static-build" }
-  ],
-  "routes": [
-    {
-      "src": "/assets/(.*)\\.js",
-      "headers": { "content-type": "application/javascript" },
-      "dest": "/assets/$1.js"
-    },
-    {
-      "src": "/assets/(.*)\\.css",
-      "headers": { "content-type": "text/css" },
-      "dest": "/assets/$1.css"
-    },
-    {
-      "src": "/assets/(.*)\\.(woff|woff2)",
-      "headers": { "content-type": "application/font-woff" },
-      "dest": "/assets/$1.$2"
-    },
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
+    {
+      "source": "/assets/(.*)\\.js",
+      "headers": [
+        { "key": "Content-Type", "value": "application/javascript" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)\\.css",
+      "headers": [
+        { "key": "Content-Type", "value": "text/css" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)\\.(woff|woff2)",
+      "headers": [
+        { "key": "Content-Type", "value": "application/font-woff" }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
