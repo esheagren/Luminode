@@ -1,141 +1,203 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { findAnalogy } from '../utils/findAnalogy';
 import './AnalogyToolbar.css';
 
 const AnalogyToolbar = ({ 
   words, 
-  serverUrl, 
-  setMidpointClusters,
-  setLoading,
-  setError
+  setLoading, 
+  setError, 
+  loading,
+  wordsValid
 }) => {
-  const [word1, setWord1] = useState('');
-  const [word2, setWord2] = useState('');
-  const [word3, setWord3] = useState('');
-  const [isComputing, setIsComputing] = useState(false);
+  const [selectedWords, setSelectedWords] = useState({
+    word1: words[0] || '',
+    word2: words[1] || '',
+    word3: words[2] || ''
+  });
   
-  // Set initial words if available
-  useEffect(() => {
-    if (words.length >= 3) {
-      setWord1(words[0]);
-      setWord2(words[1]);
-      setWord3(words[2]);
-    } else if (words.length === 2) {
-      setWord1(words[0]);
-      setWord2(words[1]);
-    }
+  // Update selected words when the words prop changes
+  React.useEffect(() => {
+    setSelectedWords({
+      word1: words[0] || '',
+      word2: words[1] || '',
+      word3: words[2] || '',
+    });
   }, [words]);
   
-  const handleComputeAnalogy = async () => {
+  const handleWordChange = (field, word) => {
+    setSelectedWords({ ...selectedWords, [field]: word });
+  };
+  
+  const findAnalogyWords = async () => {
+    const { word1, word2, word3 } = selectedWords;
+    
     if (!word1 || !word2 || !word3) {
       setError('Please select all three words for the analogy');
       return;
     }
     
-    setIsComputing(true);
     setLoading(true);
+    setError(null);
     
     try {
-      console.log(`Computing analogy: ${word1} is to ${word2} as ${word3} is to ?`);
-      const result = await findAnalogy(word1, word2, word3, 5, serverUrl);
-      console.log("Analogy results:", result);
+      const result = await findAnalogy(word1, word2, word3, 5);
       
-      // Process results to ensure they're in the correct format
-      const processedResults = result.results.map(r => ({
-        word: typeof r.word === 'string' ? r.word : String(r.word),
-        distance: typeof r.distance === 'number' ? r.distance : 0
-      }));
-      
-      // Automatically add all results to visualization
-      addAnalogyToVisualization(processedResults);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        console.log('Analogy result:', result);
+        // Here you could visualize the analogy results
+        // For now we'll just log them
+      }
     } catch (error) {
-      console.error('Error computing analogy:', error);
-      setError('Failed to compute analogy: ' + (error.response?.data?.error || error.message));
+      console.error('Error in analogy search:', error);
+      setError('Failed to complete analogy operation');
     } finally {
-      setIsComputing(false);
       setLoading(false);
     }
   };
-  
-  const addAnalogyToVisualization = (results) => {
-    if (!results || results.length === 0) return;
-    
-    console.log(`Adding ${results.length} analogy results to visualization`);
-    
-    const analogyCluster = {
-      type: 'analogy',
-      source: {
-        word1,
-        word2,
-        word3
-      },
-      words: results.map(item => ({
-        word: item.word,
-        distance: item.distance,
-        isAnalogy: true,
-        analogySource: {  // Add source information for drawing connections
-          fromWords: [word1, word2, word3]
-        }
-      }))
-    };
-    
-    // Update the visualization with the new analogy results
-    setMidpointClusters(prevClusters => [analogyCluster, ...prevClusters]);
-  };
-  
+
   return (
     <div className="analogy-toolbar">
-      <div className="analogy-setup">
-        <select 
-          value={word1}
-          onChange={(e) => setWord1(e.target.value)}
-          disabled={isComputing}
-          className="analogy-select"
-        >
-          <option value="">Select</option>
-          {words.map((word, index) => (
-            <option key={`w1-${index}`} value={word}>{word}</option>
-          ))}
-        </select>
+      <div className="analogy-explanation">
+        <span className="formula">word1 : word2 :: word3 : ?</span>
+      </div>
+      
+      <div className="analogy-inputs">
+        <div className="word-select">
+          <label>Word 1:</label>
+          <select 
+            value={selectedWords.word1} 
+            onChange={(e) => handleWordChange('word1', e.target.value)}
+            disabled={loading || !wordsValid}
+          >
+            <option value="">Select a word</option>
+            {words.map((word, index) => (
+              <option key={`w1-${index}`} value={word}>{word}</option>
+            ))}
+          </select>
+        </div>
         
-        <span className="analogy-connector">is to</span>
+        <div className="word-select">
+          <label>Word 2:</label>
+          <select 
+            value={selectedWords.word2} 
+            onChange={(e) => handleWordChange('word2', e.target.value)}
+            disabled={loading || !wordsValid}
+          >
+            <option value="">Select a word</option>
+            {words.map((word, index) => (
+              <option key={`w2-${index}`} value={word}>{word}</option>
+            ))}
+          </select>
+        </div>
         
-        <select 
-          value={word2}
-          onChange={(e) => setWord2(e.target.value)}
-          disabled={isComputing}
-          className="analogy-select"
-        >
-          <option value="">Select</option>
-          {words.map((word, index) => (
-            <option key={`w2-${index}`} value={word}>{word}</option>
-          ))}
-        </select>
-        
-        <span className="analogy-connector">as</span>
-        
-        <select 
-          value={word3}
-          onChange={(e) => setWord3(e.target.value)}
-          disabled={isComputing}
-          className="analogy-select"
-        >
-          <option value="">Select</option>
-          {words.map((word, index) => (
-            <option key={`w3-${index}`} value={word}>{word}</option>
-          ))}
-        </select>
-        
-        <span className="analogy-connector">is to</span>
-        
+        <div className="word-select">
+          <label>Word 3:</label>
+          <select 
+            value={selectedWords.word3} 
+            onChange={(e) => handleWordChange('word3', e.target.value)}
+            disabled={loading || !wordsValid}
+          >
+            <option value="">Select a word</option>
+            {words.map((word, index) => (
+              <option key={`w3-${index}`} value={word}>{word}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      
+      <div className="analogy-actions">
         <button 
-          className="analogy-compute-button"
-          onClick={handleComputeAnalogy}
-          disabled={isComputing || !word1 || !word2 || !word3}
+          className="search-btn"
+          onClick={findAnalogyWords}
+          disabled={loading || !wordsValid || !selectedWords.word1 || !selectedWords.word2 || !selectedWords.word3}
         >
-          {isComputing ? 'Computing...' : 'Find'}
+          Find Analogy
         </button>
       </div>
+      
+      <style jsx>{`
+        .analogy-toolbar {
+          background-color: #1a1a1c;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-top: 0.5rem;
+        }
+        
+        .analogy-explanation {
+          margin-bottom: 0.75rem;
+          text-align: center;
+        }
+        
+        .formula {
+          font-family: monospace;
+          background-color: #2a2a2c;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          color: #f8fafc;
+        }
+        
+        .analogy-inputs {
+          display: flex;
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+        }
+        
+        .word-select {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+        
+        label {
+          font-size: 0.85rem;
+          color: #94a3b8;
+        }
+        
+        select {
+          padding: 0.5rem;
+          border-radius: 4px;
+          background-color: #2a2a2c;
+          color: #e2e8f0;
+          border: 1px solid #3a3a3c;
+          font-size: 0.9rem;
+        }
+        
+        select:focus {
+          outline: none;
+          border-color: #FFC837;
+          box-shadow: 0 0 0 2px rgba(255, 200, 55, 0.2);
+        }
+        
+        .analogy-actions {
+          display: flex;
+          justify-content: center;
+        }
+        
+        .search-btn {
+          background-color: #FFC837;
+          color: #1a1a1c;
+          border: none;
+          padding: 0.5rem 1.5rem;
+          border-radius: 4px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        
+        .search-btn:hover:not(:disabled) {
+          background-color: #FFD166;
+          transform: translateY(-2px);
+        }
+        
+        .search-btn:disabled {
+          background-color: #3a3a3c;
+          color: #94a3b8;
+          cursor: not-allowed;
+        }
+      `}</style>
     </div>
   );
 };

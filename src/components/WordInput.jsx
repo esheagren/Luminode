@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../utils/environment';
 
 const WordInput = ({ 
   words, 
   setWords, 
-  serverUrl, 
   setResponse, 
   setLoading, 
   setError, 
@@ -12,67 +12,58 @@ const WordInput = ({
   setRelatedClusters,
   showWordTags = true
 }) => {
-  const [newWord, setNewWord] = useState('');
+  const [wordInput, setWordInput] = useState('');
   const [invalidWords, setInvalidWords] = useState([]);
   const inputRef = useRef(null);
 
-  const handleNewWordChange = (e) => {
-    setNewWord(e.target.value);
-  };
-
   const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
+    e.preventDefault();
     
-    if (words.length === 0) return;
+    if (!wordInput.trim()) return;
     
-    setLoading(true);
+    const word = wordInput.trim().toLowerCase();
+    
+    // Check if word is already in the list
+    if (words.includes(word)) {
+      setError(`"${word}" is already in your list`);
+      return;
+    }
+    
+    // Reset previous errors and indicate loading
     setError(null);
+    setLoading(true);
     
     try {
-      // Create an array of promises for each word
-      const wordPromises = words.map(word => 
-        axios.post(`${serverUrl}/api/checkWord`, { word })
-      );
+      // Call API to check if the word exists
+      const response = await axios.post(getApiUrl('/api/checkWord'), { word });
+      const data = response.data;
       
-      // Wait for all requests to complete
-      const responses = await Promise.all(wordPromises);
-      
-      // Process responses to check if all words exist
-      const wordResults = responses.map((response, index) => ({
-        word: words[index],
-        exists: response.data.data.word.exists,
-        vector: response.data.data.word.vector
-      }));
-      
-      // Check if any words don't exist
-      const nonExistingWords = wordResults.filter(result => !result.exists)
-                                         .map(result => result.word);
-      
-      // Update the invalidWords state with the list of non-existing words
-      setInvalidWords(nonExistingWords);
-      
-      let message = '';
-      if (nonExistingWords.length > 0) {
-        if (nonExistingWords.length === words.length) {
-          message = `None of the words were found in the embeddings.`;
-        } else {
-          message = `The following words were not found in the embeddings: ${nonExistingWords.join(', ')}`;
-        }
+      if (data.data.word.exists) {
+        // Add word to the list
+        const updatedWords = [...words, word];
+        setWords(updatedWords);
+        
+        // Store word data in response
+        setResponse(prev => ({
+          message: `Added word: ${word}`,
+          data: {
+            words: prev?.data?.words 
+              ? [...prev.data.words, data.data.word] 
+              : [data.data.word]
+          }
+        }));
+        
+        // Clear any existing related clusters
+        setRelatedClusters([]);
+        
+        // Clear input
+        setWordInput('');
       } else {
-        message = `All words found! Vectors retrieved successfully.`;
+        setError(`"${word}" is not in our dictionary`);
       }
-      
-      setResponse({
-        message,
-        data: {
-          words: wordResults
-        }
-      });
-      
     } catch (error) {
-      console.error('Error submitting form:', error);
-      setError(error.response?.data?.error || 'An error occurred while processing your request');
-      setRelatedClusters([]); // Only clear on error
+      console.error('Error adding word:', error);
+      setError(error.response?.data?.error || `Error adding "${word}"`);
     } finally {
       setLoading(false);
     }
@@ -81,10 +72,10 @@ const WordInput = ({
   const handleNewWordKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
-      if (newWord.trim()) {
+      if (wordInput.trim()) {
         // Add the new word and clear the input
-        setWords([...words, newWord.trim()]);
-        setNewWord('');
+        setWords([...words, wordInput.trim()]);
+        setWordInput('');
         
         // Trigger submit to update the visualization
         handleSubmit(e);
@@ -109,7 +100,7 @@ const WordInput = ({
     
     // Use requestAnimationFrame to ensure focus happens after DOM updates
     requestAnimationFrame(focusInput);
-  }, [words, newWord, loading]);
+  }, [words, wordInput, loading]);
 
   const removeWord = (indexToRemove) => {
     const updatedWords = words.filter((_, index) => index !== indexToRemove);
@@ -121,41 +112,34 @@ const WordInput = ({
 
   return (
     <div className="word-input-container">
-      <div className="input-row">
+      <form onSubmit={handleSubmit}>
         <input
           ref={inputRef}
           type="text"
-          id="newWord"
-          name="newWord"
-          value={newWord}
-          onChange={handleNewWordChange}
-          onKeyDown={handleNewWordKeyDown}
-          placeholder={words.length === 0 ? "Enter words (press Enter after each)" : "Add another word"}
+          value={wordInput}
+          onChange={(e) => setWordInput(e.target.value)}
+          placeholder="Add another word"
           disabled={loading}
-          autoFocus
-          className="word-input"
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              handleSubmit(e);
+            }
+          }}
         />
-      </div>
+      </form>
       
-      {words.length === 1 && (
-        <div className="notification-message">
-          Please add at least one more word to see relationships
-        </div>
-      )}
-      
-      {showWordTags && (
-        <div className="words-list">
+      {showWordTags && words.length > 0 && (
+        <div className="selected-words">
           {words.map((word, index) => (
-            <div 
-              key={index} 
-              className={`word-tag ${invalidWords.includes(word) ? 'invalid-word' : ''}`}
-            >
-              <span>{word}</span>
+            <div key={`word-${index}`} className="word-tag">
+              {word}
               <button 
-                type="button" 
-                className="remove-word-btn"
-                onClick={() => removeWord(index)}
-                disabled={loading}
+                className="remove-word" 
+                onClick={() => {
+                  const newWords = [...words];
+                  newWords.splice(index, 1);
+                  setWords(newWords);
+                }}
               >
                 ×
               </button>
@@ -166,88 +150,69 @@ const WordInput = ({
       
       <style jsx>{`
         .word-input-container {
-          margin-bottom: 20px;
-        }
-        
-        .input-row {
-          margin-bottom: 16px;
-        }
-        
-        .word-input {
           width: 100%;
-          padding: 16px 20px;
-          font-size: 18px;
-          border-radius: 12px;
-          border: 2px solid rgba(255, 255, 255, 0.1);
-          background-color: rgba(26, 26, 28, 0.8);
-          color: #f8fafc;
-          transition: all 0.2s ease-in-out;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
-        .word-input:focus {
-          border-color: #FF9D42;
-          box-shadow: 0 0 0 3px rgba(255, 157, 66, 0.3);
+        form {
+          position: relative;
+          margin-bottom: 1rem;
+        }
+        
+        input {
+          width: 100%;
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          border: 1px solid #2D3748;
+          background-color: #171923;
+          color: #E2E8F0;
+          font-size: 1rem;
+          transition: all 0.2s ease;
+        }
+        
+        input:focus {
           outline: none;
+          border-color: #FFC837;
+          box-shadow: 0 0 0 3px rgba(255, 200, 55, 0.2);
         }
         
-        .word-input::placeholder {
-          color: #94a3b8;
+        input::placeholder {
+          color: #718096;
         }
         
-        .words-list {
+        .selected-words {
           display: flex;
           flex-wrap: wrap;
-          gap: 10px;
+          gap: 0.5rem;
+          margin-top: 0.5rem;
         }
         
         .word-tag {
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          background: linear-gradient(135deg, rgba(255, 157, 66, 0.2) 0%, rgba(255, 200, 55, 0.2) 100%);
-          border: 1px solid rgba(255, 157, 66, 0.3);
-          border-radius: 20px;
-          padding: 8px 16px;
-          font-size: 16px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          transition: all 0.2s ease;
+          background-color: #2a2a2c;
+          border-radius: 16px;
+          padding: 0.25rem 0.75rem;
+          font-size: 0.9rem;
         }
         
-        .word-tag:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        .invalid-word {
-          background: linear-gradient(135deg, rgba(255, 87, 87, 0.2) 0%, rgba(255, 120, 120, 0.2) 100%);
-          border: 1px solid rgba(255, 87, 87, 0.5);
-          color: #FF5757;
-        }
-        
-        .remove-word-btn {
+        .remove-word {
           background: none;
           border: none;
-          color: #94a3b8;
-          font-size: 18px;
-          margin-left: 8px;
-          cursor: pointer;
-          padding: 0 4px;
-          transition: all 0.2s ease;
-        }
-        
-        .remove-word-btn:hover {
           color: #FF5757;
-          transform: scale(1.2);
+          margin-left: 0.5rem;
+          cursor: pointer;
+          font-size: 1rem;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         
-        .notification-message {
-          font-size: 14px;
-          color: #FFC837;
-          margin-bottom: 12px;
-          padding: 6px 10px;
-          background-color: rgba(255, 200, 55, 0.1);
-          border-radius: 6px;
-          text-align: center;
+        @media (max-width: 768px) {
+          input {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+          }
         }
       `}</style>
     </div>

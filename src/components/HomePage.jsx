@@ -5,6 +5,7 @@ import WordInput from './WordInput';
 import Tools from './Tools';
 import ViewButton from './ViewButton';
 import SuggestedWords from './SuggestedWords';
+import { getApiUrl } from '../utils/environment';
 
 const HomePage = () => {
   const [words, setWords] = useState([]);
@@ -12,7 +13,6 @@ const HomePage = () => {
   const [relatedClusters, setRelatedClusters] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [serverUrl, setServerUrl] = useState('http://localhost:5001');
   const [numNeighbors, setNumNeighbors] = useState(5); // Default to 5 neighbors
   const [viewMode, setViewMode] = useState('2D'); // Default to 2D view
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -27,7 +27,7 @@ const HomePage = () => {
       setLoading(true);
       setError(null);
       
-      axios.post(`${serverUrl}/api/checkWord`, { word })
+      axios.post(getApiUrl('/api/checkWord'), { word })
         .then(response => {
           const wordResult = {
             word: word,
@@ -60,7 +60,6 @@ const HomePage = () => {
           <WordInput 
             words={words}
             setWords={setWords}
-            serverUrl={serverUrl}
             setResponse={setResponse}
             setLoading={setLoading}
             setError={setError}
@@ -114,7 +113,6 @@ const HomePage = () => {
                 onWordSelect={handleWordSelect}
                 currentWords={words}
                 numSuggestions={8}
-                serverUrl={serverUrl}
               />
             </div>
           )}
@@ -124,7 +122,6 @@ const HomePage = () => {
           <div className="tools-bar">
             <Tools
               words={words}
-              serverUrl={serverUrl}
               numMidpoints={numNeighbors}
               setMidpointClusters={setRelatedClusters}
               setLoading={setLoading}
@@ -144,7 +141,6 @@ const HomePage = () => {
               words={words}
               midpointWords={relatedClusters}
               numMidpoints={numNeighbors}
-              serverUrl={serverUrl}
               viewMode={viewMode}
               setViewMode={setViewMode}
               rulerActive={rulerActive}

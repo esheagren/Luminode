@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getRandomSuggestions } from '../data/suggestedWords';
+import { getApiUrl } from '../utils/environment';
 
-const SuggestedWords = ({ onWordSelect, currentWords, serverUrl, numSuggestions = 8 }) => {
+const SuggestedWords = ({ onWordSelect, currentWords, numSuggestions = 8 }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +22,7 @@ const SuggestedWords = ({ onWordSelect, currentWords, serverUrl, numSuggestions 
         if (validWords.length >= numSuggestions) break;
         
         try {
-          const response = await axios.post(`${serverUrl}/api/checkWord`, { word });
+          const response = await axios.post(getApiUrl('/api/checkWord'), { word });
           if (response.data.data.word.exists) {
             validWords.push(word);
           }
@@ -41,7 +42,7 @@ const SuggestedWords = ({ onWordSelect, currentWords, serverUrl, numSuggestions 
   // Initial load and refresh when currentWords changes
   useEffect(() => {
     refreshSuggestions();
-  }, [currentWords, numSuggestions, serverUrl]);
+  }, [currentWords, numSuggestions]);
 
   return (
     <div className="suggested-words-container">

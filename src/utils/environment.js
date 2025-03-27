@@ -42,17 +42,21 @@ export const getApiServerUrl = () => {
  */
 export const getApiUrl = (endpoint) => {
   const baseUrl = getApiServerUrl();
+  const isProductionEnv = isProduction();
   
   // Ensure endpoint starts with a slash if it doesn't already
   const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   
-  // If baseUrl is empty (relative URLs), return the path
-  if (!baseUrl) {
-    return path;
-  }
+  // Ensure path starts with /api/ in production
+  const apiPath = path.startsWith('/api/') ? path : 
+                 (path.startsWith('/') ? `/api${path}` : `/api/${path}`);
   
-  // Otherwise, construct the full URL
-  return `${baseUrl}${path}`;
+  // Create the full URL
+  const fullUrl = baseUrl ? `${baseUrl}${apiPath}` : apiPath;
+  
+  console.debug(`API URL constructed: ${fullUrl} (production: ${isProductionEnv})`);
+  
+  return fullUrl;
 };
 
 /**
@@ -66,18 +70,47 @@ export const logEnvironmentInfo = () => {
     console.log(`- API Server URL: ${getApiServerUrl()}`);
     console.log(`- Is Production: ${isProduction()}`);
     console.log(`- Example API URL: ${getApiUrl('/api/checkWord')}`);
+    
+    // CORS and security info
+    console.log(`- Referrer Policy: ${document.referrerPolicy || 'not set'}`);
+    console.log(`- Content Security Policy: ${document.contentSecurityPolicy || 'not set'}`);
   }
 };
 
-// Log environment info when this module is loaded in the browser
-if (typeof window !== 'undefined') {
-  // Wait for window to be fully loaded to avoid initialization issues
-  setTimeout(logEnvironmentInfo, 0);
-}
+/**
+ * Initialize the environment with CORS protection
+ * Called on app startup to ensure proper configuration
+ */
+export const initializeEnvironment = () => {
+  if (typeof window !== 'undefined') {
+    // Setting up CORS protection for fetch requests
+    window.addEventListener('unhandledrejection', (event) => {
+      if (event.reason && 
+          (event.reason.name === 'AxiosError' || 
+           (typeof event.reason.toString === 'function' && 
+            event.reason.toString().includes('Network Error')))) {
+        console.error('Possible CORS issue detected:', event.reason);
+        console.log('Current environment context:', {
+          host: window.location.hostname,
+          origin: window.location.origin,
+          production: isProduction(),
+          apiServer: getApiServerUrl()
+        });
+      }
+    });
+    
+    // Log environment on load
+    setTimeout(logEnvironmentInfo, 0);
+  }
+};
+
+// Initialize environment when this module is loaded
+initializeEnvironment();
 
 export default {
   isProduction,
   getApiServerUrl,
   getApiUrl,
-  logEnvironmentInfo
+  logEnvironmentInfo,
+  initializeEnvironment
 }; 

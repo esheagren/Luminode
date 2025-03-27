@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getApiUrl } from '../utils/environment';
 
 /**
  * Finds words that complete an analogy: word1 is to word2 as word3 is to ?
@@ -6,29 +7,30 @@ import axios from 'axios';
  * @param {string} word2 - Second word in the analogy
  * @param {string} word3 - Third word in the analogy
  * @param {number} numResults - Number of results to return
- * @param {string} serverUrl - The URL of the server
- * @returns {Object} - Object containing analogy formula and results
+ * @returns {Promise<Object>} Promise resolving to analogy results
  */
-export const findAnalogy = async (word1, word2, word3, numResults = 5, serverUrl) => {
+export const findAnalogy = async (word1, word2, word3, numResults = 5) => {
   try {
-    console.log(`Sending analogy request to ${serverUrl}/api/findAnalogy`);
-    console.log(`Parameters: word1=${word1}, word2=${word2}, word3=${word3}, numResults=${numResults}`);
+    console.log(`Sending analogy request to api/findAnalogy`);
     
-    const response = await axios.post(`${serverUrl}/api/findAnalogy`, {
+    const response = await axios.post(getApiUrl('/api/findAnalogy'), {
       word1,
       word2,
       word3,
-      numResults
+      numResults,
+      useExactSearch: true
     });
     
-    console.log('Received analogy response:', response.data);
-    
-    return {
-      analogy: response.data.data.analogy,
-      results: response.data.data.results
-    };
+    if (response && response.data && response.data.data) {
+      return response.data;
+    } else {
+      return { error: 'Invalid response from the server', data: null };
+    }
   } catch (error) {
     console.error('Error finding analogy:', error);
-    throw error;
+    return { 
+      error: error.message || 'Failed to find analogy',
+      data: null
+    };
   }
 }; 

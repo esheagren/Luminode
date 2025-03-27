@@ -1,18 +1,18 @@
 import axios from 'axios';
+import { getApiUrl } from '../utils/environment';
 
 export const findMidpointsRecursively = async (
   word1, 
   word2, 
   depth = 1, 
   maxDepth = 1, 
-  numNeighbors = 5,
-  serverUrl = 'http://localhost:5001'
+  numNeighbors = 5
 ) => {
   if (depth > maxDepth) return [];
   
   try {
     // Find midpoint words between word1 and word2
-    const result = await axios.post(`${serverUrl}/api/findMidpointWords`, {
+    const result = await axios.post(getApiUrl('/api/findMidpointWords'), {
       word1: word1,
       word2: word2,
       numNeighbors: numNeighbors
@@ -42,8 +42,7 @@ export const findMidpointsRecursively = async (
         primaryMidpointWord, 
         depth + 1, 
         maxDepth,
-        numNeighbors,
-        serverUrl
+        numNeighbors
       );
       
       // Find midpoints between word2 and the primary midpoint
@@ -52,8 +51,7 @@ export const findMidpointsRecursively = async (
         primaryMidpointWord, 
         depth + 1, 
         maxDepth,
-        numNeighbors,
-        serverUrl
+        numNeighbors
       );
       
       // Add all subclusters to our result
