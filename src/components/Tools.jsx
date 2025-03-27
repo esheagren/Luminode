@@ -17,6 +17,12 @@ const Tools = ({
   setRulerActive
 }) => {
   const [activeTab, setActiveTab] = useState('midpoint');
+  
+  // Debug: Check the type of setMidpointClusters
+  console.log('Tools component:', {
+    hasSetMidpointClusters: !!setMidpointClusters,
+    typeSetMidpointClusters: typeof setMidpointClusters
+  });
 
   const renderToolContent = () => {
     switch (activeTab) {
@@ -40,6 +46,7 @@ const Tools = ({
             setError={setError}
             loading={loading}
             wordsValid={wordsValid}
+            setMidpointClusters={setMidpointClusters}
           />
         );
       default:
@@ -99,13 +106,13 @@ const Tools = ({
           flex-direction: column;
           background-color: #0f0f10;
           border-radius: 8px;
-          padding: 0.5rem;
-          margin-bottom: 1rem;
+          padding: 0.25rem;
+          margin-bottom: 0.5rem;
         }
         
         .tabs {
           display: flex;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.25rem;
         }
         
         .tab-button {
@@ -114,9 +121,9 @@ const Tools = ({
           color: #94a3b8;
           border: none;
           border-bottom: 2px solid transparent;
-          padding: 0.5rem 1rem;
+          padding: 0.3rem 0.5rem;
           cursor: pointer;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
           transition: all 0.2s ease;
         }
         
@@ -135,15 +142,15 @@ const Tools = ({
         }
         
         .tool-content {
-          padding: 0.5rem 0;
+          padding: 0.25rem 0;
         }
         
         .view-controls {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-top: 0.5rem;
-          padding-top: 0.5rem;
+          margin-top: 0.25rem;
+          padding-top: 0.25rem;
           border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
@@ -159,12 +166,12 @@ const Tools = ({
         }
         
         .ruler-checkbox {
-          margin-right: 0.5rem;
+          margin-right: 0.25rem;
           cursor: pointer;
         }
         
         .ruler-text {
-          font-size: 0.85rem;
+          font-size: 0.75rem;
           color: #94a3b8;
         }
       `}</style>

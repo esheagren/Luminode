@@ -17,6 +17,11 @@ const HomePage = () => {
   const [viewMode, setViewMode] = useState('2D'); // Default to 2D view
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [rulerActive, setRulerActive] = useState(false);
+  
+  // Debug: Log the state functions
+  console.log('HomePage component:', {
+    setRelatedClustersType: typeof setRelatedClusters
+  });
 
   const handleWordSelect = (word) => {
     if (!words.includes(word)) {
@@ -272,10 +277,13 @@ const HomePage = () => {
         
         .error-message {
           color: #FF5757;
-          padding: 0.5rem;
+          padding: 0.25rem 0.5rem;
           background-color: rgba(255, 87, 87, 0.1);
           border-radius: 4px;
-          margin-top: 0.5rem;
+          margin-top: 0.25rem;
+          font-size: 0.8rem;
+          max-height: 60px;
+          overflow-y: auto;
         }
       `}</style>
     </div>

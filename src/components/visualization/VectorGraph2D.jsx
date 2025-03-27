@@ -34,7 +34,14 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
       
       // Redraw visualization if we have coordinates
       if (coordinates.length > 0) {
-        drawVisualization();
+        // Filter out coordinates with isAnalogy = true to put them on top
+        const regularCoords = coordinates.filter(coord => !coord.isAnalogy);
+        const analogyCoords = coordinates.filter(coord => coord.isAnalogy);
+        
+        // Sort coordinates so that analogy results are processed last (drawn on top)
+        const sortedCoordinates = [...regularCoords, ...analogyCoords];
+        
+        drawVisualization(sortedCoordinates);
         setIsLoading(false);
       } else {
         console.log('No coordinates to draw');
@@ -61,10 +68,10 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
     };
   }, [coordinates, containerRef, rulerActive]);
   
-  const drawVisualization = () => {
-    if (!coordinates.length || !canvasRef.current) {
+  const drawVisualization = (coordsToRender = coordinates) => {
+    if (!coordsToRender.length || !canvasRef.current) {
       console.log('Cannot draw visualization:', { 
-        hasCoordinates: coordinates.length > 0,
+        hasCoordinates: coordsToRender.length > 0,
         hasCanvas: !!canvasRef.current
       });
       return;
@@ -78,7 +85,7 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
       return;
     }
     
-    console.log('Drawing 2D visualization with', coordinates.length, 'points');
+    console.log('Drawing 2D visualization with', coordsToRender.length, 'points');
     
     // Clear the canvas with a visible background color
     ctx.fillStyle = '#1a1a2e'; // Dark blue background
@@ -87,7 +94,7 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
     // Find min/max values to scale the plot
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     
-    coordinates.forEach(point => {
+    coordsToRender.forEach(point => {
       minX = Math.min(minX, point.x);
       maxX = Math.max(maxX, point.x);
       minY = Math.min(minY, point.y);
@@ -106,12 +113,18 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
     // Draw points
     pointsRef.current = [];
     
-    coordinates.forEach(point => {
+    coordsToRender.forEach(point => {
       const x = scaleX(point.x);
       const y = scaleY(point.y);
       const isPrimary = words.includes(point.word);
       const isContextSample = point.isContextSample === true;
       const isAnalogy = point.isAnalogy === true;
+      
+      // Log for debugging the first time we process an analogy point
+      if (isAnalogy && !window.loggedAnalogy) {
+        console.log('Processing analogy point:', point);
+        window.loggedAnalogy = true;
+      }
       
       // Determine radius based on point type
       let radius;
@@ -233,36 +246,59 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
     // Early return if no analogy points
     if (analogyPoints.length === 0) return;
     
-    // Create a map to track which words form an analogy pair
-    const analogyPairs = [];
-    
-    // Draw connections for each analogy point
-    analogyPoints.forEach(analogyPoint => {
-      if (!analogyPoint.analogySource || !analogyPoint.analogySource.fromWords) return;
+    // If we have an analogy result like "man:woman::king:queen"
+    // First draw a line between the first two words (man-woman)
+    if (primaryPoints.length >= 2) {
+      const point1 = primaryPoints[0]; // man
+      const point2 = primaryPoints[1]; // woman
       
-      // In an analogy like "man:woman::king:queen", king is the relevant source word
-      // that we should connect to the result (queen)
-      const word3 = analogyPoint.analogySource.fromWords[2]; // This should be "king" in man:woman::king:queen
+      ctx.beginPath();
+      ctx.moveTo(point1.x, point1.y);
+      ctx.lineTo(point2.x, point2.y);
+      ctx.strokeStyle = 'rgba(156, 39, 176, 0.8)'; // Solid purple for first analogy pair
+      ctx.lineWidth = 2;
+      ctx.stroke();
       
-      if (word3) {
-        const sourcePoint = points.find(p => p.word === word3);
-        if (!sourcePoint) return;
-        
-        // Draw line from source to analogy
+      // Add small lines at the end of the first pair to indicate direction
+      const angle1 = Math.atan2(point2.y - point1.y, point2.x - point1.x);
+      const arrowSize = 8;
+      
+      // Arrow at destination (woman)
+      const arrowX1 = point2.x - Math.cos(angle1) * (point2.radius + 2);
+      const arrowY1 = point2.y - Math.sin(angle1) * (point2.radius + 2);
+      
+      ctx.beginPath();
+      ctx.moveTo(
+        arrowX1 - Math.cos(angle1 - Math.PI/6) * arrowSize,
+        arrowY1 - Math.sin(angle1 - Math.PI/6) * arrowSize
+      );
+      ctx.lineTo(arrowX1, arrowY1);
+      ctx.lineTo(
+        arrowX1 - Math.cos(angle1 + Math.PI/6) * arrowSize,
+        arrowY1 - Math.sin(angle1 + Math.PI/6) * arrowSize
+      );
+      ctx.fillStyle = 'rgba(156, 39, 176, 0.8)';
+      ctx.fill();
+    }
+      
+    // If we have at least 3 primary words and at least one analogy result
+    if (primaryPoints.length >= 3 && analogyPoints.length > 0) {
+      const sourceWord = primaryPoints[2]; // king in man:woman::king:?
+      
+      // Connect king to each of its analogy results (queen, etc.)
+      analogyPoints.forEach(analogyPoint => {
         ctx.beginPath();
-        ctx.moveTo(sourcePoint.x, sourcePoint.y);
+        ctx.moveTo(sourceWord.x, sourceWord.y);
         ctx.lineTo(analogyPoint.x, analogyPoint.y);
-        ctx.strokeStyle = 'rgba(156, 39, 176, 0.6)'; // Semi-transparent purple for analogy lines
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([3, 3]); // Dotted line for analogies
+        ctx.strokeStyle = 'rgba(156, 39, 176, 0.8)'; // Solid purple for analogy lines
+        ctx.lineWidth = 2;
         ctx.stroke();
-        ctx.setLineDash([]); // Reset to solid line
         
-        // Add a small arrow indicator pointing to the analogy result
-        const angle = Math.atan2(analogyPoint.y - sourcePoint.y, analogyPoint.x - sourcePoint.x);
-        const arrowSize = 6;
-        const arrowX = analogyPoint.x - Math.cos(angle) * (analogyPoint.radius + arrowSize);
-        const arrowY = analogyPoint.y - Math.sin(angle) * (analogyPoint.radius + arrowSize);
+        // Add arrow at the end of each analogy result
+        const angle = Math.atan2(analogyPoint.y - sourceWord.y, analogyPoint.x - sourceWord.x);
+        const arrowSize = 8;
+        const arrowX = analogyPoint.x - Math.cos(angle) * (analogyPoint.radius + 2);
+        const arrowY = analogyPoint.y - Math.sin(angle) * (analogyPoint.radius + 2);
         
         ctx.beginPath();
         ctx.moveTo(
@@ -274,36 +310,40 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
           arrowX - Math.cos(angle + Math.PI/6) * arrowSize,
           arrowY - Math.sin(angle + Math.PI/6) * arrowSize
         );
-        ctx.strokeStyle = 'rgba(156, 39, 176, 0.8)';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+        ctx.fillStyle = 'rgba(156, 39, 176, 0.8)';
+        ctx.fill();
+      });
+      
+      // Now draw a parallel line between the analogy pair and results
+      // This connects the man-woman pair to the king-queen pair visually
+      // First find the "best" analogy result (highest score)
+      if (analogyPoints.length > 0) {
+        const bestAnalogy = analogyPoints.reduce(
+          (best, current) => (!best || (current.score > best.score) ? current : best), 
+          null
+        );
         
-        // Add this pair to the tracked pairs
-        analogyPairs.push([sourcePoint.word, analogyPoint.word]);
-      }
-    });
-    
-    // Now draw lines between the first analogy pair (e.g., man:woman)
-    // This assumes the first two primary words form a pair
-    if (primaryPoints.length >= 2) {
-      const point1 = primaryPoints[0];
-      const point2 = primaryPoints[1];
-      
-      // Check if this pair is already included in our analogy pairs
-      const pairExists = analogyPairs.some(pair => 
-        (pair[0] === point1.word && pair[1] === point2.word) || 
-        (pair[0] === point2.word && pair[1] === point1.word)
-      );
-      
-      if (!pairExists) {
-        ctx.beginPath();
-        ctx.moveTo(point1.x, point1.y);
-        ctx.lineTo(point2.x, point2.y);
-        ctx.strokeStyle = 'rgba(156, 39, 176, 0.6)'; // Semi-transparent purple for analogy lines
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([3, 3]); // Dotted line for analogies
-        ctx.stroke();
-        ctx.setLineDash([]); // Reset to solid line
+        if (bestAnalogy && primaryPoints[0] && primaryPoints[1] && primaryPoints[2]) {
+          const midpoint1 = {
+            x: (primaryPoints[0].x + primaryPoints[1].x) / 2,
+            y: (primaryPoints[0].y + primaryPoints[1].y) / 2
+          };
+          
+          const midpoint2 = {
+            x: (primaryPoints[2].x + bestAnalogy.x) / 2,
+            y: (primaryPoints[2].y + bestAnalogy.y) / 2
+          };
+          
+          // Draw dashed connecting line between the two analogies
+          ctx.beginPath();
+          ctx.moveTo(midpoint1.x, midpoint1.y);
+          ctx.lineTo(midpoint2.x, midpoint2.y);
+          ctx.strokeStyle = 'rgba(156, 39, 176, 0.5)'; // Translucent purple
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([5, 5]); // Dashed line to show relationship
+          ctx.stroke();
+          ctx.setLineDash([]); // Reset to solid line
+        }
       }
     }
   };
