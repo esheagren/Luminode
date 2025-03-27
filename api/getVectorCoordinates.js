@@ -1,5 +1,9 @@
-import embeddingService from '../server/services/embeddingService.js';
+import vectorService from '../server/services/vectorService.js';
 import { performPCA } from '../server/utils/mathHelpers.js';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 export default async function handler(req, res) {
   console.log(`[API] getVectorCoordinates called with method: ${req.method}`);
@@ -27,10 +31,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Initialize embeddings
-    console.log('[API] Loading embeddings...');
-    await embeddingService.loadEmbeddings();
-    console.log('[API] Embeddings loaded successfully');
+    // Initialize vector service
+    console.log('[API] Initializing vector service...');
+    await vectorService.initialize();
+    console.log('[API] Vector service initialized successfully');
     
     const { words, dimensions = 2 } = req.body;
     
@@ -49,9 +53,14 @@ export default async function handler(req, res) {
     const invalidWords = [];
     
     for (const word of words) {
-      const vector = embeddingService.getWordVector(word);
-      if (vector) {
-        vectors.push({ word, vector });
+      const exists = await vectorService.wordExists(word);
+      if (exists) {
+        const vector = await vectorService.getWordVector(word);
+        if (vector) {
+          vectors.push({ word, vector });
+        } else {
+          invalidWords.push(word);
+        }
       } else {
         invalidWords.push(word);
       }

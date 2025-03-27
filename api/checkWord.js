@@ -1,4 +1,8 @@
-import embeddingService from '../server/services/embeddingService.js';
+import vectorService from '../server/services/vectorService.js';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 export default async function handler(req, res) {
   console.log(`[API] checkWord called with method: ${req.method}`);
@@ -26,10 +30,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Initialize embeddings
-    console.log('[API] Loading embeddings...');
-    await embeddingService.loadEmbeddings();
-    console.log('[API] Embeddings loaded successfully');
+    // Initialize vector service
+    console.log('[API] Initializing vector service...');
+    await vectorService.initialize();
+    console.log('[API] Vector service initialized successfully');
     
     const { word } = req.body;
     
@@ -40,11 +44,11 @@ export default async function handler(req, res) {
     
     console.log(`[API] Checking word: "${word}"`);
     
-    // Check if word exists in embeddings
-    const wordExists = embeddingService.wordExists(word);
+    // Check if word exists in vector service
+    const wordExists = await vectorService.wordExists(word);
     
     // Get vector if word exists
-    const vector = wordExists ? embeddingService.getWordVector(word) : null;
+    const vector = wordExists ? await vectorService.getWordVector(word) : null;
     
     // For display, truncate vector to 5 elements
     const truncateVector = (vec) => {
