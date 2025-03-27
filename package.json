@@ -12,12 +12,18 @@
     "vercel-build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build-index": "node server/scripts/buildEmbeddingIndex.js"
+    "build-index": "node server/scripts/buildEmbeddingIndex.js",
+    "load-pinecone": "node server/scripts/loadEmbeddingsToPinecone.js",
+    "toggle-mode": "node server/scripts/toggleEmbeddingMode.js",
+    "start-server": "node server/server.js",
+    "restart-server": "pkill -f 'node server/server.js' || true && node server/server.js"
   },
   "dependencies": {
+    "@pinecone-database/pinecone": "^5.1.1",
     "an-array-of-english-words": "^2.0.0",
     "axios": "^1.8.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "hnswlib-node": "^3.0.0",
     "mathjs": "^14.3.0",

@@ -4,13 +4,24 @@ import { dirname, join } from 'path';
 import fs from 'fs';
 import cors from 'cors';
 import apiRoutes from './routes/api.js';
-import embeddingService from './services/embeddingService.js';
+import vectorService from './services/vectorService.js';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+// Get environment variables with fallbacks
+const env = {
+  PORT: globalThis.process?.env?.PORT || 5000,
+  NODE_ENV: globalThis.process?.env?.NODE_ENV || 'development',
+  USE_PINECONE: globalThis.process?.env?.USE_PINECONE === 'true'
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = env.PORT;
 
 // Get allowed origins based on environment
 const getAllowedOrigins = () => {
@@ -51,7 +62,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', apiRoutes);
 
 // Serve static assets in production
-if (process.env.NODE_ENV === 'production') {
+if (env.NODE_ENV === 'production') {
   app.use(express.static(join(__dirname, '../client/build')));
   
   app.get('*', (req, res) => {
@@ -59,12 +70,16 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Check if embeddings directory exists
+// Check if embeddings directory exists (for local embedding service)
 const embeddingsDir = join(__dirname, 'embeddings');
 if (!fs.existsSync(embeddingsDir)) {
   fs.mkdirSync(embeddingsDir, { recursive: true });
   console.log(`Created embeddings directory at ${embeddingsDir}`);
-  console.log('Please place glove.6B.200d.txt file in this directory before starting the server.');
+  
+  // Only show this message if not using Pinecone
+  if (!env.USE_PINECONE) {
+    console.log('Please place glove.6B.200d.txt file in this directory before starting the server.');
+  }
 }
 
 // Function to start server with port fallback
@@ -72,13 +87,13 @@ const startServer = (port) => {
   const server = app.listen(port, () => {
     console.log(`Server running on port ${port}`);
     
-    // Start loading embeddings in the background
-    embeddingService.loadEmbeddings()
+    // Start initializing vector service in the background
+    vectorService.initialize()
       .then(() => {
-        console.log('Embeddings loaded successfully');
+        console.log('Vector service initialized successfully');
       })
       .catch(err => {
-        console.error('Failed to load embeddings:', err);
+        console.error('Failed to initialize vector service:', err);
       });
   });
   

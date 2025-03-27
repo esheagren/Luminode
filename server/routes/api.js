@@ -1,5 +1,5 @@
 import express from 'express';
-import embeddingService from '../services/embeddingService.js';
+import vectorService from '../services/vectorService.js';
 import { performPCA } from '../utils/mathHelpers.js';
 
 const router = express.Router();
@@ -73,57 +73,43 @@ router.post('/getVectorCoordinates', async (req, res) => {
     // Validate dimensions
     const projectionDimensions = dimensions === 3 ? 3 : 2;
     
-    // Get vectors for all words
-    const vectors = [];
-    const invalidWords = [];
+    // Use the vector service to get coordinates
+    const result = await vectorService.getVectorCoordinates(words, projectionDimensions);
     
-    for (const word of words) {
-      const vector = embeddingService.getWordVector(word);
-      if (vector) {
-        vectors.push({ word, vector });
-      } else {
-        invalidWords.push(word);
-      }
-    }
-    
-    if (vectors.length === 0) {
+    if (result.words.length === 0) {
       return res.status(404).json({ 
         error: 'None of the provided words were found in the vocabulary',
-        invalidWords
+        invalidWords: words
       });
     }
     
-    // Extract just the vectors for PCA
-    const vectorsOnly = vectors.map(item => item.vector);
-    
-    // Perform PCA to get coordinates
-    const coordinates = performPCA(vectorsOnly, projectionDimensions);
-    
-    // Combine words with their coordinates
-    const result = vectors.map((item, index) => {
+    // Format the response
+    const formattedResult = result.words.map((word, index) => {
+      const vector = result.vectors ? result.vectors[index] : null;
       const point = {
-        word: item.word,
-        truncatedVector: `[${item.vector.slice(0, 5).join(', ')}...]`,
-        // Include full vector for similarity calculations
-        fullVector: item.vector
+        word: word,
+        truncatedVector: vector ? `[${vector.slice(0, 5).join(', ')}...]` : undefined,
+        fullVector: vector
       };
       
       // Add coordinates based on dimensions
       if (projectionDimensions === 2) {
-        point.x = coordinates[index][0];
-        point.y = coordinates[index][1];
+        point.x = result.coordinates[index][0];
+        point.y = result.coordinates[index][1];
       } else {
-        point.x = coordinates[index][0];
-        point.y = coordinates[index][1];
-        point.z = coordinates[index][2];
+        point.x = result.coordinates[index][0];
+        point.y = result.coordinates[index][1];
+        point.z = result.coordinates[index][2];
       }
       
       return point;
     });
     
+    const invalidWords = words.filter(word => !result.words.includes(word));
+    
     res.json({
       message: `Vector coordinates calculated successfully in ${projectionDimensions}D`,
-      data: result,
+      data: formattedResult,
       dimensions: projectionDimensions,
       invalidWords: invalidWords.length > 0 ? invalidWords : undefined
     });
@@ -143,18 +129,17 @@ router.post('/findNeighbors', async (req, res) => {
       return res.status(400).json({ error: 'Word is required' });
     }
     
-    // Make sure embeddings are loaded
-    await embeddingService.loadEmbeddings();
+    // Check if word exists
+    const wordExists = await vectorService.wordExists(word);
     
-    // Check if word exists in embeddings
-    if (!embeddingService.wordExists(word)) {
+    if (!wordExists) {
       return res.status(404).json({ 
         error: `Word "${word}" not found in embeddings` 
       });
     }
     
-    // Find nearest neighbors with specified search mode
-    const neighbors = embeddingService.findWordNeighbors(word, numResults, useExactSearch);
+    // Find nearest neighbors
+    const neighbors = await vectorService.findWordNeighbors(word, numResults);
     
     res.json({
       message: 'Nearest neighbors found successfully',
@@ -176,7 +161,15 @@ router.post('/getRandomWords', async (req, res) => {
   try {
     const { count = 20 } = req.body;
     
+    // This endpoint might need to remain focused on the local embedding service
+    // as the Pinecone service doesn't have direct access to the full word list
+    
     // Make sure embeddings are loaded
+    await vectorService.initialize();
+    
+    // For Pinecone, we don't have a direct way to get random words
+    // We should implement this differently or keep using the embeddingService for this specific endpoint
+    const embeddingService = await import('../services/embeddingService.js').then(m => m.default);
     await embeddingService.loadEmbeddings();
     
     // Get all words from the vocabulary
@@ -207,14 +200,11 @@ router.post('/checkWord', async (req, res) => {
       return res.status(400).json({ error: 'Word is required' });
     }
     
-    // Make sure embeddings are loaded
-    await embeddingService.loadEmbeddings();
-    
-    // Check if word exists in embeddings
-    const wordExists = embeddingService.wordExists(word);
+    // Check if word exists
+    const wordExists = await vectorService.wordExists(word);
     
     // Get vector if word exists
-    const vector = wordExists ? embeddingService.getWordVector(word) : null;
+    const vector = wordExists ? await vectorService.getWordVector(word) : null;
     
     // For display, truncate vector to 5 elements
     const truncateVector = (vec) => {
@@ -252,29 +242,24 @@ router.post('/findMidpoint', async (req, res) => {
       return res.status(400).json({ error: 'Both words are required' });
     }
     
-    // Make sure embeddings are loaded
-    await embeddingService.loadEmbeddings();
-    
-    // Check if words exist in embeddings
-    const word1Exists = embeddingService.wordExists(word1);
-    const word2Exists = embeddingService.wordExists(word2);
+    // Check if words exist
+    const word1Exists = await vectorService.wordExists(word1);
+    const word2Exists = await vectorService.wordExists(word2);
     
     if (!word1Exists || !word2Exists) {
       const message = generateResponseMessage(word1, word2, word1Exists, word2Exists);
       return res.status(404).json({ error: message });
     }
     
-    // Find midpoint with specified search mode
-    const nearestToMidpoint = embeddingService.findMidpoint(
-      word1, word2, numResults, useExactSearch
-    );
+    // Find midpoint
+    const midpointResult = await vectorService.findMidpoint(word1, word2, numResults);
     
-    // Handle recursive midpoint searches if needed
+    // Format response
     const results = {
       primaryMidpoint: {
         word1,
         word2,
-        nearestWords: nearestToMidpoint
+        nearestWords: midpointResult.neighbors
       },
       searchMode: useExactSearch ? 'exact' : 'approximate',
       secondaryMidpoints: [],
@@ -307,13 +292,10 @@ router.post('/findAnalogy', async (req, res) => {
       return res.status(400).json({ error: 'All three words are required' });
     }
     
-    // Make sure embeddings are loaded
-    await embeddingService.loadEmbeddings();
-    
-    // Check if words exist in embeddings
-    const word1Exists = embeddingService.wordExists(word1);
-    const word2Exists = embeddingService.wordExists(word2);
-    const word3Exists = embeddingService.wordExists(word3);
+    // Check if words exist
+    const word1Exists = await vectorService.wordExists(word1);
+    const word2Exists = await vectorService.wordExists(word2);
+    const word3Exists = await vectorService.wordExists(word3);
     
     if (!word1Exists || !word2Exists || !word3Exists) {
       let missingWords = [];
@@ -326,17 +308,15 @@ router.post('/findAnalogy', async (req, res) => {
       });
     }
     
-    // Calculate analogy with specified search mode
-    const analogyResults = embeddingService.findAnalogy(
-      word1, word2, word3, numResults, useExactSearch
-    );
+    // Calculate analogy
+    const analogyResults = await vectorService.findAnalogy(word1, word2, word3, numResults);
     
     res.json({
       message: 'Analogy calculated successfully',
       data: {
         analogy: `${word1} is to ${word2} as ${word3} is to ?`,
         searchMode: useExactSearch ? 'exact' : 'approximate',
-        results: analogyResults
+        results: analogyResults.neighbors
       }
     });
     
