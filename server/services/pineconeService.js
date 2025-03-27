@@ -8,6 +8,19 @@ import { fileURLToPath } from 'url';
 // Load environment variables
 dotenv.config();
 
+// Print environment information (sanitized) for debugging
+function logEnvironmentInfo() {
+  console.log('Environment variables check:');
+  console.log(`- NODE_ENV: ${process.env.NODE_ENV || 'not set'}`);
+  console.log(`- PINECONE_API_KEY: ${process.env.PINECONE_API_KEY ? 'set (begins with ' + process.env.PINECONE_API_KEY.substring(0, 3) + '...)' : 'NOT SET'}`);
+  console.log(`- Running on Vercel: ${process.env.VERCEL === '1' ? 'Yes' : 'No'}`);
+  
+  // List all environment variables (names only, not values) to see what's available
+  console.log('Available environment variables (names only):');
+  const envVars = Object.keys(process.env).filter(key => !key.includes('KEY') && !key.includes('SECRET'));
+  console.log(envVars.join(', '));
+}
+
 // Get the directory name
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,64 +51,97 @@ class PineconeService {
       return this.initialization;
     }
 
+    // Log environment info for debugging
+    logEnvironmentInfo();
+
     this.initialization = new Promise(async (resolve, reject) => {
       try {
         console.log('Initializing Pinecone service...');
         
-        // Get API key directly from environment or from .env file
+        // Get API key directly from environment
         let apiKey = process.env.PINECONE_API_KEY;
         
         if (!apiKey) {
-          console.error('Pinecone API key not found in environment variables');
+          console.error('ERROR: Pinecone API key not found in environment variables');
           throw new Error('Pinecone API key not found. Please set PINECONE_API_KEY in environment variables.');
         }
         
-        console.log(`Using Pinecone API key: ${apiKey.substring(0, 3)}...${apiKey.substring(apiKey.length - 3)}`);
+        const maskedKey = `${apiKey.substring(0, 3)}...${apiKey.substring(apiKey.length - 3)}`;
+        console.log(`Using Pinecone API key: ${maskedKey} (length: ${apiKey.length})`);
         
         // Initialize Pinecone client with retry logic
         let retries = 0;
         while (retries < MAX_RETRIES) {
           try {
+            console.log(`Attempt ${retries + 1}/${MAX_RETRIES} to initialize Pinecone client...`);
             this.pinecone = new Pinecone({
               apiKey: apiKey,
             });
+            console.log("Pinecone client created successfully");
             break;
           } catch (err) {
             retries++;
-            console.error(`Failed to initialize Pinecone client (attempt ${retries}/${MAX_RETRIES}):`, err.message);
+            console.error(`Failed to initialize Pinecone client (attempt ${retries}/${MAX_RETRIES}):`, err);
+            console.error(`Error details: ${err.message}, Type: ${err.name}, Stack: ${err.stack}`);
             
             if (retries >= MAX_RETRIES) throw err;
             
+            console.log(`Waiting ${RETRY_DELAY_MS}ms before retry...`);
             await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
           }
         }
 
         // Check if index exists
         console.log(`Checking if index '${PINECONE_INDEX_NAME}' exists...`);
-        const indexesList = await this.pinecone.listIndexes();
+        let indexesList;
+        try {
+          indexesList = await this.pinecone.listIndexes();
+          console.log(`Successfully retrieved indexes list. Found ${indexesList.indexes ? indexesList.indexes.length : 0} indexes.`);
+          
+          if (indexesList.indexes) {
+            console.log(`Available indexes: ${indexesList.indexes.map(idx => idx.name).join(', ')}`);
+          }
+        } catch (indexListError) {
+          console.error('Error listing Pinecone indexes:', indexListError);
+          console.error(`Error details: ${indexListError.message}, Type: ${indexListError.name}, Stack: ${indexListError.stack}`);
+          throw new Error(`Failed to list Pinecone indexes: ${indexListError.message}`);
+        }
         
         if (!indexesList || !indexesList.indexes) {
-          throw new Error('Failed to list Pinecone indexes');
+          console.error('Invalid response from Pinecone API - indexes list is empty or malformed');
+          throw new Error('Failed to list Pinecone indexes - received invalid response');
         }
         
         const indexExists = indexesList.indexes.some(idx => idx.name === PINECONE_INDEX_NAME);
         
         if (!indexExists) {
           console.error(`Index '${PINECONE_INDEX_NAME}' does not exist. Please run the load-pinecone script first.`);
-          reject(new Error('Pinecone index not found'));
-          return;
+          throw new Error(`Pinecone index '${PINECONE_INDEX_NAME}' not found`);
         }
         
         // Connect to the index and namespace
         console.log(`Connecting to index '${PINECONE_INDEX_NAME}' and namespace '${PINECONE_NAMESPACE}'...`);
-        this.index = this.pinecone.index(PINECONE_INDEX_NAME);
-        this.namespace = this.index.namespace(PINECONE_NAMESPACE);
+        try {
+          this.index = this.pinecone.index(PINECONE_INDEX_NAME);
+          this.namespace = this.index.namespace(PINECONE_NAMESPACE);
+          console.log(`Successfully connected to index and namespace`);
+          
+          // Verify connection with a simple query
+          console.log(`Verifying Pinecone connection with a test query...`);
+          const testResult = await this.namespace.fetch(['test']);
+          console.log(`Test query successful, response contains ${Object.keys(testResult.records || {}).length} records`);
+        } catch (connectionError) {
+          console.error('Error connecting to Pinecone index/namespace:', connectionError);
+          console.error(`Error details: ${connectionError.message}, Type: ${connectionError.name}, Stack: ${connectionError.stack}`);
+          throw new Error(`Failed to connect to Pinecone index/namespace: ${connectionError.message}`);
+        }
         
         this.isInitialized = true;
         console.log('Pinecone service initialized successfully');
         resolve();
       } catch (error) {
         console.error('Error initializing Pinecone service:', error);
+        console.error(`Error details: ${error.message}, Type: ${error.name}, Stack: ${error.stack}`);
         this.isInitialized = false;
         this.initialization = null;
         reject(error);

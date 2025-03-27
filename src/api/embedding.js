@@ -4,6 +4,35 @@ import { getApiServerUrl, getApiUrl } from '../utils/environment';
 // Log the determined server URL
 console.log('API Service using server URL:', getApiServerUrl());
 
+// Create axios instance with proper configuration
+const apiClient = axios.create({
+  baseURL: getApiServerUrl(),
+  timeout: 30000, // 30 seconds timeout
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// Add response interceptor for debugging
+apiClient.interceptors.response.use(
+  response => response,
+  error => {
+    // Create a more detailed error message for debugging
+    const errorInfo = {
+      message: error.message,
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      responseData: error.response?.data,
+    };
+    
+    console.error('API Request failed:', errorInfo);
+    
+    return Promise.reject(error);
+  }
+);
+
 /**
  * Find nearest neighbors for a word
  * @param {string} word - Word to find neighbors for
@@ -19,7 +48,7 @@ export const findNeighbors = async (
   try {
     console.log(`Finding neighbors for "${word}" with ${useExactSearch ? 'exact' : 'approximate'} search`);
     
-    const response = await axios.post(getApiUrl('/api/findNeighbors'), {
+    const response = await apiClient.post('/findNeighbors', {
       word,
       numResults,
       useExactSearch
@@ -51,7 +80,7 @@ export const findMidpoint = async (
   try {
     console.log(`Finding midpoint between "${word1}" and "${word2}" with ${useExactSearch ? 'exact' : 'approximate'} search`);
     
-    const response = await axios.post(getApiUrl('/api/findMidpoint'), {
+    const response = await apiClient.post('/findMidpoint', {
       word1,
       word2,
       numResults,
@@ -85,7 +114,7 @@ export const findAnalogy = async (
   try {
     console.log(`Finding analogy ${word1}:${word2}::${word3}:? with ${useExactSearch ? 'exact' : 'approximate'} search`);
     
-    const response = await axios.post(getApiUrl('/api/findAnalogy'), {
+    const response = await apiClient.post('/findAnalogy', {
       word1,
       word2,
       word3,
@@ -111,15 +140,36 @@ export const getVectorCoordinates = async (
   dimensions = 2
 ) => {
   try {
-    const response = await axios.post(getApiUrl('/api/getVectorCoordinates'), {
-      words,
-      dimensions
+    console.log(`Getting coordinates for ${words.length} words in ${dimensions}D`);
+    
+    // Create a copy of words array to avoid modifying the original
+    const wordsToProcess = [...words].slice(0, 20); // Limit to 20 words max
+    
+    const response = await apiClient.post('/getVectorCoordinates', { 
+      words: wordsToProcess, 
+      dimensions 
     });
     
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error('Error getting vector coordinates:', error);
-    throw error;
+    
+    if (error.response?.status === 500 && error.response?.data?.isPineconeError) {
+      return {
+        error: 'Pinecone connection failed. Please check your API key configuration.',
+        message: error.response.data.message || 'Pinecone service error',
+        data: [],
+        invalidWords: words
+      };
+    }
+    
+    // Return a standardized error response that the UI can handle
+    return {
+      error: 'Failed to calculate vector coordinates',
+      message: error.message,
+      data: [],
+      invalidWords: words
+    };
   }
 };
 
@@ -130,11 +180,20 @@ export const getVectorCoordinates = async (
  */
 export const checkWord = async (word) => {
   try {
-    const response = await axios.post(getApiUrl('/api/checkWord'), { word });
-    return response.data.data;
+    console.log(`Checking word: "${word}"`);
+    const response = await apiClient.post('/checkWord', { word });
+    return response.data;
   } catch (error) {
-    console.error(`Error checking word "${word}":`, error);
-    throw error;
+    console.error(`Error checking word "${word}":`, error.message);
+    // Return a standardized error response
+    return {
+      success: false,
+      error: `Failed to check word: ${error.message}`,
+      word: {
+        exists: false,
+        vector: null
+      }
+    };
   }
 };
 
