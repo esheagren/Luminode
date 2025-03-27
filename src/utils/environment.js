@@ -4,13 +4,8 @@
  */
 export const isProduction = () => {
   if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    return hostname.includes('vercel.app') || 
-           hostname.includes('.com') || 
-           hostname.includes('.net') || 
-           hostname.includes('.org') || 
-           hostname.includes('.io') || 
-           !hostname.includes('localhost');
+    // Check if we're running on localhost
+    return !window.location.hostname.includes('localhost');
   }
   
   // If server-side, check environment variable
@@ -24,21 +19,26 @@ export const isProduction = () => {
  * @returns {string} The API URL - empty string for relative URLs in production, localhost URL in development
  */
 export const getApiServerUrl = () => {
-  // Force absolute path for API requests regardless of environment
-  // This is necessary for Vercel deployments
+  // When in browser context, always use the current origin for API requests
   if (typeof window !== 'undefined') {
-    // Use the current origin for API requests
-    // This ensures API requests work in both development and production
-    return window.location.origin;
+    const isLocalhost = window.location.hostname.includes('localhost');
+    
+    if (isLocalhost) {
+      // In local development, use the local API server
+      return 'http://localhost:5001';
+    } else {
+      // In production, use relative URLs (empty base path)
+      // This ensures API requests go to the same domain
+      return '';
+    }
   }
   
+  // Server-side rendering - fallback based on environment
   if (isProduction()) {
-    console.log('Environment: Production - using relative URLs for API calls');
     return '';
+  } else {
+    return 'http://localhost:5001';
   }
-  
-  console.log('Environment: Development - using localhost:5001 for API calls');
-  return 'http://localhost:5001';
 };
 
 /**
@@ -61,8 +61,29 @@ export const getApiUrl = (endpoint) => {
   return `${base}${path}`;
 };
 
+/**
+ * Log environment details (for debugging)
+ */
+export const logEnvironmentInfo = () => {
+  if (typeof window !== 'undefined') {
+    console.log('Environment Info:');
+    console.log(`- Host: ${window.location.hostname}`);
+    console.log(`- Origin: ${window.location.origin}`);
+    console.log(`- API Server URL: ${getApiServerUrl()}`);
+    console.log(`- Is Production: ${isProduction()}`);
+    console.log(`- Example API URL: ${getApiUrl('/api/checkWord')}`);
+  }
+};
+
+// Log environment info when this module is loaded
+if (typeof window !== 'undefined') {
+  // Wait for window to be fully loaded
+  setTimeout(logEnvironmentInfo, 0);
+}
+
 export default {
   isProduction,
   getApiServerUrl,
-  getApiUrl
+  getApiUrl,
+  logEnvironmentInfo
 }; 

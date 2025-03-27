@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { getApiServerUrl, getApiUrl } from '../utils/environment';
+import { getApiServerUrl, getApiUrl, logEnvironmentInfo } from '../utils/environment';
 
-// Log the determined server URL
-console.log('API Service using server URL:', getApiServerUrl());
+// Log environment information for debugging
+logEnvironmentInfo();
 
 // Create axios instance with proper configuration
 const apiClient = axios.create({
@@ -12,6 +12,19 @@ const apiClient = axios.create({
     'Content-Type': 'application/json'
   }
 });
+
+// Add request interceptor for debugging
+apiClient.interceptors.request.use(
+  config => {
+    // Log the full URL being requested
+    console.log(`API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    return config;
+  },
+  error => {
+    console.error('API Request configuration error:', error);
+    return Promise.reject(error);
+  }
+);
 
 // Add response interceptor for debugging
 apiClient.interceptors.response.use(
@@ -48,16 +61,20 @@ export const findNeighbors = async (
   try {
     console.log(`Finding neighbors for "${word}" with ${useExactSearch ? 'exact' : 'approximate'} search`);
     
-    const response = await apiClient.post('/findNeighbors', {
+    const response = await apiClient.post('/api/findNeighbors', {
       word,
       numResults,
       useExactSearch
     });
     
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error('Error finding neighbors:', error);
-    throw error;
+    return {
+      error: 'Failed to find neighbors',
+      message: error.message,
+      data: { word, nearestWords: [] }
+    };
   }
 };
 
@@ -80,7 +97,7 @@ export const findMidpoint = async (
   try {
     console.log(`Finding midpoint between "${word1}" and "${word2}" with ${useExactSearch ? 'exact' : 'approximate'} search`);
     
-    const response = await apiClient.post('/findMidpoint', {
+    const response = await apiClient.post('/api/findMidpoint', {
       word1,
       word2,
       numResults,
@@ -88,10 +105,19 @@ export const findMidpoint = async (
       useExactSearch
     });
     
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error('Error finding midpoint:', error);
-    throw error;
+    return {
+      error: 'Failed to find midpoint',
+      message: error.message,
+      data: {
+        primaryMidpoint: {
+          word1, word2,
+          nearestWords: []
+        }
+      }
+    };
   }
 };
 
@@ -114,7 +140,7 @@ export const findAnalogy = async (
   try {
     console.log(`Finding analogy ${word1}:${word2}::${word3}:? with ${useExactSearch ? 'exact' : 'approximate'} search`);
     
-    const response = await apiClient.post('/findAnalogy', {
+    const response = await apiClient.post('/api/findAnalogy', {
       word1,
       word2,
       word3,
@@ -122,10 +148,17 @@ export const findAnalogy = async (
       useExactSearch
     });
     
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error('Error finding analogy:', error);
-    throw error;
+    return {
+      error: 'Failed to calculate analogy',
+      message: error.message,
+      data: {
+        analogy: `${word1} is to ${word2} as ${word3} is to ?`,
+        results: []
+      }
+    };
   }
 };
 
@@ -145,7 +178,7 @@ export const getVectorCoordinates = async (
     // Create a copy of words array to avoid modifying the original
     const wordsToProcess = [...words].slice(0, 20); // Limit to 20 words max
     
-    const response = await apiClient.post('/getVectorCoordinates', { 
+    const response = await apiClient.post('/api/getVectorCoordinates', { 
       words: wordsToProcess, 
       dimensions 
     });
@@ -181,7 +214,7 @@ export const getVectorCoordinates = async (
 export const checkWord = async (word) => {
   try {
     console.log(`Checking word: "${word}"`);
-    const response = await apiClient.post('/checkWord', { word });
+    const response = await apiClient.post('/api/checkWord', { word });
     return response.data;
   } catch (error) {
     console.error(`Error checking word "${word}":`, error.message);
