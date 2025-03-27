@@ -275,7 +275,7 @@ const EmbeddingExplanation = () => {
         {activeTab === 'glove' && renderGloveTab()}
       </div>
 
-      <style jsx>{`
+      <style jsx="true">{`
         .about-section {
           margin-bottom: 2rem;
         }

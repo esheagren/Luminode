@@ -35,7 +35,7 @@ const LoadingOverlay = () => {
         height={dimensions.height} 
       />
       
-      <style jsx>{`
+      <style jsx="true">{`
         .loading-overlay {
           position: absolute;
           top: 0;

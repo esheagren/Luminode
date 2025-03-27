@@ -93,7 +93,7 @@ const Tools = ({
         </div>
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .tools-container {
           display: flex;
           flex-direction: column;

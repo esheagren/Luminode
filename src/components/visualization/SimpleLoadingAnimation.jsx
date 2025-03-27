@@ -81,7 +81,7 @@ const SimpleLoadingAnimation = ({ width = 200, height = 200 }) => {
   return (
     <div className="simple-loading-animation-container">
       <canvas ref={canvasRef} width={width} height={height} />
-      <style jsx>{`
+      <style jsx="true">{`
         .simple-loading-animation-container {
           display: flex;
           justify-content: center;

@@ -14,7 +14,7 @@ const ViewButton = ({ viewMode, setViewMode, disabled }) => {
     >
       {viewMode === '2D' ? '3D View' : '2D View'}
       
-      <style jsx>{`
+      <style jsx="true">{`
         .view-mode-button {
           position: absolute;
           top: 16px;

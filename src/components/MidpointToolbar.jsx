@@ -167,7 +167,7 @@ const MidpointToolbar = ({
         </button>
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .midpoint-toolbar {
           background: #1a1a1c;
           border-radius: 8px;

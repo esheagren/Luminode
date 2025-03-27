@@ -24,7 +24,7 @@ const NavBar = () => {
         </ul>
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .navbar {
           background: #0f0f10;
           height: 80px;

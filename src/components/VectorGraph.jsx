@@ -169,7 +169,7 @@ const VectorGraph = ({
         )}
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .graph-container {
           width: 100%;
           height: 100%;

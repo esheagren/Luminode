@@ -116,7 +116,7 @@ const AboutPage = () => {
         </div>
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .about-page {
           position: relative;
           width: 100%;

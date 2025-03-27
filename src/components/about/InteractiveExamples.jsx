@@ -341,7 +341,7 @@ const InteractiveExamples = () => {
         </p>
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .interactive-examples {
           margin-bottom: 2rem;
         }

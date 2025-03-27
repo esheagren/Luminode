@@ -149,7 +149,7 @@ const HomePage = () => {
         </div>
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .app-container {
           display: flex;
           flex-direction: column;

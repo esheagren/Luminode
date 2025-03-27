@@ -240,7 +240,7 @@ const Introduction = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx="true">{`
         .about-section {
           margin-bottom: 2rem;
         }

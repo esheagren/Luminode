@@ -148,8 +148,9 @@ const WordInput = ({
         </div>
       )}
       
-      <style jsx>{`
+      <style jsx="true">{`
         .word-input-container {
+          position: relative;
           width: 100%;
         }
         

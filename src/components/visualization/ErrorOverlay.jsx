@@ -4,7 +4,7 @@ const ErrorOverlay = ({ error }) => (
   <div className="error-overlay">
     <p>{error}</p>
     
-    <style jsx>{`
+    <style jsx="true">{`
       .error-overlay {
         position: absolute;
         top: 0;

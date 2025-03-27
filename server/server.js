@@ -24,7 +24,18 @@ const app = express();
 
 // CORS setup
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://luminode.vercel.app'],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Allow all localhost origins, regardless of port
+    if (origin.startsWith('http://localhost:') || 
+        origin === 'https://luminode.vercel.app') {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));

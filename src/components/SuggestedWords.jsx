@@ -73,7 +73,7 @@ const SuggestedWords = ({ onWordSelect, currentWords, numSuggestions = 8 }) => {
         )}
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .suggested-words-container {
           margin-top: 1.5rem;
           padding: 1rem;

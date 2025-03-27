@@ -95,7 +95,7 @@ const LoadingAnimation = ({ width = 200, height = 200 }) => {
   return (
     <div className="loading-animation-container">
       <canvas ref={canvasRef} width={width} height={height} />
-      <style jsx>{`
+      <style jsx="true">{`
         .loading-animation-container {
           display: flex;
           justify-content: center;

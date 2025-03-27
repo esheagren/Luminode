@@ -365,7 +365,7 @@ const MiniVisualizer = () => {
         </p>
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .mini-visualizer {
           margin-bottom: 2rem;
           padding: 1rem;

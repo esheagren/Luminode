@@ -117,7 +117,7 @@ const AnalogyToolbar = ({
         </button>
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .analogy-toolbar {
           background-color: #1a1a1c;
           border-radius: 8px;
