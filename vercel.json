@@ -8,18 +8,16 @@
     "api/_init.js": {
       "memory": 128,
       "maxDuration": 5
+    },
+    "server/server.js": {
+      "memory": 512,
+      "maxDuration": 10
+    },
+    "server/routes/api.js": {
+      "memory": 512,
+      "maxDuration": 10
     }
   },
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "server/server.js",
-      "use": "@vercel/node"
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
