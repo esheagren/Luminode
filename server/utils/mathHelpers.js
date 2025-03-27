@@ -65,9 +65,9 @@ export function calculateMidpoint(a, b) {
  * Optimized for serverless environments with limited memory
  * @param {number[][]} vectors - Array of vectors to project
  * @param {number} dimensions - Number of dimensions to reduce to (2 or 3)
- * @returns {number[][]} Array of 2D or 3D coordinates
+ * @returns {Promise<number[][]>} Promise resolving to array of 2D or 3D coordinates
  */
-export function performPCA(vectors, dimensions = 2) {
+export async function performPCA(vectors, dimensions = 2) {
   if (!vectors || vectors.length === 0) {
     return [];
   }
@@ -76,6 +76,8 @@ export function performPCA(vectors, dimensions = 2) {
   dimensions = dimensions > 3 || dimensions < 2 ? 2 : dimensions;
   const numVectors = vectors.length;
   const vectorDim = vectors[0].length;
+  
+  console.log(`[PCA] Starting PCA with ${numVectors} vectors of dimension ${vectorDim}`);
   
   // Use a single array for mean calculation to reduce allocations
   const mean = new Array(vectorDim).fill(0);
@@ -127,6 +129,8 @@ export function performPCA(vectors, dimensions = 2) {
     return v;
   }
   
+  console.log(`[PCA] Finding principal components...`);
+  
   // Use power iteration to find principal components
   // This is more memory-efficient than SVD for large dimensions
   const principalComponents = [];
@@ -167,6 +171,8 @@ export function performPCA(vectors, dimensions = 2) {
     principalComponents.push(pc);
   }
   
+  console.log(`[PCA] Projecting data onto principal components...`);
+  
   // Project data onto principal components
   const projections = [];
   for (let i = 0; i < numVectors; i++) {
@@ -192,5 +198,6 @@ export function performPCA(vectors, dimensions = 2) {
     principalComponents[i] = null;
   }
   
+  console.log(`[PCA] PCA completed successfully`);
   return projections;
 } 

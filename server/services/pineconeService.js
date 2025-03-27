@@ -29,10 +29,12 @@ class PineconeService {
 
   async initialize() {
     if (this.isInitialized) {
+      console.log('Pinecone service already initialized, reusing connection');
       return Promise.resolve();
     }
 
     if (this.initialization) {
+      console.log('Pinecone service initialization in progress, waiting...');
       return this.initialization;
     }
 
@@ -43,37 +45,39 @@ class PineconeService {
         // Get API key directly from environment or from .env file
         let apiKey = process.env.PINECONE_API_KEY;
         
-        // If API key is not available, try to read from .env file directly
         if (!apiKey) {
+          console.error('Pinecone API key not found in environment variables');
+          throw new Error('Pinecone API key not found. Please set PINECONE_API_KEY in environment variables.');
+        }
+        
+        console.log(`Using Pinecone API key: ${apiKey.substring(0, 3)}...${apiKey.substring(apiKey.length - 3)}`);
+        
+        // Initialize Pinecone client with retry logic
+        let retries = 0;
+        while (retries < MAX_RETRIES) {
           try {
-            const envPath = path.resolve(process.cwd(), '.env');
-            console.log('Attempting to read .env file from:', envPath);
-            if (fs.existsSync(envPath)) {
-              const envContent = fs.readFileSync(envPath, 'utf8');
-              const match = envContent.match(/PINECONE_API_KEY=([^\r\n]+)/);
-              if (match && match[1]) {
-                apiKey = match[1].trim();
-                console.log('Found API key in .env file');
-              }
-            }
+            this.pinecone = new Pinecone({
+              apiKey: apiKey,
+            });
+            break;
           } catch (err) {
-            console.error('Error reading .env file:', err);
+            retries++;
+            console.error(`Failed to initialize Pinecone client (attempt ${retries}/${MAX_RETRIES}):`, err.message);
+            
+            if (retries >= MAX_RETRIES) throw err;
+            
+            await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
           }
         }
-        
-        if (!apiKey) {
-          throw new Error('Pinecone API key not found. Please set PINECONE_API_KEY in .env file or environment.');
-        }
-        
-        console.log('Using Pinecone API key:', apiKey.substring(0, 5) + '...');
-        
-        // Initialize Pinecone client
-        this.pinecone = new Pinecone({
-          apiKey: apiKey,
-        });
 
         // Check if index exists
+        console.log(`Checking if index '${PINECONE_INDEX_NAME}' exists...`);
         const indexesList = await this.pinecone.listIndexes();
+        
+        if (!indexesList || !indexesList.indexes) {
+          throw new Error('Failed to list Pinecone indexes');
+        }
+        
         const indexExists = indexesList.indexes.some(idx => idx.name === PINECONE_INDEX_NAME);
         
         if (!indexExists) {
@@ -83,6 +87,7 @@ class PineconeService {
         }
         
         // Connect to the index and namespace
+        console.log(`Connecting to index '${PINECONE_INDEX_NAME}' and namespace '${PINECONE_NAMESPACE}'...`);
         this.index = this.pinecone.index(PINECONE_INDEX_NAME);
         this.namespace = this.index.namespace(PINECONE_NAMESPACE);
         
@@ -91,6 +96,8 @@ class PineconeService {
         resolve();
       } catch (error) {
         console.error('Error initializing Pinecone service:', error);
+        this.isInitialized = false;
+        this.initialization = null;
         reject(error);
       }
     });
@@ -100,9 +107,9 @@ class PineconeService {
 
   // Check if a word exists in the database
   async wordExists(word) {
-    await this.initialize();
-    
     try {
+      await this.initialize();
+      
       // Use fetch to check if the word exists
       const result = await this.namespace.fetch([word]);
       return result.records && Object.keys(result.records).length > 0;
@@ -114,9 +121,9 @@ class PineconeService {
 
   // Get vector for a word
   async getWordVector(word) {
-    await this.initialize();
-    
     try {
+      await this.initialize();
+      
       const result = await this.namespace.fetch([word]);
       if (!result.records || !result.records[word]) {
         return null;
@@ -125,15 +132,15 @@ class PineconeService {
       return result.records[word].values;
     } catch (error) {
       console.error(`Error getting vector for word '${word}':`, error);
-      return null;
+      throw error;
     }
   }
 
   // Find nearest neighbors for a word
   async findWordNeighbors(word, numResults = 5) {
-    await this.initialize();
-    
     try {
+      await this.initialize();
+      
       // Get the vector for the word
       const vector = await this.getWordVector(word);
       if (!vector) {
@@ -150,9 +157,9 @@ class PineconeService {
 
   // Find nearest neighbors for a vector
   async findVectorNeighbors(vector, numResults = 5, excludeWords = []) {
-    await this.initialize();
-    
     try {
+      await this.initialize();
+      
       let retries = 0;
       let queryResponse;
       
@@ -203,9 +210,9 @@ class PineconeService {
 
   // Find the nearest words to the midpoint of two words
   async findMidpoint(word1, word2, numResults = 5) {
-    await this.initialize();
-    
     try {
+      await this.initialize();
+      
       // Get vectors for both words
       const vector1 = await this.getWordVector(word1);
       const vector2 = await this.getWordVector(word2);
@@ -251,9 +258,9 @@ class PineconeService {
 
   // Find analogy results
   async findAnalogy(word1, word2, word3, numResults = 5) {
-    await this.initialize();
-    
     try {
+      await this.initialize();
+      
       // Get vectors for all words
       const vector1 = await this.getWordVector(word1);
       const vector2 = await this.getWordVector(word2);
@@ -281,11 +288,12 @@ class PineconeService {
 
   // Get vector coordinates for visualization using PCA
   async getVectorCoordinates(words, dimensions = 2) {
-    await this.initialize();
-    
     try {
+      await this.initialize();
+      
       // Limit number of words to process to prevent excessive memory usage
-      const wordsToProcess = words.slice(0, 50); // Limit to 50 words maximum
+      const wordsToProcess = words.slice(0, 25); // Limit to 25 words maximum for serverless
+      console.log(`Processing ${wordsToProcess.length} words in Pinecone service`);
       
       // Get vectors for all words
       const vectors = [];
@@ -293,14 +301,19 @@ class PineconeService {
       
       // Process words sequentially to avoid memory pressure
       for (const word of wordsToProcess) {
-        const vector = await this.getWordVector(word);
-        if (vector) {
-          vectors.push(vector);
-          validWords.push(word);
-          
-          // Release control to event loop between operations
-          await new Promise(resolve => setTimeout(resolve, 0));
+        try {
+          const vector = await this.getWordVector(word);
+          if (vector) {
+            vectors.push(vector);
+            validWords.push(word);
+          }
+        } catch (err) {
+          console.error(`Error fetching vector for word "${word}":`, err.message);
+          // Continue with next word
         }
+        
+        // Release control to event loop between operations
+        await new Promise(resolve => setTimeout(resolve, 0));
       }
       
       if (vectors.length === 0) {
@@ -308,8 +321,9 @@ class PineconeService {
       }
       
       // Use PCA from mathHelpers to reduce dimensions
+      console.log(`Running PCA on ${vectors.length} vectors...`);
       const { performPCA } = await import('../utils/mathHelpers.js');
-      const coordinates = performPCA(vectors, dimensions);
+      const coordinates = await performPCA(vectors, dimensions);
       
       // Clear vector references to help GC
       for (let i = 0; i < vectors.length; i++) {
