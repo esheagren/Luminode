@@ -353,12 +353,21 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
     // Find midpoint points
     const midpointPoints = points.filter(point => point.isMidpoint);
     
+    // Debug midpoint points
+    console.log('Midpoint points for visualization:', midpointPoints);
+    
     // Early return if no midpoint points
-    if (midpointPoints.length === 0) return;
+    if (midpointPoints.length === 0) {
+      console.log('No midpoint points found in the visualization data');
+      return;
+    }
     
     // Draw connections for each midpoint point
     midpointPoints.forEach(midpointPoint => {
-      if (!midpointPoint.midpointSource || !midpointPoint.midpointSource.fromWords) return;
+      if (!midpointPoint.midpointSource || !midpointPoint.midpointSource.fromWords) {
+        console.log('Midpoint point missing source or fromWords:', midpointPoint);
+        return;
+      }
       
       // Only draw lines for primary results (the closest word to the theoretical midpoint)
       if (!midpointPoint.midpointSource.isPrimaryResult) return;

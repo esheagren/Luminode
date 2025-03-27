@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import VectorGraph from './VectorGraph';
 import WordInput from './WordInput';
@@ -22,6 +22,17 @@ const HomePage = () => {
   console.log('HomePage component:', {
     setRelatedClustersType: typeof setRelatedClusters
   });
+  
+  // Add effect to monitor relatedClusters changes
+  useEffect(() => {
+    console.log('relatedClusters changed:', relatedClusters);
+  }, [relatedClusters]);
+  
+  // Create a debug wrapper for setRelatedClusters
+  const debugSetRelatedClusters = (newClusters) => {
+    console.log('Setting related clusters:', newClusters);
+    setRelatedClusters(newClusters);
+  };
 
   const handleWordSelect = (word) => {
     if (!words.includes(word)) {
@@ -128,7 +139,7 @@ const HomePage = () => {
             <Tools
               words={words}
               numMidpoints={numNeighbors}
-              setMidpointClusters={setRelatedClusters}
+              setMidpointClusters={debugSetRelatedClusters}
               setLoading={setLoading}
               setError={setError}
               loading={loading}

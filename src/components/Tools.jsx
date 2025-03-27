@@ -3,6 +3,14 @@ import MidpointToolbar from './MidpointToolbar';
 import AnalogyToolbar from './AnalogyToolbar';
 import ViewButton from './ViewButton';
 
+// Wrapper function for better debugging of setMidpointClusters
+const createDebugSetMidpointClusters = (setMidpointClusters) => {
+  return (clusters) => {
+    console.log('Setting midpoint clusters:', clusters);
+    return setMidpointClusters(clusters);
+  };
+};
+
 const Tools = ({
   words,
   numMidpoints,
@@ -23,6 +31,9 @@ const Tools = ({
     hasSetMidpointClusters: !!setMidpointClusters,
     typeSetMidpointClusters: typeof setMidpointClusters
   });
+  
+  // Create debug wrapper for setMidpointClusters
+  const debugSetMidpointClusters = createDebugSetMidpointClusters(setMidpointClusters);
 
   const renderToolContent = () => {
     switch (activeTab) {
@@ -31,7 +42,7 @@ const Tools = ({
           <MidpointToolbar
             words={words}
             numMidpoints={numMidpoints}
-            setMidpointClusters={setMidpointClusters}
+            setMidpointClusters={debugSetMidpointClusters}
             setLoading={setLoading}
             setError={setError}
             loading={loading}
@@ -46,7 +57,7 @@ const Tools = ({
             setError={setError}
             loading={loading}
             wordsValid={wordsValid}
-            setMidpointClusters={setMidpointClusters}
+            setMidpointClusters={debugSetMidpointClusters}
           />
         );
       default:

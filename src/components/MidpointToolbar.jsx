@@ -5,13 +5,24 @@ const MidpointToolbar = ({
   words, 
   setMidpointClusters, 
   setLoading, 
-  setError 
+  setError,
+  loading,
+  wordsValid
 }) => {
   const [word1, setWord1] = useState('');
   const [word2, setWord2] = useState('');
   const [recursionDepth, setRecursionDepth] = useState(0);
   const [isComputing, setIsComputing] = useState(false);
   const [useExactSearch, setUseExactSearch] = useState(true);
+  
+  // Debug log - check if the component gets the required props
+  console.log('MidpointToolbar props:', {
+    hasWords: Array.isArray(words) && words.length > 0,
+    wordCount: Array.isArray(words) ? words.length : 0,
+    hasSetMidpointClusters: typeof setMidpointClusters === 'function',
+    loading,
+    wordsValid
+  });
   
   const handleSearch = async () => {
     if (!word1 || !word2) {
@@ -21,15 +32,28 @@ const MidpointToolbar = ({
     
     setIsComputing(true);
     setLoading(true);
+    console.log(`Starting midpoint search for words: "${word1}" and "${word2}"`);
     
     try {
-      const results = await findMidpoint(
+      const response = await findMidpoint(
         word1, 
         word2, 
         5,
         recursionDepth,
         useExactSearch
       );
+      
+      console.log('Midpoint search raw response:', response);
+      
+      // Ensure we have a valid response structure
+      if (!response || !response.data || !response.data.primaryMidpoint) {
+        console.error('Invalid response structure:', response);
+        throw new Error('Invalid response received from server');
+      }
+      
+      // Get the data from the response
+      const results = response.data;
+      console.log('Midpoint search results data:', results);
       
       // Process results for visualization
       const midpointCluster = {
@@ -44,10 +68,22 @@ const MidpointToolbar = ({
       
       // Add primary midpoint
       const primaryMidpoint = results.primaryMidpoint;
+      console.log('Processing primary midpoint:', primaryMidpoint);
+      
+      // Ensure we have nearestWords in the expected format
+      if (!primaryMidpoint.nearestWords || !Array.isArray(primaryMidpoint.nearestWords) || primaryMidpoint.nearestWords.length === 0) {
+        console.error('No nearest words found in the midpoint response:', primaryMidpoint);
+        throw new Error('No midpoint results found');
+      }
+      
+      // Add each primary midpoint word to the cluster
       primaryMidpoint.nearestWords.forEach((item, index) => {
+        // Handle both score and distance field names
+        const distanceValue = item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0);
+        
         midpointCluster.words.push({
           word: item.word,
-          distance: item.distance,
+          distance: distanceValue, 
           isMidpoint: true,
           midpointLevel: 'primary',
           midpointSource: {
@@ -60,14 +96,21 @@ const MidpointToolbar = ({
       // Add secondary midpoints if available
       if (results.secondaryMidpoints && results.secondaryMidpoints.length > 0) {
         results.secondaryMidpoints.forEach(midpoint => {
+          if (!midpoint.nearestWords || !Array.isArray(midpoint.nearestWords)) {
+            console.warn('Invalid secondary midpoint structure:', midpoint);
+            return;
+          }
+          
           midpoint.nearestWords.forEach((item, index) => {
+            const distanceValue = item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0);
+            
             midpointCluster.words.push({
               word: item.word,
-              distance: item.distance,
+              distance: distanceValue,
               isMidpoint: true,
               midpointLevel: 'secondary',
               midpointSource: {
-                fromWords: midpoint.endpoints,
+                fromWords: midpoint.endpoints || [word1, word2],
                 isPrimaryResult: index === 0
               }
             });
@@ -78,14 +121,21 @@ const MidpointToolbar = ({
       // Add tertiary midpoints if available
       if (results.tertiaryMidpoints && results.tertiaryMidpoints.length > 0) {
         results.tertiaryMidpoints.forEach(midpoint => {
+          if (!midpoint.nearestWords || !Array.isArray(midpoint.nearestWords)) {
+            console.warn('Invalid tertiary midpoint structure:', midpoint);
+            return;
+          }
+          
           midpoint.nearestWords.forEach((item, index) => {
+            const distanceValue = item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0);
+            
             midpointCluster.words.push({
               word: item.word,
-              distance: item.distance,
+              distance: distanceValue,
               isMidpoint: true,
               midpointLevel: 'tertiary',
               midpointSource: {
-                fromWords: midpoint.endpoints,
+                fromWords: midpoint.endpoints || [word1, word2],
                 isPrimaryResult: index === 0
               }
             });
@@ -93,8 +143,15 @@ const MidpointToolbar = ({
         });
       }
       
+      console.log('Prepared midpoint cluster for visualization:', midpointCluster);
+      
       // Update the visualization with the new midpoint cluster
-      setMidpointClusters([midpointCluster]);
+      if (typeof setMidpointClusters === 'function') {
+        setMidpointClusters([midpointCluster]);
+      } else {
+        console.error('setMidpointClusters is not a function', typeof setMidpointClusters);
+        setError('Failed to update visualization: internal error');
+      }
       
     } catch (error) {
       console.error('Error in midpoint search:', error);

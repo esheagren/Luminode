@@ -94,13 +94,38 @@ const VectorGraph = ({
             analogySource = analogyWord?.analogySource || null;
           }
           
+          // Check if this point is part of a midpoint result
+          const midpointCluster = midpointWords.find(cluster => 
+            cluster.type === 'midpoint' && 
+            cluster.words.some(w => w.word === point.word)
+          );
+          
+          let isMidpoint = false;
+          let midpointLevel = null;
+          let midpointSource = null;
+          
+          if (midpointCluster) {
+            const midpointWord = midpointCluster.words.find(w => w.word === point.word);
+            isMidpoint = !!midpointWord?.isMidpoint;
+            midpointLevel = midpointWord?.midpointLevel || 'primary';
+            midpointSource = midpointWord?.midpointSource || null;
+            
+            console.log(`Found midpoint word ${point.word} with level ${midpointLevel}`, midpointWord);
+          }
+          
           return {
             ...point,
             truncatedVector: vectorMap[point.word] || `Vector for ${point.word}`,
             isAnalogy,
-            analogySource
+            analogySource,
+            isMidpoint,
+            midpointLevel,
+            midpointSource
           };
         });
+        
+        // Debug the coordinates data after processing
+        console.log('Processed coordinates with clusters:', coordinatesWithVectors.filter(c => c.isMidpoint || c.isAnalogy));
         
         setCoordinates(coordinatesWithVectors);
       } catch (error) {
