@@ -23,7 +23,11 @@ const env = process.env;
 const app = express();
 
 // CORS setup
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://luminode.vercel.app'],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Middleware for parsing JSON
 app.use(express.json());

@@ -28,7 +28,7 @@ export const getApiServerUrl = () => {
   // Only use localhost in development and only when actually on localhost
   if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
     // In local development, if we're actually on localhost, use the local API server
-    return 'http://localhost:5001';
+    return 'http://localhost:3001';
   }
   
   // For any other case, use relative URLs for safety
