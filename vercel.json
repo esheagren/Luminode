@@ -13,18 +13,6 @@
       "memory": 1024,
       "maxDuration": 30
     },
-    "api/findNeighbors.js": {
-      "memory": 256,
-      "maxDuration": 10
-    },
-    "api/findMidpoint.js": {
-      "memory": 256,
-      "maxDuration": 10
-    },
-    "api/findAnalogy.js": {
-      "memory": 256,
-      "maxDuration": 10
-    },
     "api/_init.js": {
       "memory": 128,
       "maxDuration": 5
