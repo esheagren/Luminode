@@ -266,9 +266,8 @@ const HomePage = () => {
         }
         
         .tools-bar {
-          padding: 0.5rem 1rem;
+          padding: 0;
           background-color: #0f0f10;
-          border-bottom: 1px solid #2a2a2c;
         }
         
         .graph-area {

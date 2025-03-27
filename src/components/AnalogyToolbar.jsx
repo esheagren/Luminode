@@ -39,142 +39,121 @@ const AnalogyToolbar = ({
   const findAnalogyWords = async () => {
     const { word1, word2, word3 } = selectedWords;
     
+    // Make sure all words are selected
     if (!word1 || !word2 || !word3) {
-      setError('Please select all three words for the analogy');
+      setError('Please select all three words for analogy search');
       return;
     }
     
     setLoading(true);
     setError(null);
-    setResults(null);
     
     try {
-      console.log(`Attempting to find analogy with words: ${word1}, ${word2}, ${word3}`);
-      const result = await findAnalogy(word1, word2, word3, 5);
+      const response = await findAnalogy(word1, word2, word3, 5);
       
-      if (result.error) {
-        console.error('Analogy error received:', result.error);
-        
-        // Display detailed error to help troubleshoot
-        if (result.details) {
-          console.log('Error details:', result.details);
-          
-          // Handle specific error cases
-          if (result.details.status === 404) {
-            setError(`Not found: The analogy endpoint might be missing. Status: ${result.details.status}`);
-          } else if (result.details.message && result.details.message.includes('Network Error')) {
-            setError('Network error: Could not connect to the server. The server might be down or not running on the expected port.');
-          } else {
-            setError(`${result.error} (Status: ${result.details.status || 'unknown'})`);
-          }
-        } else {
-          setError(result.error);
-        }
-      } else if (!result.data) {
-        setError('No results were returned from the server');
-      } else {
-        console.log('Analogy result:', result);
-        setResults(result.data.results);
-        
-        try {
-          // Format the analogy results with the correct structure for visualization
-          const analogyCluster = {
-            type: 'analogy',
-            parent1: word1,
-            parent2: word2,
-            parent3: word3,
-            words: result.data.results.map(item => ({
-              word: item.word,
-              score: item.score,
-              isAnalogy: true,
-              analogySource: {
-                fromWords: [word1, word2, word3]
-              }
-            }))
-          };
-          
-          console.log('Creating analogy cluster:', analogyCluster);
-          
-          // Check if setMidpointClusters is a function before calling it
-          if (typeof setMidpointClusters === 'function') {
-            // Use a simpler approach to update the state
-            setMidpointClusters(clusters => {
-              console.log('Current clusters:', clusters);
-              return [analogyCluster, ...clusters];
-            });
-          } else {
-            console.warn('setMidpointClusters is not available or not a function');
-            console.log('Type of setMidpointClusters:', typeof setMidpointClusters);
-          }
-        } catch (error) {
-          console.error('Error updating visualization with analogy results:', error);
-          setError(`Error adding results to visualization: ${error.message}`);
-        }
+      if (response.error) {
+        throw new Error(response.error);
       }
+      
+      // Process results
+      setResults(response.data.results);
+      
+      // Format results for visualization
+      const analogyResults = response.data.results.map(result => ({
+        word: result.word,
+        score: result.score,
+        isAnalogy: true,
+        analogySource: {
+          from: word3,
+          relation: `${word1}:${word2}::${word3}:${result.word}`
+        }
+      }));
+      
+      // Create analogy cluster for visualization
+      const analogyCluster = {
+        type: 'analogy',
+        source: {
+          word1, word2, word3
+        },
+        words: [
+          // Include the three input words
+          { word: word1, isAnalogy: false },
+          { word: word2, isAnalogy: false },
+          { word: word3, isAnalogy: false },
+          // Include analogy results
+          ...analogyResults
+        ]
+      };
+      
+      // Update visualization with analogy results
+      if (typeof setMidpointClusters === 'function') {
+        setMidpointClusters([analogyCluster]);
+      } else {
+        console.error('setMidpointClusters is not a function:', typeof setMidpointClusters);
+      }
+      
     } catch (error) {
-      console.error('Exception in analogy search:', error);
-      setError(`Failed to complete analogy operation: ${error.message}`);
+      console.error('Error finding analogy:', error);
+      setError(`Failed to find analogy: ${error.message}`);
+      setResults(null);
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="analogy-toolbar">
       <div className="analogy-form">
-        <div className="analogy-inputs">
+        <div className="analogy-selects">
           <select 
-            value={selectedWords.word1} 
+            value={selectedWords.word1}
             onChange={(e) => handleWordChange('word1', e.target.value)}
-            disabled={loading || !wordsValid}
-            className="word-select"
+            className="analogy-select"
           >
-            <option value="">Word 1</option>
-            {words.map((word, index) => (
-              <option key={`w1-${index}`} value={word}>{word}</option>
+            <option value="">First word</option>
+            {words.map(word => (
+              <option key={`a1-${word}`} value={word}>{word}</option>
             ))}
           </select>
           
-          <span className="connector">:</span>
+          <span className="analogy-connector">:</span>
           
           <select 
-            value={selectedWords.word2} 
+            value={selectedWords.word2}
             onChange={(e) => handleWordChange('word2', e.target.value)}
-            disabled={loading || !wordsValid}
-            className="word-select"
+            className="analogy-select"
           >
-            <option value="">Word 2</option>
-            {words.map((word, index) => (
-              <option key={`w2-${index}`} value={word}>{word}</option>
+            <option value="">Second word</option>
+            {words.map(word => (
+              <option key={`a2-${word}`} value={word}>{word}</option>
             ))}
           </select>
           
-          <span className="connector">::</span>
+          <span className="analogy-connector">::</span>
           
           <select 
-            value={selectedWords.word3} 
+            value={selectedWords.word3}
             onChange={(e) => handleWordChange('word3', e.target.value)}
-            disabled={loading || !wordsValid}
-            className="word-select"
+            className="analogy-select"
           >
-            <option value="">Word 3</option>
-            {words.map((word, index) => (
-              <option key={`w3-${index}`} value={word}>{word}</option>
+            <option value="">Third word</option>
+            {words.map(word => (
+              <option key={`a3-${word}`} value={word}>{word}</option>
             ))}
           </select>
           
-          <span className="connector">:</span>
+          <span className="analogy-connector">:</span>
           
-          <span className="result-marker">?</span>
+          <span className="analogy-result">?</span>
+          
+          <button 
+            className="analogy-search-btn"
+            onClick={findAnalogyWords}
+            disabled={!selectedWords.word1 || !selectedWords.word2 || !selectedWords.word3 || loading}
+          >
+            Find
+          </button>
         </div>
-        
-        <button 
-          className="search-btn"
-          onClick={findAnalogyWords}
-          disabled={loading || !wordsValid || !selectedWords.word1 || !selectedWords.word2 || !selectedWords.word3}
-        >
-          Find
-        </button>
       </div>
       
       {results && results.length > 0 && (
@@ -192,10 +171,7 @@ const AnalogyToolbar = ({
       
       <style jsx="true">{`
         .analogy-toolbar {
-          background-color: #1a1a1c;
-          border-radius: 8px;
-          padding: 0.5rem;
-          margin-top: 0.25rem;
+          padding: 0.75rem;
         }
         
         .analogy-form {
@@ -204,66 +180,57 @@ const AnalogyToolbar = ({
           gap: 0.5rem;
         }
         
-        .analogy-inputs {
+        .analogy-selects {
           display: flex;
           align-items: center;
-          flex: 1;
-          background-color: rgba(26, 26, 28, 0.6);
-          border-radius: 4px;
-          padding: 0.25rem 0.5rem;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+          width: 100%;
         }
         
-        .word-select {
-          flex: 1;
-          padding: 0.25rem;
+        .analogy-select {
+          padding: 0.4rem 0.5rem;
           border-radius: 4px;
-          background-color: #2a2a2c;
-          color: #e2e8f0;
+          background: rgba(42, 42, 44, 0.6);
+          color: white;
           border: 1px solid #3a3a3c;
-          font-size: 0.8rem;
-          min-width: 80px;
+          font-size: 0.85rem;
+          min-width: 90px;
+          flex: 1;
         }
         
-        .word-select:focus {
-          outline: none;
-          border-color: #FFC837;
-          box-shadow: 0 0 0 1px rgba(255, 200, 55, 0.2);
+        .analogy-connector {
+          color: #aaa;
+          font-size: 0.85rem;
         }
         
-        .connector {
-          font-family: monospace;
-          color: #94a3b8;
-          margin: 0 0.25rem;
-          font-size: 0.9rem;
-        }
-        
-        .result-marker {
+        .analogy-result {
+          font-size: 0.85rem;
           color: #FFC837;
           font-weight: bold;
-          font-size: 1.1rem;
-          margin-left: 0.25rem;
         }
         
-        .search-btn {
-          background-color: #FFC837;
-          color: #1a1a1c;
-          border: none;
-          padding: 0.25rem 0.5rem;
+        .analogy-search-btn {
+          padding: 0.4rem 0.75rem;
           border-radius: 4px;
+          background: linear-gradient(135deg, #FF8008 0%, #FFC837 100%);
+          color: white;
+          border: none;
           font-weight: 500;
           font-size: 0.85rem;
           cursor: pointer;
-          transition: all 0.2s ease;
           white-space: nowrap;
+          transition: all 0.2s ease;
+          margin-left: 0.5rem;
         }
         
-        .search-btn:hover:not(:disabled) {
-          background-color: #FFD166;
+        .analogy-search-btn:hover:not(:disabled) {
+          box-shadow: 0 2px 4px rgba(255, 136, 8, 0.3);
+          transform: translateY(-1px);
         }
         
-        .search-btn:disabled {
-          background-color: #3a3a3c;
-          color: #94a3b8;
+        .analogy-search-btn:disabled {
+          opacity: 0.6;
           cursor: not-allowed;
         }
         

@@ -3,6 +3,42 @@ import MidpointToolbar from './MidpointToolbar';
 import AnalogyToolbar from './AnalogyToolbar';
 import ViewButton from './ViewButton';
 
+// Import icons from a reliable source like Feather or include SVG directly
+const MidpointIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <line x1="12" y1="8" x2="12" y2="16"></line>
+    <line x1="8" y1="12" x2="16" y2="12"></line>
+  </svg>
+);
+
+const AnalogyIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 3a2.85 2.85 0 1 1 0 5.7"></path>
+    <path d="M10 13a2.85 2.85 0 1 1 0 5.7"></path>
+    <line x1="10" y1="7" x2="17" y2="7"></line>
+    <line x1="7" y1="13" x2="13" y2="13"></line>
+  </svg>
+);
+
+const RulerIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"></path>
+    <path d="M6 8v.01"></path>
+    <path d="M9 8v.01"></path>
+    <path d="M12 8v.01"></path>
+    <path d="M15 8v.01"></path>
+    <path d="M18 8v.01"></path>
+    <path d="M6 12v.01"></path>
+    <path d="M18 12v.01"></path>
+    <path d="M6 16v.01"></path>
+    <path d="M9 16v.01"></path>
+    <path d="M12 16v.01"></path>
+    <path d="M15 16v.01"></path>
+    <path d="M18 16v.01"></path>
+  </svg>
+);
+
 // Wrapper function for better debugging of setMidpointClusters
 const createDebugSetMidpointClusters = (setMidpointClusters) => {
   return (clusters) => {
@@ -25,6 +61,7 @@ const Tools = ({
   setRulerActive
 }) => {
   const [activeTab, setActiveTab] = useState('midpoint');
+  const [showContent, setShowContent] = useState(true);
   
   // Debug: Check the type of setMidpointClusters
   console.log('Tools component:', {
@@ -35,7 +72,18 @@ const Tools = ({
   // Create debug wrapper for setMidpointClusters
   const debugSetMidpointClusters = createDebugSetMidpointClusters(setMidpointClusters);
 
+  const handleTabClick = (tab) => {
+    if (tab === activeTab) {
+      setShowContent(!showContent);
+    } else {
+      setActiveTab(tab);
+      setShowContent(true);
+    }
+  };
+
   const renderToolContent = () => {
+    if (!showContent) return null;
+    
     switch (activeTab) {
       case 'midpoint':
         return (
@@ -61,54 +109,54 @@ const Tools = ({
           />
         );
       default:
-        return <div>Select a tool</div>;
+        return null;
     }
-  };
-
-  const tabButtonClass = (tab) => {
-    return `tab-button ${activeTab === tab ? 'active' : ''}`;
   };
 
   return (
     <div className="tools-container">
-      <div className="tabs">
-        <button
-          className={tabButtonClass('midpoint')}
-          onClick={() => setActiveTab('midpoint')}
-          disabled={loading}
-        >
-          Midpoint
-        </button>
-        <button
-          className={tabButtonClass('analogy')}
-          onClick={() => setActiveTab('analogy')}
-          disabled={loading}
-        >
-          Analogy
-        </button>
-      </div>
-      
-      <div className="tool-content">
-        {renderToolContent()}
-      </div>
-      
-      <div className="view-controls">
-        <ViewButton 
-          viewMode={viewMode} 
-          setViewMode={setViewMode} 
-        />
-        
-        <div className="ruler-toggle">
-          <label className="ruler-label">
-            <input
-              type="checkbox"
-              checked={rulerActive}
-              onChange={() => setRulerActive(!rulerActive)}
-              className="ruler-checkbox"
-            />
-            <span className="ruler-text">Ruler</span>
-          </label>
+      <div className="tools-header">
+        <div className="tool-buttons">
+          <button
+            className={`icon-button ${activeTab === 'midpoint' ? 'active' : ''}`}
+            onClick={() => handleTabClick('midpoint')}
+            disabled={loading}
+            title="Midpoint"
+          >
+            <MidpointIcon />
+            <span>Midpoint</span>
+          </button>
+          
+          <button
+            className={`icon-button ${activeTab === 'analogy' ? 'active' : ''}`}
+            onClick={() => handleTabClick('analogy')}
+            disabled={loading}
+            title="Analogy"
+          >
+            <AnalogyIcon />
+            <span>Analogy</span>
+          </button>
+          
+          <div className="spacer"></div>
+          
+          <button
+            className={`icon-button ${rulerActive ? 'active' : ''}`}
+            onClick={() => setRulerActive(!rulerActive)}
+            title="Ruler"
+          >
+            <RulerIcon />
+          </button>
+          
+          <ViewButton 
+            viewMode={viewMode} 
+            setViewMode={setViewMode} 
+            isCompact={true}
+          />
         </div>
+      </div>
+      
+      <div className={`tool-content ${showContent ? 'visible' : 'hidden'}`}>
+        {renderToolContent()}
       </div>
       
       <style jsx="true">{`
@@ -116,74 +164,70 @@ const Tools = ({
           display: flex;
           flex-direction: column;
           background-color: #0f0f10;
-          border-radius: 8px;
+          border-radius: 6px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tools-header {
           padding: 0.25rem;
-          margin-bottom: 0.5rem;
+          border-bottom: 1px solid #222;
         }
         
-        .tabs {
+        .tool-buttons {
           display: flex;
-          margin-bottom: 0.25rem;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 0.25rem;
         }
         
-        .tab-button {
-          flex: 1;
-          background-color: transparent;
-          color: #94a3b8;
+        .icon-button {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          background: transparent;
+          color: #ccc;
           border: none;
-          border-bottom: 2px solid transparent;
-          padding: 0.3rem 0.5rem;
-          cursor: pointer;
+          padding: 0.5rem 0.75rem;
+          border-radius: 4px;
           font-size: 0.85rem;
-          transition: all 0.2s ease;
+          cursor: pointer;
+          transition: all 0.15s ease;
         }
         
-        .tab-button:hover:not(:disabled) {
-          color: #e2e8f0;
+        .icon-button:hover {
+          background: rgba(255, 255, 255, 0.05);
+          color: white;
         }
         
-        .tab-button.active {
-          color: #FFC837;
-          border-bottom: 2px solid #FFC837;
+        .icon-button.active {
+          background: rgba(66, 133, 244, 0.1);
+          color: #4285F4;
+          box-shadow: inset 0 -2px 0 #4285F4;
         }
         
-        .tab-button:disabled {
+        .icon-button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
         }
         
+        .spacer {
+          flex-grow: 1;
+        }
+        
         .tool-content {
-          padding: 0.25rem 0;
+          transition: max-height 0.3s ease, opacity 0.2s ease;
+          overflow: hidden;
         }
         
-        .view-controls {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 0.25rem;
-          padding-top: 0.25rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        .tool-content.visible {
+          max-height: 500px;
+          opacity: 1;
         }
         
-        .ruler-toggle {
-          display: flex;
-          align-items: center;
-        }
-        
-        .ruler-label {
-          display: flex;
-          align-items: center;
-          cursor: pointer;
-        }
-        
-        .ruler-checkbox {
-          margin-right: 0.25rem;
-          cursor: pointer;
-        }
-        
-        .ruler-text {
-          font-size: 0.75rem;
-          color: #94a3b8;
+        .tool-content.hidden {
+          max-height: 0;
+          opacity: 0;
         }
       `}</style>
     </div>
