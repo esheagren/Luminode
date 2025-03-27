@@ -3,12 +3,13 @@
  * @returns {boolean} True if in production, false if in development
  */
 export const isProduction = () => {
+  // Browser-side check
   if (typeof window !== 'undefined') {
-    // Check if we're running on localhost
+    // Always treat non-localhost as production
     return !window.location.hostname.includes('localhost');
   }
   
-  // If server-side, check environment variable
+  // Server-side check
   return process.env.NODE_ENV === 'production' || 
          process.env.VERCEL === '1' || 
          !!process.env.VERCEL_URL;
@@ -16,29 +17,22 @@ export const isProduction = () => {
 
 /**
  * Gets the appropriate API server URL based on the current environment
- * @returns {string} The API URL - empty string for relative URLs in production, localhost URL in development
+ * @returns {string} The API URL
  */
 export const getApiServerUrl = () => {
-  // When in browser context, always use the current origin for API requests
-  if (typeof window !== 'undefined') {
-    const isLocalhost = window.location.hostname.includes('localhost');
-    
-    if (isLocalhost) {
-      // In local development, use the local API server
-      return 'http://localhost:5001';
-    } else {
-      // In production, use relative URLs (empty base path)
-      // This ensures API requests go to the same domain
-      return '';
-    }
-  }
-  
-  // Server-side rendering - fallback based on environment
+  // ALWAYS use relative URLs in production to avoid mixed content issues
   if (isProduction()) {
     return '';
-  } else {
+  }
+  
+  // Only use localhost in development and only when actually on localhost
+  if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
+    // In local development, if we're actually on localhost, use the local API server
     return 'http://localhost:5001';
   }
+  
+  // For any other case, use relative URLs for safety
+  return '';
 };
 
 /**
@@ -49,16 +43,16 @@ export const getApiServerUrl = () => {
 export const getApiUrl = (endpoint) => {
   const baseUrl = getApiServerUrl();
   
-  // Ensure endpoint starts with a slash
+  // Ensure endpoint starts with a slash if it doesn't already
   const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   
-  // For empty baseUrl (relative URLs), just return the path
-  if (!baseUrl) return path;
+  // If baseUrl is empty (relative URLs), return the path
+  if (!baseUrl) {
+    return path;
+  }
   
-  // Remove trailing slash from baseUrl if present
-  const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-  
-  return `${base}${path}`;
+  // Otherwise, construct the full URL
+  return `${baseUrl}${path}`;
 };
 
 /**
@@ -75,9 +69,9 @@ export const logEnvironmentInfo = () => {
   }
 };
 
-// Log environment info when this module is loaded
+// Log environment info when this module is loaded in the browser
 if (typeof window !== 'undefined') {
-  // Wait for window to be fully loaded
+  // Wait for window to be fully loaded to avoid initialization issues
   setTimeout(logEnvironmentInfo, 0);
 }
 
