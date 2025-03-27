@@ -9,19 +9,19 @@
       "memory": 128,
       "maxDuration": 5
     },
-    "server/server.js": {
-      "memory": 512,
+    "api/checkWord.js": {
+      "memory": 256,
       "maxDuration": 10
     },
-    "server/routes/api.js": {
+    "api/getVectorCoordinates.js": {
       "memory": 512,
-      "maxDuration": 10
+      "maxDuration": 15
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/server/routes/api.js"
+      "destination": "/api/$1"
     },
     {
       "source": "/(.*)",
