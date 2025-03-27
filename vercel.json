@@ -4,9 +4,21 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "functions": {
-    "api/**/*.js": {
-      "memory": 3008,
+    "api/index.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "api/checkWord.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "api/getVectorCoordinates.js": {
+      "memory": 2048,
       "maxDuration": 60
+    },
+    "api/_init.js": {
+      "memory": 512,
+      "maxDuration": 5
     }
   },
   "rewrites": [

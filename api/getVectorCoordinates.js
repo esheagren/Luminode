@@ -8,7 +8,6 @@ dotenv.config();
 export default async function handler(req, res) {
   console.log(`[API] getVectorCoordinates called with method: ${req.method}`);
   console.log(`[API] Request origin: ${req.headers.origin || 'unknown'}`);
-  console.log(`[API] Request body:`, JSON.stringify(req.body));
   
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -43,7 +42,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid words array' });
     }
     
-    console.log(`[API] Processing words: ${JSON.stringify(words)}`);
+    // Limit number of words to process to prevent excessive memory usage
+    const wordsToProcess = words.slice(0, 50); // Limit to 50 words maximum
+    
+    console.log(`[API] Processing ${wordsToProcess.length} words`);
     
     // Validate dimensions
     const projectionDimensions = dimensions === 3 ? 3 : 2;
@@ -52,7 +54,8 @@ export default async function handler(req, res) {
     const vectors = [];
     const invalidWords = [];
     
-    for (const word of words) {
+    // Process words in batches to reduce memory pressure
+    for (const word of wordsToProcess) {
       const exists = await vectorService.wordExists(word);
       if (exists) {
         const vector = await vectorService.getWordVector(word);
@@ -64,6 +67,9 @@ export default async function handler(req, res) {
       } else {
         invalidWords.push(word);
       }
+      
+      // Give the event loop a chance to breathe between heavy operations
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
     
     if (vectors.length === 0) {
@@ -73,33 +79,48 @@ export default async function handler(req, res) {
       });
     }
     
-    // Extract just the vectors for PCA
-    const vectorsOnly = vectors.map(item => item.vector);
+    // Extract just the vectors for PCA (avoid creating large temporary arrays)
+    const vectorsOnly = new Array(vectors.length);
+    for (let i = 0; i < vectors.length; i++) {
+      vectorsOnly[i] = vectors[i].vector;
+    }
     
     // Perform PCA to get coordinates
     const coordinates = performPCA(vectorsOnly, projectionDimensions);
     
+    // Clean up to help garbage collection
+    for (let i = 0; i < vectorsOnly.length; i++) {
+      vectorsOnly[i] = null;
+    }
+    
     // Combine words with their coordinates
-    const result = vectors.map((item, index) => {
+    const result = [];
+    for (let i = 0; i < vectors.length; i++) {
       const point = {
-        word: item.word,
-        truncatedVector: `[${item.vector.slice(0, 5).join(', ')}...]`,
-        // Include full vector for similarity calculations
-        fullVector: item.vector
+        word: vectors[i].word,
+        // Don't include truncated vector in response to save memory
       };
       
       // Add coordinates based on dimensions
       if (projectionDimensions === 2) {
-        point.x = coordinates[index][0];
-        point.y = coordinates[index][1];
+        point.x = coordinates[i][0];
+        point.y = coordinates[i][1];
       } else {
-        point.x = coordinates[index][0];
-        point.y = coordinates[index][1];
-        point.z = coordinates[index][2];
+        point.x = coordinates[i][0];
+        point.y = coordinates[i][1];
+        point.z = coordinates[i][2];
       }
       
-      return point;
-    });
+      result.push(point);
+      
+      // Clear references to help GC
+      vectors[i].vector = null;
+    }
+    
+    // Final cleanup
+    for (let i = 0; i < vectors.length; i++) {
+      vectors[i] = null;
+    }
     
     return res.status(200).json({
       message: `Vector coordinates calculated successfully in ${projectionDimensions}D`,

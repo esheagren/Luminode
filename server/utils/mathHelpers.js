@@ -62,6 +62,7 @@ export function calculateMidpoint(a, b) {
 
 /**
  * Perform Principal Component Analysis (PCA) to reduce vectors to 3D
+ * Memory-optimized version to reduce serverless function memory usage
  * @param {number[][]} vectors - Array of vectors to project
  * @param {number} dimensions - Number of dimensions to reduce to (2 or 3)
  * @returns {number[][]} Array of 2D or 3D coordinates
@@ -76,7 +77,7 @@ export function performPCA(vectors, dimensions = 2) {
     dimensions = 2; // Default to 2D if invalid
   }
   
-  // Center the data
+  // Center the data (optimize memory usage by doing in-place operations)
   const vectorDimensions = vectors[0].length;
   const mean = new Array(vectorDimensions).fill(0);
   
@@ -87,16 +88,21 @@ export function performPCA(vectors, dimensions = 2) {
     }
   }
   
-  // Center the vectors by subtracting the mean
-  const centeredVectors = vectors.map(vector => 
-    vector.map((val, i) => val - mean[i])
-  );
+  // Center the vectors by subtracting the mean (in-place modification)
+  // Only create a new array if necessary for further processing
+  const workingVectors = new Array(vectors.length);
+  for (let i = 0; i < vectors.length; i++) {
+    workingVectors[i] = new Array(vectorDimensions);
+    for (let j = 0; j < vectorDimensions; j++) {
+      workingVectors[i][j] = vectors[i][j] - mean[j];
+    }
+  }
   
-  // Function to multiply a vector by the covariance matrix
+  // Function to multiply a vector by the covariance matrix (optimized)
   const multiplyByCovariance = (v) => {
     const result = new Array(vectorDimensions).fill(0);
     
-    for (const vector of centeredVectors) {
+    for (const vector of workingVectors) {
       // Calculate dot product of v and vector
       let dotProduct = 0;
       for (let i = 0; i < vectorDimensions; i++) {
@@ -105,17 +111,26 @@ export function performPCA(vectors, dimensions = 2) {
       
       // Add the contribution to the result
       for (let i = 0; i < vectorDimensions; i++) {
-        result[i] += dotProduct * vector[i];
+        result[i] += dotProduct * vector[i] / workingVectors.length;
       }
     }
     
     return result;
   };
   
-  // Normalize a vector
+  // Normalize a vector (in-place optimization)
   const normalize = (v) => {
-    const norm = Math.sqrt(v.reduce((sum, val) => sum + val * val, 0));
-    return v.map(val => val / norm);
+    let norm = 0;
+    for (let i = 0; i < v.length; i++) {
+      norm += v[i] * v[i];
+    }
+    norm = Math.sqrt(norm);
+    
+    // In-place normalization
+    for (let i = 0; i < v.length; i++) {
+      v[i] /= norm;
+    }
+    return v;
   };
   
   // Find principal components using power iteration
@@ -124,7 +139,11 @@ export function performPCA(vectors, dimensions = 2) {
   // Find each principal component
   for (let pc = 0; pc < dimensions; pc++) {
     // Start with a random vector
-    let currentPC = normalize(Array.from({ length: vectorDimensions }, () => Math.random() - 0.5));
+    let currentPC = new Array(vectorDimensions);
+    for (let i = 0; i < vectorDimensions; i++) {
+      currentPC[i] = Math.random() - 0.5;
+    }
+    currentPC = normalize(currentPC);
     
     // Make orthogonal to previous principal components (Gram-Schmidt)
     for (let iter = 0; iter < 10; iter++) {
@@ -133,8 +152,14 @@ export function performPCA(vectors, dimensions = 2) {
       
       // Make orthogonal to all previous principal components
       for (let prevPC = 0; prevPC < principalComponents.length; prevPC++) {
-        const dot = currentPC.reduce((sum, val, i) => sum + val * principalComponents[prevPC][i], 0);
-        currentPC = currentPC.map((val, i) => val - dot * principalComponents[prevPC][i]);
+        let dot = 0;
+        for (let i = 0; i < vectorDimensions; i++) {
+          dot += currentPC[i] * principalComponents[prevPC][i];
+        }
+        
+        for (let i = 0; i < vectorDimensions; i++) {
+          currentPC[i] -= dot * principalComponents[prevPC][i];
+        }
       }
       
       // Normalize
@@ -144,12 +169,27 @@ export function performPCA(vectors, dimensions = 2) {
     principalComponents.push(currentPC);
   }
   
-  // Project the original vectors onto the reduced space
-  return vectors.map(vector => {
-    const projection = [];
+  // Project the original vectors onto the reduced space (reuse memory)
+  const projections = new Array(vectors.length);
+  
+  for (let i = 0; i < vectors.length; i++) {
+    const projection = new Array(dimensions);
+    
     for (let pc = 0; pc < dimensions; pc++) {
-      projection.push(vector.reduce((sum, val, i) => sum + val * principalComponents[pc][i], 0));
+      let dotProduct = 0;
+      for (let j = 0; j < vectorDimensions; j++) {
+        dotProduct += vectors[i][j] * principalComponents[pc][j];
+      }
+      projection[pc] = dotProduct;
     }
-    return projection;
-  });
+    
+    projections[i] = projection;
+  }
+  
+  // Clean up to help garbage collection
+  for (let i = 0; i < workingVectors.length; i++) {
+    workingVectors[i] = null;
+  }
+  
+  return projections;
 } 

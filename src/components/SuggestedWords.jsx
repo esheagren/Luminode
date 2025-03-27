@@ -1,79 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { getRandomWords as getRandomCommonWords } from '../data/commonWords';
-import { getRandomWords as getRandomEsotericWords } from '../data/esotericWords';
+import { getRandomSuggestions } from '../data/suggestedWords';
 
 const SuggestedWords = ({ onWordSelect, currentWords, serverUrl, numSuggestions = 8 }) => {
-  const [commonSuggestions, setCommonSuggestions] = useState([]);
-  const [esotericSuggestions, setEsotericSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Generate new common word suggestions
-  const refreshCommonSuggestions = async () => {
+  // Generate new word suggestions
+  const refreshSuggestions = async () => {
     setLoading(true);
     
     // Get random words from our curated list
-    const candidateWords = getRandomCommonWords(numSuggestions * 2, currentWords);
+    const candidateWords = getRandomSuggestions(numSuggestions * 2, currentWords);
     
-    // Check which words exist in the database
     try {
       const validWords = [];
       
-      // Check each word against the API
+      // Check each word against the API to verify it exists in Pinecone
       for (const word of candidateWords) {
         if (validWords.length >= numSuggestions) break;
         
-        const response = await axios.post(`${serverUrl}/api/checkWord`, { word });
-        if (response.data.data.word.exists) {
-          validWords.push(word);
+        try {
+          const response = await axios.post(`${serverUrl}/api/checkWord`, { word });
+          if (response.data.data.word.exists) {
+            validWords.push(word);
+          }
+        } catch (error) {
+          console.error(`Error checking word ${word}:`, error);
         }
       }
       
-      setCommonSuggestions(validWords);
+      setSuggestions(validWords);
     } catch (error) {
-      console.error('Error checking common words:', error);
+      console.error('Error refreshing suggestions:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  // Generate new esoteric word suggestions
-  const refreshEsotericSuggestions = async () => {
-    setLoading(true);
-    
-    try {
-      // Get random words from our esoteric words list
-      const candidateWords = getRandomEsotericWords(numSuggestions * 2, currentWords);
-      
-      const validWords = [];
-      
-      // Check each word against the API
-      for (const word of candidateWords) {
-        if (validWords.length >= numSuggestions) break;
-        
-        const response = await axios.post(`${serverUrl}/api/checkWord`, { word });
-        if (response.data.data.word.exists) {
-          validWords.push(word);
-        }
-      }
-      
-      setEsotericSuggestions(validWords);
-    } catch (error) {
-      console.error('Error checking esoteric words:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Refresh all suggestions
-  const refreshAllSuggestions = () => {
-    refreshCommonSuggestions();
-    refreshEsotericSuggestions();
   };
 
   // Initial load and refresh when currentWords changes
   useEffect(() => {
-    refreshAllSuggestions();
+    refreshSuggestions();
   }, [currentWords, numSuggestions, serverUrl]);
 
   return (
@@ -81,7 +48,7 @@ const SuggestedWords = ({ onWordSelect, currentWords, serverUrl, numSuggestions 
       <div className="suggested-words-header">
         <h3>Suggested Words</h3>
         <button 
-          onClick={refreshAllSuggestions} 
+          onClick={refreshSuggestions} 
           className="refresh-btn"
           title="Get new suggestions"
           disabled={loading}
@@ -90,40 +57,19 @@ const SuggestedWords = ({ onWordSelect, currentWords, serverUrl, numSuggestions 
         </button>
       </div>
       
-      <div className="word-section">
-        <h4>Common Words</h4>
-        <div className="suggested-words-list">
-          {commonSuggestions.map((word, index) => (
-            <div 
-              key={`common-${index}`} 
-              className="suggested-word"
-              onClick={() => onWordSelect(word)}
-            >
-              {word}
-            </div>
-          ))}
-          {commonSuggestions.length === 0 && !loading && (
-            <div className="empty-message">No common words available</div>
-          )}
-        </div>
-      </div>
-      
-      <div className="word-section">
-        <h4>Esoteric Words</h4>
-        <div className="suggested-words-list">
-          {esotericSuggestions.map((word, index) => (
-            <div 
-              key={`esoteric-${index}`} 
-              className="suggested-word esoteric"
-              onClick={() => onWordSelect(word)}
-            >
-              {word}
-            </div>
-          ))}
-          {esotericSuggestions.length === 0 && !loading && (
-            <div className="empty-message">No esoteric words available</div>
-          )}
-        </div>
+      <div className="suggested-words-list">
+        {suggestions.map((word, index) => (
+          <div 
+            key={`word-${index}`} 
+            className="suggested-word"
+            onClick={() => onWordSelect(word)}
+          >
+            {word}
+          </div>
+        ))}
+        {suggestions.length === 0 && !loading && (
+          <div className="empty-message">No suggestions available</div>
+        )}
       </div>
       
       <style jsx>{`
@@ -146,17 +92,6 @@ const SuggestedWords = ({ onWordSelect, currentWords, serverUrl, numSuggestions 
           font-size: 1rem;
           color: #f8fafc;
           margin: 0;
-        }
-        
-        .word-section {
-          margin-bottom: 16px;
-        }
-        
-        .word-section h4 {
-          font-size: 0.9rem;
-          color: #94a3b8;
-          margin: 8px 0;
-          font-weight: normal;
         }
         
         .refresh-btn {
@@ -204,16 +139,6 @@ const SuggestedWords = ({ onWordSelect, currentWords, serverUrl, numSuggestions 
           background: linear-gradient(135deg, rgba(255, 157, 66, 0.1) 0%, rgba(255, 200, 55, 0.1) 100%);
           border-color: rgba(255, 157, 66, 0.3);
           transform: translateY(-2px);
-        }
-        
-        .suggested-word.esoteric {
-          background: linear-gradient(135deg, rgba(138, 43, 226, 0.05) 0%, rgba(138, 43, 226, 0.1) 100%);
-          border: 1px solid rgba(138, 43, 226, 0.2);
-        }
-        
-        .suggested-word.esoteric:hover {
-          background: linear-gradient(135deg, rgba(138, 43, 226, 0.1) 0%, rgba(138, 43, 226, 0.2) 100%);
-          border-color: rgba(138, 43, 226, 0.3);
         }
         
         .empty-message {

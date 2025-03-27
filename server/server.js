@@ -7,8 +7,14 @@ import apiRoutes from './routes/api.js';
 import vectorService from './services/vectorService.js';
 import dotenv from 'dotenv';
 
-// Load environment variables
+// Load environment variables immediately - this is critical for API keys
+console.log('Loading environment variables...');
 dotenv.config();
+
+// Verify that essential environment variables are loaded
+if (!process.env.PINECONE_API_KEY) {
+  console.warn('PINECONE_API_KEY is not set in environment. Will attempt to read from .env directly in pineconeService.');
+}
 
 // Get environment variables with fallbacks
 const env = {

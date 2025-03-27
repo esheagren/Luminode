@@ -1,9 +1,16 @@
 import { Pinecone } from '@pinecone-database/pinecone';
 import dotenv from 'dotenv';
 import { cosineSimilarity } from '../utils/mathHelpers.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Load environment variables
 dotenv.config();
+
+// Get the directory name
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Constants
 const PINECONE_INDEX_NAME = 'quickstart';
@@ -33,9 +40,36 @@ class PineconeService {
       try {
         console.log('Initializing Pinecone service...');
         
+        // Get API key directly from environment or from .env file
+        let apiKey = process.env.PINECONE_API_KEY;
+        
+        // If API key is not available, try to read from .env file directly
+        if (!apiKey) {
+          try {
+            const envPath = path.resolve(process.cwd(), '.env');
+            console.log('Attempting to read .env file from:', envPath);
+            if (fs.existsSync(envPath)) {
+              const envContent = fs.readFileSync(envPath, 'utf8');
+              const match = envContent.match(/PINECONE_API_KEY=([^\r\n]+)/);
+              if (match && match[1]) {
+                apiKey = match[1].trim();
+                console.log('Found API key in .env file');
+              }
+            }
+          } catch (err) {
+            console.error('Error reading .env file:', err);
+          }
+        }
+        
+        if (!apiKey) {
+          throw new Error('Pinecone API key not found. Please set PINECONE_API_KEY in .env file or environment.');
+        }
+        
+        console.log('Using Pinecone API key:', apiKey.substring(0, 5) + '...');
+        
         // Initialize Pinecone client
         this.pinecone = new Pinecone({
-          apiKey: process.env.PINECONE_API_KEY,
+          apiKey: apiKey,
         });
 
         // Check if index exists
@@ -250,15 +284,22 @@ class PineconeService {
     await this.initialize();
     
     try {
+      // Limit number of words to process to prevent excessive memory usage
+      const wordsToProcess = words.slice(0, 50); // Limit to 50 words maximum
+      
       // Get vectors for all words
       const vectors = [];
       const validWords = [];
       
-      for (const word of words) {
+      // Process words sequentially to avoid memory pressure
+      for (const word of wordsToProcess) {
         const vector = await this.getWordVector(word);
         if (vector) {
           vectors.push(vector);
           validWords.push(word);
+          
+          // Release control to event loop between operations
+          await new Promise(resolve => setTimeout(resolve, 0));
         }
       }
       
@@ -270,9 +311,13 @@ class PineconeService {
       const { performPCA } = await import('../utils/mathHelpers.js');
       const coordinates = performPCA(vectors, dimensions);
       
+      // Clear vector references to help GC
+      for (let i = 0; i < vectors.length; i++) {
+        vectors[i] = null;
+      }
+      
       return {
         words: validWords,
-        vectors,
         coordinates
       };
     } catch (error) {
