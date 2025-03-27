@@ -156,41 +156,6 @@ router.post('/findNeighbors', async (req, res) => {
   }
 });
 
-// Endpoint to get random words from the database
-router.post('/getRandomWords', async (req, res) => {
-  try {
-    const { count = 20 } = req.body;
-    
-    // This endpoint might need to remain focused on the local embedding service
-    // as the Pinecone service doesn't have direct access to the full word list
-    
-    // Make sure embeddings are loaded
-    await vectorService.initialize();
-    
-    // For Pinecone, we don't have a direct way to get random words
-    // We should implement this differently or keep using the embeddingService for this specific endpoint
-    const embeddingService = await import('../services/embeddingService.js').then(m => m.default);
-    await embeddingService.loadEmbeddings();
-    
-    // Get all words from the vocabulary
-    const allWords = Object.keys(embeddingService.wordVectors);
-    
-    // Shuffle and take the first 'count' words
-    const shuffled = [...allWords].sort(() => 0.5 - Math.random());
-    const randomWords = shuffled.slice(0, count);
-    
-    res.json({
-      message: 'Random words retrieved successfully',
-      data: {
-        words: randomWords
-      }
-    });
-  } catch (error) {
-    console.error('Error getting random words:', error);
-    res.status(500).json({ error: 'Failed to get random words' });
-  }
-});
-
 // Endpoint to check if a word exists and get its vector
 router.post('/checkWord', async (req, res) => {
   try {

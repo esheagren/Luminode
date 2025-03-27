@@ -7,7 +7,7 @@ dotenv.config();
 class VectorService {
   constructor() {
     this.service = pineconeService;
-    console.log(`Using Pinecone embedding service`);
+    console.log(`Using Pinecone embedding service exclusively`);
   }
 
   // Initialize the service
