@@ -45,6 +45,12 @@ const MidpointToolbar = ({
       
       console.log('Midpoint search raw response:', response);
       
+      // Handle API error responses
+      if (response.error) {
+        console.error('API returned an error:', response.error);
+        throw new Error(response.message || response.error);
+      }
+      
       // Ensure we have a valid response structure
       if (!response || !response.data || !response.data.primaryMidpoint) {
         console.error('Invalid response structure:', response);
