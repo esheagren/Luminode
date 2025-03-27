@@ -1,6 +1,6 @@
 # VectorMind - Word Embedding Explorer
 
-An application for exploring word embeddings, finding semantic relationships, and visualizing vector spaces. VectorMind supports both local (HNSW-based) and cloud-based (Pinecone) storage of word embeddings.
+An application for exploring word embeddings, finding semantic relationships, and visualizing vector spaces. VectorMind supports both local (HNSW-based) and cloud-based (Pinecone) storage of word embeddings!
 
 ## Features
 
