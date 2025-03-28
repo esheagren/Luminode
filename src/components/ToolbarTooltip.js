@@ -188,7 +188,7 @@ const getTooltipContent = (toolType) => {
       return `
         <div class="tooltip-title">Slice Tool</div>
         <div class="tooltip-description">
-          Create a semantic slice between two words, visualizing the path through embedding space. This tool identifies intermediary words by interpolating between embedding vectors, showing how semantic meaning transitions across the embedding manifold.
+          Create a semantic slice between two words, visualizing the path through embedding space. This tool identifies intermediary words by recursively interpolating between embedding vectors, showing how semantic meaning transitions across the embedding manifold. The recursive algorithm progressively explores finer-grained connections in high-dimensional space.
         </div>
         <div class="tooltip-usage">
           <div class="tooltip-usage-title">How to use:</div>
