@@ -3,7 +3,15 @@ import { createTooltip, removeTooltip } from './VectorTooltip';
 import { getPointColor, calculateCosineSimilarity, formatSimilarity } from './VectorUtils';
 import SimpleLoadingAnimation from './SimpleLoadingAnimation';
 
-const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
+const VectorGraph2D = ({ 
+  coordinates, 
+  words, 
+  containerRef, 
+  rulerActive,
+  selectionMode = false,
+  onPointSelected = null,
+  selectedPoints = []
+}) => {
   const canvasRef = useRef(null);
   const pointsRef = useRef([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,7 +74,7 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
     return () => {
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [coordinates, containerRef, rulerActive]);
+  }, [coordinates, containerRef, rulerActive, selectedPoints, selectionMode]);
   
   const drawVisualization = (coordsToRender = coordinates) => {
     if (!coordsToRender.length || !canvasRef.current) {
@@ -119,6 +127,7 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
       const isPrimary = words.includes(point.word);
       const isContextSample = point.isContextSample === true;
       const isAnalogy = point.isAnalogy === true;
+      const isSelected = selectedPoints.includes(point.word);
       
       // Log for debugging the first time we process an analogy point
       if (isAnalogy && !window.loggedAnalogy) {
@@ -146,7 +155,8 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
         radius,
         isPrimary,
         isContextSample,
-        isAnalogy
+        isAnalogy,
+        isSelected
       });
       
       // Draw point
@@ -154,6 +164,15 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fillStyle = getPointColor(point.word, words, isPrimary, isContextSample, isAnalogy);
       ctx.fill();
+      
+      // Add highlight for selected points
+      if (isSelected) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius + 3, 0, Math.PI * 2);
+        ctx.strokeStyle = '#4285F4';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
       
       // Draw label only for primary words, analogy results, and related words (not context samples)
       if (!isContextSample || isPrimary || isAnalogy) {
@@ -174,12 +193,24 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
     
     // Draw midpoint lines when midpoints exist 
     drawMidpointLines(ctx, pointsRef.current);
+    
+    // Display selection mode indicator if active
+    if (selectionMode) {
+      const message = `Selection Mode: Click on a word to select (${selectedPoints.length}/2)`;
+      ctx.font = 'bold 14px Arial';
+      ctx.fillStyle = '#4285F4';
+      ctx.textAlign = 'center';
+      ctx.fillText(message, canvas.width / 2, 30);
+    }
   };
   
   // Function to draw ruler lines between points
   const drawRulerLines = (ctx, points) => {
-    // Filter to only get primary words
+    // Find primary words (words from the user input)
     const primaryPoints = points.filter(point => point.isPrimary);
+    
+    // Early return if we don't have enough points
+    if (primaryPoints.length < 2) return;
     
     // Draw lines between each pair of primary points
     for (let i = 0; i < primaryPoints.length; i++) {
@@ -187,57 +218,41 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
         const point1 = primaryPoints[i];
         const point2 = primaryPoints[j];
         
-        // Draw line
+        // Draw line between points
         ctx.beginPath();
         ctx.moveTo(point1.x, point1.y);
         ctx.lineTo(point2.x, point2.y);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.lineWidth = 1;
-        ctx.setLineDash([5, 3]); // Dashed line
+        ctx.setLineDash([5, 5]); // Dashed line
         ctx.stroke();
         ctx.setLineDash([]); // Reset to solid line
         
-        // Calculate midpoint for label
+        // Calculate distance between points for label
+        const distance = calculateCosineSimilarity(point1, point2);
+        
+        // Draw distance label at midpoint of line
         const midX = (point1.x + point2.x) / 2;
         const midY = (point1.y + point2.y) / 2;
         
-        // Find the original vectors for these points
-        const vector1 = coordinates.find(c => c.word === point1.word)?.truncatedVector;
-        const vector2 = coordinates.find(c => c.word === point2.word)?.truncatedVector;
+        // Add background for better readability
+        const distText = formatSimilarity(distance);
+        const textWidth = ctx.measureText(distText).width;
         
-        // Calculate similarity if we have the vectors
-        let similarityText = "No vector data";
-        if (vector1 && vector2) {
-          // Extract numeric values from truncated vector strings
-          const extractVector = (vecStr) => {
-            if (typeof vecStr !== 'string') return null;
-            const matches = vecStr.match(/\[(.*?)\.\.\.]/);
-            if (!matches || !matches[1]) return null;
-            return matches[1].split(',').map(num => parseFloat(num.trim()));
-          };
-          
-          const vec1 = extractVector(vector1);
-          const vec2 = extractVector(vector2);
-          
-          if (vec1 && vec2) {
-            const similarity = calculateCosineSimilarity(vec1, vec2);
-            similarityText = formatSimilarity(similarity);
-          }
-        }
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillRect(midX - textWidth / 2 - 5, midY - 10, textWidth + 10, 20);
         
-        // Draw similarity label
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(midX - 30, midY - 10, 60, 20);
-        ctx.fillStyle = '#ffffff';
+        // Draw text
         ctx.font = '12px Arial';
+        ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(similarityText, midX, midY);
+        ctx.fillText(distText, midX, midY);
       }
     }
   };
   
-  // Add the drawAnalogyLines function right after drawRulerLines
+  // Function to draw analogy lines between points
   const drawAnalogyLines = (ctx, points) => {
     // Find primary words and analogy points
     const primaryPoints = points.filter(point => point.isPrimary);
@@ -280,43 +295,47 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
       ctx.fillStyle = 'rgba(156, 39, 176, 0.8)';
       ctx.fill();
     }
-      
-    // If we have at least 3 primary words and at least one analogy result
+    
+    // Then if we have a third word (king) and at least one analogy result (queen)
     if (primaryPoints.length >= 3 && analogyPoints.length > 0) {
-      const sourceWord = primaryPoints[2]; // king in man:woman::king:?
+      const point3 = primaryPoints[2]; // king
+      const arrowSize = 8;
       
-      // Connect king to each of its analogy results (queen, etc.)
-      analogyPoints.forEach(analogyPoint => {
+      // Find the "best" analogy result (highest score)
+      const bestAnalogy = analogyPoints.reduce(
+        (best, current) => (!best || (current.score > best.score) ? current : best), 
+        null
+      );
+      
+      if (bestAnalogy) {
+        // Draw line from king to queen
         ctx.beginPath();
-        ctx.moveTo(sourceWord.x, sourceWord.y);
-        ctx.lineTo(analogyPoint.x, analogyPoint.y);
-        ctx.strokeStyle = 'rgba(156, 39, 176, 0.8)'; // Solid purple for analogy lines
+        ctx.moveTo(point3.x, point3.y);
+        ctx.lineTo(bestAnalogy.x, bestAnalogy.y);
+        ctx.strokeStyle = 'rgba(156, 39, 176, 0.8)';
         ctx.lineWidth = 2;
         ctx.stroke();
         
-        // Add arrow at the end of each analogy result
-        const angle = Math.atan2(analogyPoint.y - sourceWord.y, analogyPoint.x - sourceWord.x);
-        const arrowSize = 8;
-        const arrowX = analogyPoint.x - Math.cos(angle) * (analogyPoint.radius + 2);
-        const arrowY = analogyPoint.y - Math.sin(angle) * (analogyPoint.radius + 2);
+        // Arrow at destination (queen)
+        const angle2 = Math.atan2(bestAnalogy.y - point3.y, bestAnalogy.x - point3.x);
+        const arrowX2 = bestAnalogy.x - Math.cos(angle2) * (bestAnalogy.radius + 2);
+        const arrowY2 = bestAnalogy.y - Math.sin(angle2) * (bestAnalogy.radius + 2);
         
         ctx.beginPath();
         ctx.moveTo(
-          arrowX - Math.cos(angle - Math.PI/6) * arrowSize,
-          arrowY - Math.sin(angle - Math.PI/6) * arrowSize
+          arrowX2 - Math.cos(angle2 - Math.PI/6) * arrowSize,
+          arrowY2 - Math.sin(angle2 - Math.PI/6) * arrowSize
         );
-        ctx.lineTo(arrowX, arrowY);
+        ctx.lineTo(arrowX2, arrowY2);
         ctx.lineTo(
-          arrowX - Math.cos(angle + Math.PI/6) * arrowSize,
-          arrowY - Math.sin(angle + Math.PI/6) * arrowSize
+          arrowX2 - Math.cos(angle2 + Math.PI/6) * arrowSize,
+          arrowY2 - Math.sin(angle2 + Math.PI/6) * arrowSize
         );
         ctx.fillStyle = 'rgba(156, 39, 176, 0.8)';
         ctx.fill();
-      });
+      }
       
-      // Now draw a parallel line between the analogy pair and results
-      // This connects the man-woman pair to the king-queen pair visually
-      // First find the "best" analogy result (highest score)
+      // If we have a best analogy result, draw a dashed line between the two relationships
       if (analogyPoints.length > 0) {
         const bestAnalogy = analogyPoints.reduce(
           (best, current) => (!best || (current.score > best.score) ? current : best), 
@@ -468,6 +487,28 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
     removeTooltip();
   };
   
+  // Handle point selection when in selection mode
+  const handleClick = (e) => {
+    if (!selectionMode || !onPointSelected || !canvasRef.current || !pointsRef.current.length) return;
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    // Check if mouse is over any point
+    for (const point of pointsRef.current) {
+      const distance = Math.sqrt(
+        Math.pow(mouseX - point.x, 2) + Math.pow(mouseY - point.y, 2)
+      );
+      
+      if (distance <= point.radius) {
+        // Trigger the selection callback
+        onPointSelected(point.word);
+        break;
+      }
+    }
+  };
+  
   return (
     <>
       {isLoading ? (
@@ -481,6 +522,7 @@ const VectorGraph2D = ({ coordinates, words, containerRef, rulerActive }) => {
           className="vector-canvas"
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
+          onClick={handleClick}
         />
       )}
     </>

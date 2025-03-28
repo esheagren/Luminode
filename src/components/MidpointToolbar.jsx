@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { findMidpoint } from '../api/embedding';
+import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
 
 const MidpointToolbar = ({ 
   words, 
@@ -7,7 +7,8 @@ const MidpointToolbar = ({
   setLoading, 
   setError,
   loading,
-  wordsValid
+  wordsValid,
+  onEnterSelectionMode
 }) => {
   const [word1, setWord1] = useState('');
   const [word2, setWord2] = useState('');
@@ -35,7 +36,8 @@ const MidpointToolbar = ({
     console.log(`Starting midpoint search for words: "${word1}" and "${word2}"`);
     
     try {
-      const response = await findMidpoint(
+      // Use refactored findMidpoint function
+      const results = await findMidpoint(
         word1, 
         word2, 
         5,
@@ -43,111 +45,10 @@ const MidpointToolbar = ({
         useExactSearch
       );
       
-      console.log('Midpoint search raw response:', response);
-      
-      // Handle API error responses
-      if (response.error) {
-        console.error('API returned an error:', response.error);
-        throw new Error(response.message || response.error);
-      }
-      
-      // Ensure we have a valid response structure
-      if (!response || !response.data || !response.data.primaryMidpoint) {
-        console.error('Invalid response structure:', response);
-        throw new Error('Invalid response received from server');
-      }
-      
-      // Get the data from the response
-      const results = response.data;
       console.log('Midpoint search results data:', results);
       
-      // Process results for visualization
-      const midpointCluster = {
-        type: 'midpoint',
-        source: {
-          word1,
-          word2,
-          recursionDepth
-        },
-        words: []
-      };
-      
-      // Add primary midpoint
-      const primaryMidpoint = results.primaryMidpoint;
-      console.log('Processing primary midpoint:', primaryMidpoint);
-      
-      // Ensure we have nearestWords in the expected format
-      if (!primaryMidpoint.nearestWords || !Array.isArray(primaryMidpoint.nearestWords) || primaryMidpoint.nearestWords.length === 0) {
-        console.error('No nearest words found in the midpoint response:', primaryMidpoint);
-        throw new Error('No midpoint results found');
-      }
-      
-      // Add each primary midpoint word to the cluster
-      primaryMidpoint.nearestWords.forEach((item, index) => {
-        // Handle both score and distance field names
-        const distanceValue = item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0);
-        
-        midpointCluster.words.push({
-          word: item.word,
-          distance: distanceValue, 
-          isMidpoint: true,
-          midpointLevel: 'primary',
-          midpointSource: {
-            fromWords: [word1, word2],
-            isPrimaryResult: index === 0
-          }
-        });
-      });
-      
-      // Add secondary midpoints if available
-      if (results.secondaryMidpoints && results.secondaryMidpoints.length > 0) {
-        results.secondaryMidpoints.forEach(midpoint => {
-          if (!midpoint.nearestWords || !Array.isArray(midpoint.nearestWords)) {
-            console.warn('Invalid secondary midpoint structure:', midpoint);
-            return;
-          }
-          
-          midpoint.nearestWords.forEach((item, index) => {
-            const distanceValue = item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0);
-            
-            midpointCluster.words.push({
-              word: item.word,
-              distance: distanceValue,
-              isMidpoint: true,
-              midpointLevel: 'secondary',
-              midpointSource: {
-                fromWords: midpoint.endpoints || [word1, word2],
-                isPrimaryResult: index === 0
-              }
-            });
-          });
-        });
-      }
-      
-      // Add tertiary midpoints if available
-      if (results.tertiaryMidpoints && results.tertiaryMidpoints.length > 0) {
-        results.tertiaryMidpoints.forEach(midpoint => {
-          if (!midpoint.nearestWords || !Array.isArray(midpoint.nearestWords)) {
-            console.warn('Invalid tertiary midpoint structure:', midpoint);
-            return;
-          }
-          
-          midpoint.nearestWords.forEach((item, index) => {
-            const distanceValue = item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0);
-            
-            midpointCluster.words.push({
-              word: item.word,
-              distance: distanceValue,
-              isMidpoint: true,
-              midpointLevel: 'tertiary',
-              midpointSource: {
-                fromWords: midpoint.endpoints || [word1, word2],
-                isPrimaryResult: index === 0
-              }
-            });
-          });
-        });
-      }
+      // Process results using our utility function
+      const midpointCluster = processMidpointResults(results, word1, word2, recursionDepth);
       
       console.log('Prepared midpoint cluster for visualization:', midpointCluster);
       
@@ -168,8 +69,27 @@ const MidpointToolbar = ({
     }
   };
   
+  // Handle entering selection mode
+  const handleEnterSelectionMode = () => {
+    if (typeof onEnterSelectionMode === 'function') {
+      onEnterSelectionMode();
+    }
+  };
+  
   return (
     <div className="midpoint-toolbar">
+      <div className="midpoint-actions">
+        <button 
+          className="selection-btn"
+          onClick={handleEnterSelectionMode}
+          disabled={loading || isComputing}
+        >
+          Click to Select Points
+        </button>
+        
+        <div className="separator">or</div>
+      </div>
+      
       <div className="midpoint-setup">
         <select 
           className="midpoint-select"
@@ -229,6 +149,45 @@ const MidpointToolbar = ({
       <style jsx="true">{`
         .midpoint-toolbar {
           padding: 0.75rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        
+        .midpoint-actions {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 0.5rem;
+        }
+        
+        .selection-btn {
+          background: linear-gradient(135deg, #34A853 0%, #4285F4 100%);
+          color: white;
+          border: none;
+          border-radius: 4px;
+          padding: 0.5rem 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          flex: 1;
+        }
+        
+        .selection-btn:hover:not(:disabled) {
+          box-shadow: 0 2px 4px rgba(52, 168, 83, 0.3);
+          transform: translateY(-1px);
+        }
+        
+        .selection-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        
+        .separator {
+          color: #aaa;
+          font-size: 0.85rem;
+          flex: 0;
+          padding: 0 0.5rem;
         }
         
         .midpoint-setup {

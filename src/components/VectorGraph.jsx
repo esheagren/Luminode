@@ -13,7 +13,10 @@ const VectorGraph = ({
   numMidpoints, 
   viewMode = '2D', 
   setViewMode,
-  rulerActive // Receive as prop instead of managing state
+  rulerActive,
+  selectionMode = false,
+  onPointSelected = null,
+  selectedPoints = []
 }) => {
   const [coordinates, setCoordinates] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -129,15 +132,22 @@ const VectorGraph = ({
         
         setCoordinates(coordinatesWithVectors);
       } catch (error) {
-        console.error('Error fetching coordinates:', error);
-        setError(error.response?.data?.error || 'Failed to get visualization data');
+        console.error('Error fetching vector coordinates:', error);
+        setError('Failed to load visualization data. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
     
     fetchCoordinates();
-  }, [words, midpointWords, viewMode]);
+  }, [words, viewMode, midpointWords, numMidpoints]);
+  
+  // Handle point selection
+  const handlePointSelected = (word) => {
+    if (onPointSelected) {
+      onPointSelected(word);
+    }
+  };
   
   // Add transition animation when switching view modes
   useEffect(() => {
@@ -183,6 +193,9 @@ const VectorGraph = ({
             words={words} 
             containerRef={containerRef}
             rulerActive={rulerActive}
+            selectionMode={selectionMode}
+            onPointSelected={handlePointSelected}
+            selectedPoints={selectedPoints}
           />
         ) : (
           <VectorGraph3D 

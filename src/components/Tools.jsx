@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import MidpointToolbar from './MidpointToolbar';
 import AnalogyToolbar from './AnalogyToolbar';
 import ViewButton from './ViewButton';
+import MidpointSelection from './MidpointSelection';
+import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
 
 // Import icons from a reliable source like Feather or include SVG directly
 const MidpointIcon = () => (
@@ -58,7 +60,11 @@ const Tools = ({
   viewMode,
   setViewMode,
   rulerActive,
-  setRulerActive
+  setRulerActive,
+  selectionMode,
+  setSelectionMode,
+  selectedPoints,
+  setSelectedPoints
 }) => {
   const [activeTab, setActiveTab] = useState('midpoint');
   const [showContent, setShowContent] = useState(true);
@@ -79,10 +85,64 @@ const Tools = ({
       setActiveTab(tab);
       setShowContent(true);
     }
+    
+    // Cancel selection mode when switching tabs
+    if (tab !== 'midpoint' && selectionMode) {
+      setSelectionMode(false);
+    }
+  };
+  
+  // Find midpoint for the selected points
+  const findMidpointForSelectedPoints = async () => {
+    if (selectedPoints.length !== 2) {
+      setError('Please select two points first');
+      return;
+    }
+    
+    const [word1, word2] = selectedPoints;
+    
+    setLoading(true);
+    
+    try {
+      // Call the midpoint API
+      const results = await findMidpoint(word1, word2, numMidpoints, 0, true);
+      
+      // Process the results into visualization format
+      const midpointCluster = processMidpointResults(results, word1, word2, 0);
+      
+      // Update visualization
+      debugSetMidpointClusters([midpointCluster]);
+      
+      // Exit selection mode
+      setSelectionMode(false);
+      
+    } catch (error) {
+      console.error('Error finding midpoint:', error);
+      setError(`Failed to find midpoint: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Toggle selection mode
+  const toggleSelectionMode = () => {
+    setSelectionMode(!selectionMode);
   };
 
   const renderToolContent = () => {
     if (!showContent) return null;
+    
+    if (selectionMode) {
+      return (
+        <MidpointSelection 
+          selectedPoints={selectedPoints}
+          onReset={() => setSelectedPoints([])}
+          onFindMidpoint={findMidpointForSelectedPoints}
+          onCancel={() => setSelectionMode(false)}
+          loading={loading}
+        />
+      );
+    }
     
     switch (activeTab) {
       case 'midpoint':
@@ -95,6 +155,7 @@ const Tools = ({
             setError={setError}
             loading={loading}
             wordsValid={wordsValid}
+            onEnterSelectionMode={toggleSelectionMode}
           />
         );
       case 'analogy':
@@ -118,19 +179,19 @@ const Tools = ({
       <div className="tools-header">
         <div className="tool-buttons">
           <button
-            className={`icon-button ${activeTab === 'midpoint' ? 'active' : ''}`}
-            onClick={() => handleTabClick('midpoint')}
-            disabled={loading}
-            title="Midpoint"
+            className={`icon-button ${activeTab === 'midpoint' ? 'active' : ''} ${selectionMode ? 'selection-active' : ''}`}
+            onClick={() => selectionMode ? toggleSelectionMode() : handleTabClick('midpoint')}
+            disabled={loading && !selectionMode}
+            title={selectionMode ? "Click to cancel selection mode" : "Midpoint"}
           >
             <MidpointIcon />
-            <span>Midpoint</span>
+            <span>{selectionMode ? `Select words (${selectedPoints.length}/2)` : "Midpoint"}</span>
           </button>
           
           <button
             className={`icon-button ${activeTab === 'analogy' ? 'active' : ''}`}
             onClick={() => handleTabClick('analogy')}
-            disabled={loading}
+            disabled={loading || selectionMode}
             title="Analogy"
           >
             <AnalogyIcon />
@@ -204,6 +265,19 @@ const Tools = ({
           background: rgba(66, 133, 244, 0.1);
           color: #4285F4;
           box-shadow: inset 0 -2px 0 #4285F4;
+        }
+        
+        .icon-button.selection-active {
+          background: rgba(52, 168, 83, 0.15);
+          color: #34A853;
+          box-shadow: inset 0 -2px 0 #34A853;
+          animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+          0% { opacity: 0.8; }
+          50% { opacity: 1; }
+          100% { opacity: 0.8; }
         }
         
         .icon-button:disabled {

@@ -17,6 +17,8 @@ const HomePage = () => {
   const [viewMode, setViewMode] = useState('2D'); // Default to 2D view
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [rulerActive, setRulerActive] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedPoints, setSelectedPoints] = useState([]);
   
   // Debug: Log the state functions
   console.log('HomePage component:', {
@@ -65,6 +67,34 @@ const HomePage = () => {
         .finally(() => {
           setLoading(false);
         });
+    }
+  };
+  
+  // Handle point selection from the graph
+  const handlePointSelected = (word) => {
+    if (!selectionMode) return;
+    
+    setSelectedPoints(prevPoints => {
+      // If the word is already selected, remove it
+      if (prevPoints.includes(word)) {
+        return prevPoints.filter(p => p !== word);
+      }
+      
+      // If we already have 2 points, replace the oldest one
+      if (prevPoints.length >= 2) {
+        return [prevPoints[1], word];
+      }
+      
+      // Otherwise, add the new point
+      return [...prevPoints, word];
+    });
+  };
+  
+  // Toggle selection mode
+  const setPointSelectionMode = (active) => {
+    setSelectionMode(active);
+    if (!active) {
+      setSelectedPoints([]);
     }
   };
 
@@ -149,6 +179,10 @@ const HomePage = () => {
               setViewMode={setViewMode}
               rulerActive={rulerActive}
               setRulerActive={setRulerActive}
+              selectionMode={selectionMode}
+              setSelectionMode={setPointSelectionMode}
+              selectedPoints={selectedPoints}
+              setSelectedPoints={setSelectedPoints}
             />
           </div>
           
@@ -160,6 +194,9 @@ const HomePage = () => {
               viewMode={viewMode}
               setViewMode={setViewMode}
               rulerActive={rulerActive}
+              selectionMode={selectionMode}
+              onPointSelected={handlePointSelected}
+              selectedPoints={selectedPoints}
             />
           </div>
         </div>

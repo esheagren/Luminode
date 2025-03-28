@@ -20,6 +20,13 @@ export const isProduction = () => {
  * @returns {string} The API URL
  */
 export const getApiServerUrl = () => {
+  // First check for the environment variable
+  const envApiUrl = import.meta.env.VITE_API_URL;
+  if (envApiUrl) {
+    console.log(`Using API URL from environment: ${envApiUrl}`);
+    return envApiUrl;
+  }
+  
   // ALWAYS use relative URLs in production to avoid mixed content issues
   if (isProduction()) {
     return '';
