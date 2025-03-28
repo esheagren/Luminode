@@ -138,6 +138,7 @@ const VectorGraph = ({
           let sliceDepth = null;
           let sliceSource = null;
           let similarity = null;
+          let distance = null;
           
           if (sliceCluster) {
             const sliceWord = sliceCluster.words.find(w => w.word === point.word);
@@ -150,6 +151,7 @@ const VectorGraph = ({
               sliceDepth = sliceWord.sliceDepth || 0;
               sliceSource = sliceWord.sliceSource || null;
               similarity = sliceWord.similarity || null;
+              distance = sliceWord.distance || null;
               
               console.log(`Found slice word ${point.word} with level ${sliceLevel}`, sliceWord);
             }
@@ -170,7 +172,8 @@ const VectorGraph = ({
             sliceIndex,
             sliceDepth,
             sliceSource,
-            similarity
+            similarity,
+            distance
           };
         });
         

@@ -149,25 +149,45 @@ export const processSliceResults = (results, word1, word2) => {
       });
     });
 
-    // Then add neighbor points
+    // Group neighbor points by their source
+    const neighborsBySource = new Map();
     const neighborPoints = results.slicePoints.filter(point => 
       point.isMainPoint !== true && !point.isEndpoint
     );
     
+    // Create a map of source word -> [neighbor points]
     neighborPoints.forEach(point => {
-      sliceCluster.words.push({
-        word: point.word,
-        distance: point.distance || 0,
-        isSlice: true,
-        isMainPoint: false,
-        sliceLevel: 'neighbor',
-        sliceIndex: point.index || 0,
-        sliceDepth: point.depth || 0,
-        sliceSource: {
-          fromWords: point.fromWords || [],
-          path: point.path || []
+      if (point.fromWords && point.fromWords.length > 0) {
+        const sourceWord = point.fromWords[0];
+        if (!neighborsBySource.has(sourceWord)) {
+          neighborsBySource.set(sourceWord, []);
         }
-      });
+        neighborsBySource.get(sourceWord).push(point);
+      }
+    });
+    
+    // For each source, find the closest neighbor
+    neighborsBySource.forEach((neighbors, sourceWord) => {
+      // Sort by distance (ascending)
+      neighbors.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      
+      // Add only the closest neighbor
+      if (neighbors.length > 0) {
+        const closestNeighbor = neighbors[0];
+        sliceCluster.words.push({
+          word: closestNeighbor.word,
+          distance: closestNeighbor.distance || 0,
+          isSlice: true,
+          isMainPoint: false,
+          sliceLevel: 'neighbor',
+          sliceIndex: closestNeighbor.index || 0,
+          sliceDepth: closestNeighbor.depth || 0,
+          sliceSource: {
+            fromWords: closestNeighbor.fromWords || [],
+            path: closestNeighbor.path || []
+          }
+        });
+      }
     });
   }
   
