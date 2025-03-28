@@ -45,11 +45,11 @@ const AnalogySelection = ({
     
     switch (analogyStep) {
       case 0:
-        return "Click on the first word to begin analogy";
+        return "👉 Click on the first word to begin analogy";
       case 1:
-        return `${selectedPoints[0]} → Click on the second word for comparison`;
+        return `${selectedPoints[0]} → 👉 Click on the second word for comparison`;
       case 2:
-        return `${selectedPoints[0]}:${selectedPoints[1]} → Click on the third word to find analogy`;
+        return `${selectedPoints[0]}:${selectedPoints[1]} → 👉 Click on the third word to find analogy`;
       case 3:
         return `Searching for words that relate to ${selectedPoints[2]} as ${selectedPoints[1]} relates to ${selectedPoints[0]}...`;
       case 4:
@@ -85,6 +85,22 @@ const AnalogySelection = ({
           </div>
         )}
       </div>
+      
+      {analogyStep > 0 && analogyStep < 4 && (
+        <div className="analogy-step-indicator">
+          <div className={`step-dot ${analogyStep >= 1 ? 'active' : ''}`}>
+            1 <span className="step-label">First word</span>
+          </div>
+          <div className="step-line"></div>
+          <div className={`step-dot ${analogyStep >= 2 ? 'active' : ''}`}>
+            2 <span className="step-label">Second word</span>
+          </div>
+          <div className="step-line"></div>
+          <div className={`step-dot ${analogyStep >= 3 ? 'active' : ''}`}>
+            3 <span className="step-label">Third word</span>
+          </div>
+        </div>
+      )}
       
       {analogyStep === 4 && (
         <div className="analogy-explanation">
@@ -153,6 +169,47 @@ const AnalogySelection = ({
           font-size: 0.8rem;
           color: #aaa;
           font-style: italic;
+        }
+        
+        .analogy-step-indicator {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.5rem;
+          margin-top: 0.25rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .step-dot {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background-color: rgba(255, 255, 255, 0.1);
+          color: rgba(255, 255, 255, 0.6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.8rem;
+          position: relative;
+        }
+        
+        .step-dot.active {
+          background-color: #FF8008;
+          color: white;
+        }
+        
+        .step-label {
+          position: absolute;
+          top: -22px;
+          font-size: 0.7rem;
+          color: rgba(255, 255, 255, 0.6);
+          white-space: nowrap;
+        }
+        
+        .step-line {
+          height: 2px;
+          width: 30px;
+          background-color: rgba(255, 255, 255, 0.1);
         }
         
         @keyframes pulse {

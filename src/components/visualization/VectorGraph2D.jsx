@@ -756,16 +756,21 @@ const VectorGraph2D = ({
   // Update handle click to support both midpoint and analogy modes
   const handleClick = (e) => {
     // Log all the conditions to better understand why this might not be triggering
-    console.log('Click event conditions:', {
+    console.log('Click event on canvas detected:', {
       selectionMode,
       analogyMode,
+      analogyStep,
+      selectedPointsCount: selectedPoints.length,
       hasOnPointSelected: !!onPointSelected,
       hasCanvas: !!canvasRef.current,
       hasPoints: pointsRef.current.length > 0,
       willProceed: (selectionMode || analogyMode) && !!onPointSelected && !!canvasRef.current && pointsRef.current.length > 0
     });
     
-    if ((!selectionMode && !analogyMode) || !onPointSelected || !canvasRef.current || !pointsRef.current.length) return;
+    if ((!selectionMode && !analogyMode) || !onPointSelected || !canvasRef.current || !pointsRef.current.length) {
+      console.log('Aborting click processing due to conditions not met');
+      return;
+    }
     
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
@@ -780,7 +785,12 @@ const VectorGraph2D = ({
       
       if (distance <= point.radius) {
         // Log the point being selected
-        console.log('Selected point:', point.word, { selectionMode, analogyMode });
+        console.log('Selected point:', point.word, { 
+          selectionMode, 
+          analogyMode,
+          analogyStep,
+          selectedWords: selectedPoints 
+        });
         
         // Trigger the selection callback
         onPointSelected(point.word);

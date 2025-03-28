@@ -75,9 +75,17 @@ const HomePage = () => {
   
   // Handle point selection from the graph
   const handlePointSelected = (word) => {
-    if (!selectionMode && !analogyMode) return;
+    if (!selectionMode && !analogyMode) {
+      console.log('Point selection ignored - not in selection or analogy mode:', word);
+      return;
+    }
     
-    console.log('Point selected:', word, { analogyMode, selectionMode, currentSelectedPoints: selectedPoints });
+    console.log('Point selected:', word, { 
+      analogyMode, 
+      selectionMode, 
+      analogyStep,
+      currentSelectedPoints: selectedPoints 
+    });
     
     if (analogyMode) {
       // Analogy mode selection logic
@@ -98,7 +106,18 @@ const HomePage = () => {
       
       // Add the new word to selected points
       console.log('Adding word to analogy selection:', word);
-      setSelectedPoints([...selectedPoints, word]);
+      const newSelection = [...selectedPoints, word];
+      setSelectedPoints(newSelection);
+      
+      // Log immediately after setting
+      setTimeout(() => {
+        console.log('Updated selection after adding:', {
+          newSelection,
+          currentState: selectedPoints,
+          analogyStep
+        });
+      }, 0);
+      
       return;
     }
     

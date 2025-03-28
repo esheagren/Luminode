@@ -78,31 +78,51 @@ const Tools = ({
   const debugSetMidpointClusters = createDebugSetMidpointClusters(setMidpointClusters);
 
   const handleTabClick = (tab) => {
+    console.log(`Tab clicked: ${tab}`, { 
+      currentActiveTab: activeTab, 
+      selectionMode, 
+      analogyMode 
+    });
+    
     if (tab === activeTab) {
       // If clicking on midpoint tab when already active, toggle selection mode
       if (tab === 'midpoint') {
+        console.log('Toggling midpoint selection mode');
         toggleMidpointSelectionMode();
       } else if (tab === 'analogy') {
+        console.log('Toggling analogy mode');
         toggleAnalogyMode();
       } else {
         setShowContent(!showContent);
       }
     } else {
       // Switching to a different tab
+      console.log(`Switching tabs from ${activeTab} to ${tab}`);
       setActiveTab(tab);
       setShowContent(true);
       
       // Cancel selection mode when switching tabs
       if (selectionMode) {
+        console.log('Canceling selection mode due to tab switch');
         setSelectionMode(false);
         setSelectedPoints([]);
       }
       
       // Cancel analogy mode when switching away from analogy tab
       if (analogyMode && tab !== 'analogy') {
+        console.log('Canceling analogy mode due to tab switch');
         setAnalogyMode(false);
         setAnalogyStep(0);
         setSelectedPoints([]);
+      }
+      
+      // Activate the appropriate mode for the tab
+      if (tab === 'analogy' && !analogyMode) {
+        console.log('Activating analogy mode on tab switch');
+        toggleAnalogyMode();
+      } else if (tab === 'midpoint' && !selectionMode) {
+        console.log('Activating midpoint selection mode on tab switch');
+        toggleMidpointSelectionMode();
       }
     }
   };
@@ -123,16 +143,28 @@ const Tools = ({
   // Toggle analogy mode
   const toggleAnalogyMode = () => {
     if (analogyMode) {
+      console.log('Turning off analogy mode');
       setAnalogyMode(false);
       setAnalogyStep(0);
       setSelectedPoints([]);
+      setIsSearchingAnalogy(false);
     } else {
       // Ensure midpoint selection mode is off
+      console.log('Turning on analogy mode');
       setSelectionMode(false);
       // Turn on analogy mode
       setAnalogyMode(true);
       setAnalogyStep(0);
       setSelectedPoints([]);
+      
+      // Log the state immediately after setting
+      setTimeout(() => {
+        console.log('Analogy mode state after toggle:', {
+          analogyMode,
+          analogyStep,
+          selectedPoints: selectedPoints.length
+        });
+      }, 0);
     }
   };
   
@@ -190,27 +222,32 @@ const Tools = ({
   
   // Effect to handle step transitions in analogy mode
   React.useEffect(() => {
+    console.log('Analogy mode effect triggered:', { 
+      selectedPoints, 
+      analogyMode,
+      analogyStep, 
+      count: selectedPoints.length 
+    });
+    
     if (analogyMode) {
-      console.log('Analogy mode effect triggered:', { 
-        selectedPoints, 
-        analogyStep, 
-        count: selectedPoints.length 
-      });
-      
       // Update step based on number of selected points
       if (selectedPoints.length === 1 && analogyStep === 0) {
+        console.log('Moving to analogy step 1 - first word selected');
         setAnalogyStep(1);
       } else if (selectedPoints.length === 2 && analogyStep === 1) {
+        console.log('Moving to analogy step 2 - second word selected');
         setAnalogyStep(2);
       } else if (selectedPoints.length === 3 && analogyStep === 2) {
-        console.log('Third word selected, starting analogy search');
+        console.log('Moving to analogy step 3 - third word selected, starting analogy search');
         // We're ready to search
         setAnalogyStep(3);
-        // Automatically start the search
-        findAnalogyForSelectedPoints();
+        // Automatically start the search without using useEffect to avoid dependency issues
+        setTimeout(() => {
+          findAnalogyForSelectedPoints();
+        }, 0);
       }
     }
-  }, [analogyMode, selectedPoints]);
+  }, [analogyMode, selectedPoints, analogyStep]);
   
   // Find analogy for the selected points
   const findAnalogyForSelectedPoints = async () => {
