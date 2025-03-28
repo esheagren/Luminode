@@ -7,6 +7,7 @@ import ViewButton from './ViewButton';
 import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
 import { findAnalogy } from '../utils/findAnalogy';
 import { findSlice, processSliceResults } from '../utils/sliceCalculation';
+import { createToolbarTooltip, removeToolbarTooltip } from './ToolbarTooltip';
 import './ToolbarStyles.css';
 
 // Import icons from a reliable source like Feather or include SVG directly
@@ -604,12 +605,15 @@ const Tools = ({
             viewMode={viewMode} 
             setViewMode={setViewMode} 
             isCompact={true}
+            onMouseEnter={(e) => createToolbarTooltip('3D', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
           />
 
           <button
             className={`icon-button ${rulerActive ? 'active' : ''}`}
             onClick={() => setRulerActive(!rulerActive)}
-            title="Measure distances between vectors using cosine similarity"
+            onMouseEnter={(e) => createToolbarTooltip('Measure', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
           >
             <RulerIcon />
             <span>Measure</span>
@@ -619,7 +623,8 @@ const Tools = ({
             className={`icon-button ${activeTab === 'midpoint' ? 'active' : ''} ${selectionMode ? 'selection-active' : ''}`}
             onClick={() => handleTabClick('midpoint')}
             disabled={loading || analogyMode || sliceMode}
-            title={selectionMode ? "Click to cancel selection mode" : "Midpoint"}
+            onMouseEnter={(e) => createToolbarTooltip('Midpoint', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
           >
             <MidpointIcon />
             <span>{selectionMode ? `Select words (${selectedPoints.length}/2)` : "Midpoint"}</span>
@@ -629,7 +634,8 @@ const Tools = ({
             className={`icon-button ${activeTab === 'analogy' ? 'active' : ''} ${analogyMode ? 'analogy-active' : ''}`}
             onClick={() => handleTabClick('analogy')}
             disabled={loading || selectionMode || sliceMode}
-            title={analogyMode ? "Click to cancel analogy mode" : "Analogy"}
+            onMouseEnter={(e) => createToolbarTooltip('Analogy', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
           >
             <AnalogyIcon />
             <span>{analogyMode ? `Analogy (Step ${analogyStep + 1})` : "Analogy"}</span>
@@ -639,7 +645,8 @@ const Tools = ({
             className={`icon-button ${activeTab === 'slice' ? 'active' : ''} ${sliceMode ? 'slice-active' : ''}`}
             onClick={() => handleTabClick('slice')}
             disabled={loading || selectionMode || analogyMode}
-            title={sliceMode ? "Click to cancel slice mode" : "Slice"}
+            onMouseEnter={(e) => createToolbarTooltip('Slice', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
           >
             <SliceIcon />
             <span>{sliceMode ? `Slice (${selectedPoints.length}/2)` : "Slice"}</span>
@@ -649,7 +656,8 @@ const Tools = ({
             className="icon-button reset-button"
             onClick={handleReset}
             disabled={loading || words.length === 0}
-            title="Reset all words and visualization"
+            onMouseEnter={(e) => createToolbarTooltip('Reset', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
           >
             <ResetIcon />
             <span>Reset</span>
@@ -657,7 +665,12 @@ const Tools = ({
           
           <div className="spacer"></div>
           
-          <Link to="/about" className="icon-button learn-button">
+          <Link 
+            to="/about" 
+            className="icon-button learn-button"
+            onMouseEnter={(e) => createToolbarTooltip('Learn', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
+          >
             <BookIcon />
             <span>Learn</span>
           </Link>

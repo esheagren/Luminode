@@ -16,7 +16,13 @@ const View2DIcon = () => (
   </svg>
 );
 
-const ViewButton = ({ viewMode, setViewMode, isCompact = false }) => {
+const ViewButton = ({ 
+  viewMode, 
+  setViewMode, 
+  isCompact = false,
+  onMouseEnter,
+  onMouseLeave 
+}) => {
   const toggle = () => {
     setViewMode(viewMode === '2D' ? '3D' : '2D');
   };
@@ -27,7 +33,8 @@ const ViewButton = ({ viewMode, setViewMode, isCompact = false }) => {
       <button 
         className={`view-toggle-compact`}
         onClick={toggle}
-        title={`Switch to ${viewMode === '2D' ? '3D' : '2D'} View`}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         {viewMode === '2D' ? <View3DIcon /> : <View2DIcon />}
         <span>{viewMode === '2D' ? '3D' : '2D'}</span>
@@ -61,6 +68,8 @@ const ViewButton = ({ viewMode, setViewMode, isCompact = false }) => {
     <button 
       className={`view-toggle ${viewMode === '3D' ? 'view-3d' : 'view-2d'}`}
       onClick={toggle}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       {viewMode === '2D' ? '3D View' : '2D View'}
       <style jsx="true">{`
