@@ -4,6 +4,7 @@ import AnalogyToolbar from './AnalogyToolbar';
 import ViewButton from './ViewButton';
 import MidpointSelection from './MidpointSelection';
 import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
+import './ToolbarStyles.css';
 
 // Import icons from a reliable source like Feather or include SVG directly
 const MidpointIcon = () => (

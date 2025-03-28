@@ -34,8 +34,8 @@ export const getApiServerUrl = () => {
   
   // Only use localhost in development and only when actually on localhost
   if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
-    // In local development, use port 3001 where the server is running
-    return 'http://localhost:3001';
+    // In local development, always use port 5001 where the server should be running
+    return 'http://localhost:5001';
   }
   
   // For any other case, use relative URLs for safety

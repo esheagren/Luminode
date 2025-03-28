@@ -102,8 +102,12 @@ if (!fs.existsSync(embeddingsDir)) {
 
 // Function to start server with port fallback
 const startServer = (port) => {
+  // Log the port we're attempting to use
+  console.log(`Attempting to start server on port ${port}`);
+  
   const server = app.listen(port, () => {
     console.log(`Server running on port ${port}`);
+    console.log(`API now available at http://localhost:${port}/api`);
     
     // Start initializing vector service in the background
     // We're now ensuring we only use Pinecone, so this should be lightweight
@@ -128,8 +132,9 @@ const startServer = (port) => {
   });
 };
 
-// Start server
-const PORT = parseInt(env.PORT || '3001', 10);
+// Start server with the desired port
+const PORT = parseInt(process.env.PORT || '5001', 10);
+console.log(`Environment PORT value: ${process.env.PORT}`);
 startServer(PORT);
 
 export default app; 

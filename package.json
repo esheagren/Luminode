@@ -8,13 +8,15 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev-all": "sh start-dev.sh",
     "build": "vite build",
     "vercel-build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "load-pinecone": "node server/scripts/loadEmbeddingsToPinecone.js",
-    "start-server": "node server/server.js",
-    "restart-server": "pkill -f 'node server/server.js' || true && node server/server.js"
+    "start-server": "PORT=5001 node server/server.js",
+    "restart-server": "pkill -f 'node server/server.js' || true && PORT=5001 node server/server.js",
+    "stop-server": "pkill -f 'node server/server.js' || true"
   },
   "dependencies": {
     "@pinecone-database/pinecone": "^5.1.1",
