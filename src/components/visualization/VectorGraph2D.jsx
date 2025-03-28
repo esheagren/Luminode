@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createTooltip, removeTooltip } from './VectorTooltip';
 import { getPointColor, calculateCosineSimilarity, formatSimilarity } from './VectorUtils';
 import SimpleLoadingAnimation from './SimpleLoadingAnimation';
+import drawAnalogyProjection from './AnalogyProjection';
 
 const VectorGraph2D = ({ 
   coordinates, 
@@ -10,11 +11,97 @@ const VectorGraph2D = ({
   rulerActive,
   selectionMode = false,
   onPointSelected = null,
-  selectedPoints = []
+  selectedPoints = [],
+  analogyMode = false,
+  analogyStep = 0,
+  isSearchingAnalogy = false
 }) => {
   const canvasRef = useRef(null);
   const pointsRef = useRef([]);
   const [isLoading, setIsLoading] = useState(true);
+  const animationFrameRef = useRef(null);
+  
+  // Cancel animation frame on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+  
+  // Animation function for the analogy projection
+  const animateAnalogyProjection = useCallback(() => {
+    if (!canvasRef.current || !pointsRef.current.length) {
+      console.log('Cannot animate: missing canvas or points');
+      return;
+    }
+    
+    if (!isSearchingAnalogy || analogyStep !== 3) {
+      console.log('Not in searching state or wrong step:', { isSearchingAnalogy, analogyStep });
+      return;
+    }
+    
+    if (selectedPoints.length < 3) {
+      console.log('Not enough selected points for projection');
+      return;
+    }
+    
+    // Get the points needed for the projection
+    const points = pointsRef.current;
+    const sourcePoint = points.find(p => p.word === selectedPoints[2]);
+    const point1 = points.find(p => p.word === selectedPoints[0]);
+    const point2 = points.find(p => p.word === selectedPoints[1]);
+    
+    if (!sourcePoint || !point1 || !point2) {
+      console.log('Missing required points for projection', { 
+        hasSourcePoint: !!sourcePoint, 
+        hasPoint1: !!point1, 
+        hasPoint2: !!point2,
+        selectedPoints
+      });
+      return;
+    }
+    
+    // Draw the visualization
+    const ctx = canvasRef.current.getContext('2d');
+    if (!ctx) return;
+    
+    // Redraw the full visualization to avoid artifacts
+    drawVisualization(coordinates);
+    
+    // Draw the analogy projection with the current timestamp for animation
+    const timestamp = performance.now();
+    drawAnalogyProjection(sourcePoint, point1, point2, ctx, timestamp);
+    
+    // Continue animation
+    animationFrameRef.current = requestAnimationFrame(animateAnalogyProjection);
+  }, [isSearchingAnalogy, analogyStep, selectedPoints, coordinates]);
+  
+  // Start or stop projection animation when search state changes
+  useEffect(() => {
+    console.log('Analogy search state changed:', { 
+      isSearchingAnalogy, 
+      analogyStep, 
+      selectedPoints
+    });
+    
+    if (isSearchingAnalogy && analogyStep === 3) {
+      console.log('Starting analogy projection animation');
+      animationFrameRef.current = requestAnimationFrame(animateAnalogyProjection);
+    } else if (animationFrameRef.current) {
+      console.log('Stopping analogy projection animation');
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [isSearchingAnalogy, analogyStep, animateAnalogyProjection, selectedPoints]);
   
   useEffect(() => {
     setIsLoading(coordinates.length === 0);
@@ -74,7 +161,7 @@ const VectorGraph2D = ({
     return () => {
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [coordinates, containerRef, rulerActive, selectedPoints, selectionMode]);
+  }, [coordinates, containerRef, rulerActive, selectedPoints, selectionMode, analogyMode, analogyStep, isSearchingAnalogy]);
   
   const drawVisualization = (coordsToRender = coordinates) => {
     if (!coordsToRender.length || !canvasRef.current) {
@@ -188,17 +275,30 @@ const VectorGraph2D = ({
       drawRulerLines(ctx, pointsRef.current);
     }
 
-    // Always draw analogy lines when analogies exist (regardless of ruler setting)
-    drawAnalogyLines(ctx, pointsRef.current);
+    // Draw analogy selection lines if in analogy mode
+    if (analogyMode && selectedPoints.length > 0) {
+      drawAnalogySelectionLines(ctx, pointsRef.current, selectedPoints);
+    }
+    // Only draw analogy result lines if not in active selection mode
+    else if (!analogyMode && !selectionMode) {
+      drawAnalogyLines(ctx, pointsRef.current);
+    }
     
     // Draw midpoint lines when midpoints exist 
     drawMidpointLines(ctx, pointsRef.current);
     
     // Display selection mode indicator if active
-    if (selectionMode) {
+    if (selectionMode && !analogyMode) {
       const message = `Selection Mode: Click on a word to select (${selectedPoints.length}/2)`;
       ctx.font = 'bold 14px Arial';
       ctx.fillStyle = '#4285F4';
+      ctx.textAlign = 'center';
+      ctx.fillText(message, canvas.width / 2, 30);
+    }
+    else if (analogyMode) {
+      const message = `Analogy Mode: Step ${analogyStep + 1}`;
+      ctx.font = 'bold 14px Arial';
+      ctx.fillStyle = '#FF8008';
       ctx.textAlign = 'center';
       ctx.fillText(message, canvas.width / 2, 30);
     }
@@ -452,6 +552,108 @@ const VectorGraph2D = ({
     });
   };
   
+  // New function to draw analogy selection lines
+  const drawAnalogySelectionLines = (ctx, points, selectedWords) => {
+    if (!points.length || selectedWords.length === 0) return;
+    
+    console.log('Drawing analogy selection lines for words:', selectedWords);
+    
+    // Find the selected points
+    const selectedPoints = [];
+    for (let i = 0; i < selectedWords.length; i++) {
+      const point = points.find(p => p.word === selectedWords[i]);
+      if (point) {
+        selectedPoints.push(point);
+      } else {
+        console.warn(`Could not find point for selected word: ${selectedWords[i]}`);
+      }
+    }
+    
+    // If we have at least two points (first and second selection)
+    if (selectedPoints.length >= 2) {
+      const point1 = selectedPoints[0];
+      const point2 = selectedPoints[1];
+      
+      // Draw the first relationship line
+      ctx.beginPath();
+      ctx.moveTo(point1.x, point1.y);
+      ctx.lineTo(point2.x, point2.y);
+      ctx.strokeStyle = 'rgba(255, 128, 8, 0.9)'; // Orange for selection
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Add arrow to show direction
+      const angle = Math.atan2(point2.y - point1.y, point2.x - point1.x);
+      const arrowSize = 8;
+      
+      // Arrow at destination
+      const arrowX = point2.x - Math.cos(angle) * (point2.radius + 2);
+      const arrowY = point2.y - Math.sin(angle) * (point2.radius + 2);
+      
+      ctx.beginPath();
+      ctx.moveTo(
+        arrowX - Math.cos(angle - Math.PI/6) * arrowSize,
+        arrowY - Math.sin(angle - Math.PI/6) * arrowSize
+      );
+      ctx.lineTo(arrowX, arrowY);
+      ctx.lineTo(
+        arrowX - Math.cos(angle + Math.PI/6) * arrowSize,
+        arrowY - Math.sin(angle + Math.PI/6) * arrowSize
+      );
+      ctx.fillStyle = 'rgba(255, 128, 8, 0.9)';
+      ctx.fill();
+    }
+    
+    // If we have three points
+    if (selectedPoints.length >= 3) {
+      const point3 = selectedPoints[2];
+      
+      // Get any analogy result points
+      const analogyPoints = points.filter(point => point.isAnalogy);
+      
+      // Highlight the third point more prominently when waiting for results
+      if (analogyPoints.length === 0 && isSearchingAnalogy) {
+        // Add pulsing circle around the third point
+        ctx.beginPath();
+        const pulseSize = 6 + Math.sin(Date.now() / 200) * 3;
+        ctx.arc(point3.x, point3.y, point3.radius + pulseSize, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 128, 8, 0.2)';
+        ctx.fill();
+      }
+      
+      // Draw lines from point3 to each analogy result
+      analogyPoints.forEach(analogyPoint => {
+        // Draw line
+        ctx.beginPath();
+        ctx.moveTo(point3.x, point3.y);
+        ctx.lineTo(analogyPoint.x, analogyPoint.y);
+        ctx.strokeStyle = 'rgba(255, 128, 8, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Add arrow
+        const angle = Math.atan2(analogyPoint.y - point3.y, analogyPoint.x - point3.x);
+        const arrowSize = 8;
+        
+        const arrowX = analogyPoint.x - Math.cos(angle) * (analogyPoint.radius + 2);
+        const arrowY = analogyPoint.y - Math.sin(angle) * (analogyPoint.radius + 2);
+        
+        ctx.beginPath();
+        ctx.moveTo(
+          arrowX - Math.cos(angle - Math.PI/6) * arrowSize,
+          arrowY - Math.sin(angle - Math.PI/6) * arrowSize
+        );
+        ctx.lineTo(arrowX, arrowY);
+        ctx.lineTo(
+          arrowX - Math.cos(angle + Math.PI/6) * arrowSize,
+          arrowY - Math.sin(angle + Math.PI/6) * arrowSize
+        );
+        ctx.fillStyle = 'rgba(255, 128, 8, 0.8)';
+        ctx.fill();
+      });
+    }
+  };
+  
   // Handle mouse interactions
   const handleMouseMove = (e) => {
     if (!canvasRef.current || !pointsRef.current.length) return;
@@ -487,9 +689,9 @@ const VectorGraph2D = ({
     removeTooltip();
   };
   
-  // Handle point selection when in selection mode
+  // Update handle click to support both midpoint and analogy modes
   const handleClick = (e) => {
-    if (!selectionMode || !onPointSelected || !canvasRef.current || !pointsRef.current.length) return;
+    if ((!selectionMode && !analogyMode) || !onPointSelected || !canvasRef.current || !pointsRef.current.length) return;
     
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;

@@ -16,7 +16,10 @@ const VectorGraph = ({
   rulerActive,
   selectionMode = false,
   onPointSelected = null,
-  selectedPoints = []
+  selectedPoints = [],
+  analogyMode = false,
+  analogyStep = 0,
+  isSearchingAnalogy = false
 }) => {
   const [coordinates, setCoordinates] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -196,6 +199,9 @@ const VectorGraph = ({
             selectionMode={selectionMode}
             onPointSelected={handlePointSelected}
             selectedPoints={selectedPoints}
+            analogyMode={analogyMode}
+            analogyStep={analogyStep}
+            isSearchingAnalogy={isSearchingAnalogy}
           />
         ) : (
           <VectorGraph3D 

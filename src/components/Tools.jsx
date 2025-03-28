@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import MidpointSelection from './MidpointSelection';
-import AnalogyToolbar from './AnalogyToolbar';
+import AnalogySelection from './AnalogySelection';
 import ViewButton from './ViewButton';
 import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
+import { findAnalogy } from '../utils/findAnalogy';
 import './ToolbarStyles.css';
 
 // Import icons from a reliable source like Feather or include SVG directly
@@ -64,7 +65,13 @@ const Tools = ({
   selectionMode,
   setSelectionMode,
   selectedPoints,
-  setSelectedPoints
+  setSelectedPoints,
+  analogyMode,
+  setAnalogyMode,
+  analogyStep,
+  setAnalogyStep,
+  isSearchingAnalogy,
+  setIsSearchingAnalogy
 }) => {
   const [activeTab, setActiveTab] = useState('midpoint');
   const [showContent, setShowContent] = useState(true);
@@ -82,19 +89,75 @@ const Tools = ({
     if (tab === activeTab) {
       // If clicking on midpoint tab when already active, toggle selection mode
       if (tab === 'midpoint') {
-        toggleSelectionMode();
+        toggleMidpointSelectionMode();
+      } else if (tab === 'analogy') {
+        toggleAnalogyMode();
       } else {
         setShowContent(!showContent);
       }
     } else {
+      // Switching to a different tab
       setActiveTab(tab);
       setShowContent(true);
       
-      // Cancel selection mode when switching to analogy tab
-      if (tab !== 'midpoint' && selectionMode) {
+      // Cancel selection mode when switching tabs
+      if (selectionMode) {
         setSelectionMode(false);
+        setSelectedPoints([]);
+      }
+      
+      // Cancel analogy mode when switching away from analogy tab
+      if (analogyMode && tab !== 'analogy') {
+        setAnalogyMode(false);
+        setAnalogyStep(0);
+        setSelectedPoints([]);
       }
     }
+  };
+  
+  // Toggle midpoint selection mode
+  const toggleMidpointSelectionMode = () => {
+    if (selectionMode) {
+      setSelectionMode(false);
+      setSelectedPoints([]);
+    } else {
+      // Ensure analogy mode is off
+      setAnalogyMode(false);
+      // Turn on midpoint selection mode
+      setSelectionMode(true);
+    }
+  };
+  
+  // Toggle analogy mode
+  const toggleAnalogyMode = () => {
+    if (analogyMode) {
+      setAnalogyMode(false);
+      setAnalogyStep(0);
+      setSelectedPoints([]);
+    } else {
+      // Ensure midpoint selection mode is off
+      setSelectionMode(false);
+      // Turn on analogy mode
+      setAnalogyMode(true);
+      setAnalogyStep(0);
+      setSelectedPoints([]);
+    }
+  };
+  
+  // Check if a word is already selected
+  const isWordAlreadySelected = (word) => {
+    return selectedPoints.includes(word);
+  };
+  
+  // Function to validate if a new analogy selection is valid
+  const validateAnalogySelection = (word) => {
+    // Check if the word is already selected in the analogy
+    if (isWordAlreadySelected(word)) {
+      setError("Each word can only be used once in the analogy");
+      return false;
+    }
+    
+    return true;
   };
   
   // Find midpoint for the selected points
@@ -129,23 +192,148 @@ const Tools = ({
     }
   };
   
-  // Toggle selection mode
-  const toggleSelectionMode = () => {
-    if (selectionMode) {
-      setSelectionMode(false);
-      setSelectedPoints([]);
-    } else {
-      setSelectionMode(true);
+  // Effect to handle step transitions in analogy mode
+  React.useEffect(() => {
+    if (analogyMode) {
+      console.log('Analogy mode effect triggered:', { 
+        selectedPoints, 
+        analogyStep, 
+        count: selectedPoints.length 
+      });
+      
+      // Update step based on number of selected points
+      if (selectedPoints.length === 1 && analogyStep === 0) {
+        setAnalogyStep(1);
+      } else if (selectedPoints.length === 2 && analogyStep === 1) {
+        setAnalogyStep(2);
+      } else if (selectedPoints.length === 3 && analogyStep === 2) {
+        console.log('Third word selected, starting analogy search');
+        // We're ready to search
+        setAnalogyStep(3);
+        // Automatically start the search
+        findAnalogyForSelectedPoints();
+      }
+    }
+  }, [analogyMode, selectedPoints]);
+  
+  // Find analogy for the selected points
+  const findAnalogyForSelectedPoints = async () => {
+    if (selectedPoints.length !== 3) {
+      console.log('Cannot find analogy: need exactly 3 words, got', selectedPoints.length);
+      setError('Please select three points for analogy');
+      return;
+    }
+    
+    const [word1, word2, word3] = selectedPoints;
+    console.log(`Finding analogy for ${word1}:${word2}::${word3}:?`);
+    
+    setIsSearchingAnalogy(true);
+    setLoading(true);
+    
+    try {
+      // Call the analogy API with timeout handling
+      const timeout = setTimeout(() => {
+        if (loading) {
+          console.log('Analogy search taking too long, might be a backend issue');
+          // Don't interrupt the actual search, just inform the user
+          setError('The search is taking longer than expected. This might be due to backend service load.');
+        }
+      }, 8000); // Show warning after 8 seconds
+      
+      // Call the analogy API
+      const response = await findAnalogy(word1, word2, word3, 5);
+      
+      clearTimeout(timeout);
+      
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      
+      if (!response.data || !response.data.results || response.data.results.length === 0) {
+        throw new Error('No analogy results found. The server may be experiencing issues.');
+      }
+      
+      console.log('Analogy results:', response.data.results);
+      
+      // Process the results
+      const analogyResults = response.data.results.map(result => ({
+        word: result.word,
+        score: result.score,
+        isAnalogy: true,
+        analogySource: {
+          from: word3,
+          relation: `${word1}:${word2}::${word3}:${result.word}`
+        }
+      }));
+      
+      // Create analogy cluster for visualization
+      const analogyCluster = {
+        type: 'analogy',
+        source: {
+          word1, word2, word3
+        },
+        words: [
+          // Include the three input words
+          { word: word1, isAnalogy: false },
+          { word: word2, isAnalogy: false },
+          { word: word3, isAnalogy: false },
+          // Include analogy results
+          ...analogyResults
+        ]
+      };
+      
+      // Update visualization
+      debugSetMidpointClusters([analogyCluster]);
+      
+      // Move to step 4 (completed)
+      setAnalogyStep(4);
+      
+    } catch (error) {
+      console.error('Error finding analogy:', error);
+      
+      // Provide more user-friendly error messages
+      let errorMessage = 'Failed to find analogy';
+      
+      if (error.message?.includes('timeout') || error.message?.includes('504')) {
+        errorMessage = 'The server timed out. The vector database might be experiencing high load. Please try again later.';
+      } else if (error.message?.includes('No analogy')) {
+        errorMessage = 'No strong analogies found. Try different words with clearer relationships.';
+      } else {
+        errorMessage = `Failed to find analogy: ${error.message || 'Unknown error'}`;
+      }
+      
+      setError(errorMessage);
+      
+      // Reset to selection state
+      setAnalogyStep(2);
+    } finally {
+      setLoading(false);
+      setIsSearchingAnalogy(false);
     }
   };
   
-  // Handle point selection
+  // Handle point selection for midpoint
   React.useEffect(() => {
     // Automatically find midpoint when two points are selected
     if (selectedPoints.length === 2 && selectionMode) {
       findMidpointForSelectedPoints();
     }
-  }, [selectedPoints]);
+  }, [selectedPoints, selectionMode]);
+  
+  // Reset analogy selection
+  const resetAnalogySelection = () => {
+    setSelectedPoints([]);
+    setAnalogyStep(0);
+    setIsSearchingAnalogy(false);
+  };
+  
+  // Cancel analogy selection
+  const cancelAnalogySelection = () => {
+    setAnalogyMode(false);
+    setSelectedPoints([]);
+    setAnalogyStep(0);
+    setIsSearchingAnalogy(false);
+  };
 
   const renderToolContent = () => {
     if (!showContent) return null;
@@ -164,24 +352,19 @@ const Tools = ({
       );
     }
     
-    switch (activeTab) {
-      case 'midpoint':
-        // We don't need to render the MidpointToolbar anymore
-        return null;
-      case 'analogy':
-        return (
-          <AnalogyToolbar
-            words={words}
-            setLoading={setLoading}
-            setError={setError}
-            loading={loading}
-            wordsValid={wordsValid}
-            setMidpointClusters={debugSetMidpointClusters}
-          />
-        );
-      default:
-        return null;
+    if (analogyMode) {
+      return (
+        <AnalogySelection 
+          selectedPoints={selectedPoints}
+          analogyStep={analogyStep}
+          onReset={resetAnalogySelection}
+          onCancel={cancelAnalogySelection}
+          loading={loading || isSearchingAnalogy}
+        />
+      );
     }
+    
+    return null;
   };
 
   return (
@@ -191,7 +374,7 @@ const Tools = ({
           <button
             className={`icon-button ${activeTab === 'midpoint' ? 'active' : ''} ${selectionMode ? 'selection-active' : ''}`}
             onClick={() => handleTabClick('midpoint')}
-            disabled={loading}
+            disabled={loading || analogyMode}
             title={selectionMode ? "Click to cancel selection mode" : "Midpoint"}
           >
             <MidpointIcon />
@@ -199,13 +382,13 @@ const Tools = ({
           </button>
           
           <button
-            className={`icon-button ${activeTab === 'analogy' ? 'active' : ''}`}
+            className={`icon-button ${activeTab === 'analogy' ? 'active' : ''} ${analogyMode ? 'analogy-active' : ''}`}
             onClick={() => handleTabClick('analogy')}
             disabled={loading || selectionMode}
-            title="Analogy"
+            title={analogyMode ? "Click to cancel analogy mode" : "Analogy"}
           >
             <AnalogyIcon />
-            <span>Analogy</span>
+            <span>{analogyMode ? `Analogy (Step ${analogyStep + 1})` : "Analogy"}</span>
           </button>
           
           <div className="spacer"></div>
@@ -281,6 +464,13 @@ const Tools = ({
           background: rgba(52, 168, 83, 0.15);
           color: #34A853;
           box-shadow: inset 0 -2px 0 #34A853;
+          animation: pulse 1.5s infinite;
+        }
+        
+        .icon-button.analogy-active {
+          background: rgba(255, 128, 8, 0.15);
+          color: #FF8008;
+          box-shadow: inset 0 -2px 0 #FF8008;
           animation: pulse 1.5s infinite;
         }
         

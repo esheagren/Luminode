@@ -19,6 +19,9 @@ const HomePage = () => {
   const [rulerActive, setRulerActive] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedPoints, setSelectedPoints] = useState([]);
+  const [analogyMode, setAnalogyMode] = useState(false);
+  const [analogyStep, setAnalogyStep] = useState(0);
+  const [isSearchingAnalogy, setIsSearchingAnalogy] = useState(false);
   
   // Debug: Log the state functions
   console.log('HomePage component:', {
@@ -72,22 +75,47 @@ const HomePage = () => {
   
   // Handle point selection from the graph
   const handlePointSelected = (word) => {
-    if (!selectionMode) return;
+    if (!selectionMode && !analogyMode) return;
     
-    setSelectedPoints(prevPoints => {
-      // If the word is already selected, remove it
-      if (prevPoints.includes(word)) {
-        return prevPoints.filter(p => p !== word);
+    console.log('Point selected:', word, { analogyMode, selectionMode, currentSelectedPoints: selectedPoints });
+    
+    if (analogyMode) {
+      // Analogy mode selection logic
+      if (selectedPoints.includes(word)) {
+        console.log('Word already selected, showing error:', word);
+        setError("Each word can only be used once in an analogy");
+        return; // Already selected
       }
       
-      // If we already have 2 points, replace the oldest one
-      if (prevPoints.length >= 2) {
-        return [prevPoints[1], word];
+      // We need at most 3 words for analogy
+      if (selectedPoints.length >= 3) {
+        console.log('Already have 3 words, ignoring:', word);
+        return;
       }
       
-      // Otherwise, add the new point
-      return [...prevPoints, word];
-    });
+      // Clear any previous errors
+      if (error) setError(null);
+      
+      // Add the new word to selected points
+      console.log('Adding word to analogy selection:', word);
+      setSelectedPoints([...selectedPoints, word]);
+      return;
+    }
+    
+    if (selectionMode) {
+      // Clear any previous errors
+      if (error) setError(null);
+      
+      // Midpoint selection logic
+      if (selectedPoints.includes(word)) {
+        setSelectedPoints(selectedPoints.filter(p => p !== word));
+      } else if (selectedPoints.length < 2) {
+        setSelectedPoints([...selectedPoints, word]);
+      } else {
+        // Replace oldest point
+        setSelectedPoints([selectedPoints[1], word]);
+      }
+    }
   };
   
   // Toggle selection mode
@@ -96,6 +124,33 @@ const HomePage = () => {
     if (!active) {
       setSelectedPoints([]);
     }
+    
+    // Ensure analogy mode is off when selection mode is on
+    if (active && analogyMode) {
+      setAnalogyMode(false);
+      setAnalogyStep(0);
+    }
+  };
+  
+  // Set analogy mode
+  const setAnalogySelectionMode = (active, step = 0) => {
+    setAnalogyMode(active);
+    setAnalogyStep(step);
+    
+    if (!active) {
+      setSelectedPoints([]);
+      setIsSearchingAnalogy(false);
+    }
+    
+    // Ensure selection mode is off when analogy mode is on
+    if (active && selectionMode) {
+      setSelectionMode(false);
+    }
+  };
+  
+  // Updated set searching analogy state
+  const setSearchingAnalogy = (isSearching) => {
+    setIsSearchingAnalogy(isSearching);
   };
 
   return (
@@ -183,6 +238,12 @@ const HomePage = () => {
               setSelectionMode={setPointSelectionMode}
               selectedPoints={selectedPoints}
               setSelectedPoints={setSelectedPoints}
+              analogyMode={analogyMode}
+              setAnalogyMode={setAnalogySelectionMode}
+              analogyStep={analogyStep}
+              setAnalogyStep={setAnalogyStep}
+              isSearchingAnalogy={isSearchingAnalogy}
+              setIsSearchingAnalogy={setSearchingAnalogy}
             />
           </div>
           
@@ -197,6 +258,9 @@ const HomePage = () => {
               selectionMode={selectionMode}
               onPointSelected={handlePointSelected}
               selectedPoints={selectedPoints}
+              analogyMode={analogyMode}
+              analogyStep={analogyStep}
+              isSearchingAnalogy={isSearchingAnalogy}
             />
           </div>
         </div>

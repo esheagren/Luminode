@@ -102,6 +102,27 @@
   font-weight: bold;
 }
 
+/* Analogy selection animations */
+.animate-arrow {
+  animation: arrow-pulse 1s infinite;
+}
+
+@keyframes arrow-pulse {
+  0% { opacity: 0.5; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(3px); }
+  100% { opacity: 0.5; transform: translateX(0); }
+}
+
+.analogy-searching {
+  animation: searching-pulse 1.5s infinite;
+}
+
+@keyframes searching-pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
 /* Results display */
 .results-container {
   display: flex;
