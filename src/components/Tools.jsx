@@ -155,20 +155,24 @@ const Tools = ({
   // Find midpoint for the selected points
   const findMidpointForSelectedPoints = async () => {
     if (selectedPoints.length !== 2) {
+      console.error('Cannot find midpoint: need exactly 2 words, got', selectedPoints.length);
       setError('Please select two points first');
       return;
     }
     
     const [word1, word2] = selectedPoints;
+    console.log(`Finding midpoint between "${word1}" and "${word2}" with ${numMidpoints} results`);
     
     setLoading(true);
     
     try {
       // Call the midpoint API
       const results = await findMidpoint(word1, word2, numMidpoints, 0, true);
+      console.log('Midpoint results received:', results);
       
       // Process the results into visualization format
       const midpointCluster = processMidpointResults(results, word1, word2, 0);
+      console.log('Processed midpoint cluster:', midpointCluster);
       
       // Update visualization
       debugSetMidpointClusters([midpointCluster]);
@@ -304,12 +308,17 @@ const Tools = ({
     }
   };
   
-  // Handle point selection for midpoint
+  // Handle point selection for midpoint - no longer auto-triggering calculation
   React.useEffect(() => {
-    // Automatically find midpoint when two points are selected
-    if (selectedPoints.length === 2 && selectionMode) {
-      findMidpointForSelectedPoints();
-    }
+    console.log('Selected points updated:', {
+      selectedPoints,
+      selectionMode,
+      count: selectedPoints.length
+    });
+    
+    // We no longer automatically trigger the midpoint calculation
+    // This is now handled by the explicit Calculate button
+    // Instead, we just log the state for debugging
   }, [selectedPoints, selectionMode]);
   
   // Reset analogy selection
@@ -339,6 +348,7 @@ const Tools = ({
             setSelectionMode(false);
             setSelectedPoints([]);
           }}
+          onCalculate={findMidpointForSelectedPoints}
           loading={loading}
         />
       );

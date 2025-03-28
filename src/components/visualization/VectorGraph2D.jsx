@@ -755,6 +755,16 @@ const VectorGraph2D = ({
   
   // Update handle click to support both midpoint and analogy modes
   const handleClick = (e) => {
+    // Log all the conditions to better understand why this might not be triggering
+    console.log('Click event conditions:', {
+      selectionMode,
+      analogyMode,
+      hasOnPointSelected: !!onPointSelected,
+      hasCanvas: !!canvasRef.current,
+      hasPoints: pointsRef.current.length > 0,
+      willProceed: (selectionMode || analogyMode) && !!onPointSelected && !!canvasRef.current && pointsRef.current.length > 0
+    });
+    
     if ((!selectionMode && !analogyMode) || !onPointSelected || !canvasRef.current || !pointsRef.current.length) return;
     
     const rect = canvasRef.current.getBoundingClientRect();
@@ -762,16 +772,25 @@ const VectorGraph2D = ({
     const mouseY = e.clientY - rect.top;
     
     // Check if mouse is over any point
+    let foundPoint = false;
     for (const point of pointsRef.current) {
       const distance = Math.sqrt(
         Math.pow(mouseX - point.x, 2) + Math.pow(mouseY - point.y, 2)
       );
       
       if (distance <= point.radius) {
+        // Log the point being selected
+        console.log('Selected point:', point.word, { selectionMode, analogyMode });
+        
         // Trigger the selection callback
         onPointSelected(point.word);
+        foundPoint = true;
         break;
       }
+    }
+    
+    if (!foundPoint) {
+      console.log('Click did not hit any point');
     }
   };
   

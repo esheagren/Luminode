@@ -8,6 +8,7 @@ const MidpointSelection = ({
   selectedPoints = [], 
   onReset, 
   onCancel,
+  onCalculate,
   loading = false 
 }) => {
   return (
@@ -30,6 +31,16 @@ const MidpointSelection = ({
               
               {selectedPoints.length === 2 && loading && (
                 <span className="point-instruction">Finding midpoint...</span>
+              )}
+              
+              {selectedPoints.length === 2 && !loading && onCalculate && (
+                <button 
+                  className="search-btn calculate-btn"
+                  onClick={onCalculate}
+                  style={{ background: 'rgba(6, 182, 72, 0.2)', color: '#4ada7c', marginLeft: '10px' }}
+                >
+                  Calculate Midpoint
+                </button>
               )}
             </div>
           )}
@@ -91,6 +102,10 @@ const MidpointSelection = ({
           display: flex;
           gap: 0.5rem;
           margin-left: auto;
+        }
+        
+        .calculate-btn {
+          font-weight: bold;
         }
       `}</style>
     </div>
