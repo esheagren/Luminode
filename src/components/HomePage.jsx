@@ -263,6 +263,7 @@ const HomePage = () => {
               setAnalogyStep={setAnalogyStep}
               isSearchingAnalogy={isSearchingAnalogy}
               setIsSearchingAnalogy={setSearchingAnalogy}
+              setWords={setWords}
             />
           </div>
           

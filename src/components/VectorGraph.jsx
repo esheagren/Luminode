@@ -31,7 +31,12 @@ const VectorGraph = ({
   
   // Fetch coordinates when words or viewMode changes
   useEffect(() => {
-    if (!words || words.length === 0) return;
+    if (!words || words.length === 0) {
+      // Clear coordinates when there are no words
+      console.log('No words to visualize, clearing the graph');
+      setCoordinates([]);
+      return;
+    }
     
     const fetchCoordinates = async () => {
       setLoading(true);

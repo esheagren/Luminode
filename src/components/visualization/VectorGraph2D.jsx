@@ -139,14 +139,19 @@ const VectorGraph2D = ({
         drawVisualization(sortedCoordinates);
         setIsLoading(false);
       } else {
-        console.log('No coordinates to draw');
-        setIsLoading(true);
+        console.log('No coordinates to draw, clearing graph');
+        setIsLoading(false); // Changed from true to false to avoid showing loading animation
         
         // Draw empty state with visible background
         const ctx = canvasRef.current.getContext('2d');
         if (ctx) {
+          // Clear the entire canvas
           ctx.fillStyle = '#1a1a2e'; // Dark blue background
           ctx.fillRect(0, 0, width, height);
+          // Reset any stored point data
+          pointsRef.current = [];
+          window.similarityLabels = [];
+          console.log('Graph cleared successfully');
         }
       }
     };

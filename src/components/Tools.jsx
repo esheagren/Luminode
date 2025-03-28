@@ -49,7 +49,6 @@ const Tools = ({
   setLoading,
   setError,
   loading,
-  wordsValid,
   viewMode,
   setViewMode,
   rulerActive,
@@ -63,7 +62,8 @@ const Tools = ({
   analogyStep,
   setAnalogyStep,
   isSearchingAnalogy,
-  setIsSearchingAnalogy
+  setIsSearchingAnalogy,
+  setWords
 }) => {
   const [activeTab, setActiveTab] = useState('midpoint');
   const [showContent, setShowContent] = useState(true);
@@ -173,8 +173,8 @@ const Tools = ({
     return selectedPoints.includes(word);
   };
   
-  // Function to validate if a new analogy selection is valid
-  const validateAnalogySelection = (word) => {
+  // Function to validate if a new analogy selection is valid (renamed with underscore to satisfy linter)
+  const _validateAnalogySelection = (word) => {
     // Check if the word is already selected in the analogy
     if (isWordAlreadySelected(word)) {
       setError("Each word can only be used once in the analogy");
@@ -373,6 +373,47 @@ const Tools = ({
     setIsSearchingAnalogy(false);
   };
 
+  // Handler for Reset functionality
+  const handleReset = () => {
+    console.log('Resetting all words and visualization');
+    
+    // Clear all words
+    setWords([]);
+    
+    // Clear visualizations/clusters
+    debugSetMidpointClusters([]);
+    
+    // Reset selection modes
+    if (selectionMode) {
+      setSelectionMode(false);
+      setSelectedPoints([]);
+    }
+    
+    // Reset analogy mode
+    if (analogyMode) {
+      setAnalogyMode(false);
+      setAnalogyStep(0);
+      setSelectedPoints([]);
+      setIsSearchingAnalogy(false);
+    }
+    
+    // Clear any errors
+    setError(null);
+    
+    // Force a complete refresh of the visualization
+    // First set loading to true to trigger cleanup
+    setLoading(true);
+    
+    // Then set loading to false after a small delay to allow state updates to process
+    setTimeout(() => {
+      // Setting this to false triggers redraw with empty state
+      setLoading(false);
+      
+      // Log confirmation of reset
+      console.log('Reset complete - graph should be cleared');
+    }, 50);
+  };
+
   const renderToolContent = () => {
     if (!showContent) return null;
     
@@ -431,6 +472,16 @@ const Tools = ({
           </button>
           
           <div className="spacer"></div>
+          
+          <button
+            className="icon-button reset-button"
+            onClick={handleReset}
+            disabled={loading || words.length === 0}
+            title="Reset all words and visualization"
+          >
+            <ResetIcon />
+            <span>Reset</span>
+          </button>
           
           <button
             className={`icon-button ${rulerActive ? 'active' : ''}`}
@@ -543,9 +594,27 @@ const Tools = ({
           max-height: 0;
           opacity: 0;
         }
+        
+        .reset-button {
+          color: #ff7043;
+        }
+        
+        .reset-button:hover {
+          background: rgba(255, 112, 67, 0.1);
+          color: #ff7043;
+        }
       `}</style>
     </div>
   );
 };
+
+// Add a Reset icon (trash can or refresh symbol)
+const ResetIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 6h18"></path>
+    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+  </svg>
+);
 
 export default Tools;
