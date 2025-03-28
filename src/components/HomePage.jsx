@@ -5,7 +5,6 @@ import WordInput from './WordInput';
 import Tools from './Tools';
 import ViewButton from './ViewButton';
 import SuggestedWords from './SuggestedWords';
-import NavBar from './NavBar';
 import { getApiUrl } from '../utils/environment';
 import { Link } from 'react-router-dom';
 
@@ -196,7 +195,6 @@ const HomePage = () => {
 
   return (
     <div className="app-container">
-      <NavBar />
       <div className="main-layout">
         <div className="sidebar">
           <WordInput 
