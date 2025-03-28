@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import luminodeLogo from '../assets/luminodeLogoSmall.png';
 import LoadingAnimation from './visualization/LoadingAnimation';
 
 const LandingPage = () => {
@@ -40,18 +39,42 @@ const LandingPage = () => {
       </div>
       
       <div className="landing-content">
-        <div className="logo-container">
-          <img src={luminodeLogo} alt="Luminode Logo" className="landing-logo" />
+        <div className="headline-container">
           <h1 className="landing-title">Luminode</h1>
+          <h2 className="landing-tagline">Unlock the Power of Vector Space</h2>
         </div>
         
         <div className="landing-description">
-          <p>Explore the world of vector embeddings with interactive visualizations</p>
+          <p>Visualize complex data relationships in an intuitive, interactive environment that brings embeddings to life</p>
+        </div>
+        
+        <div className="benefits-grid">
+          <div className="benefit-item">
+            <div className="benefit-icon">🔍</div>
+            <div className="benefit-text">
+              <h3>Discover Patterns</h3>
+              <p>Identify hidden connections in your data through dynamic visualizations</p>
+            </div>
+          </div>
+          <div className="benefit-item">
+            <div className="benefit-icon">🧠</div>
+            <div className="benefit-text">
+              <h3>Interpret AI</h3>
+              <p>Understand how AI models perceive language and concepts</p>
+            </div>
+          </div>
+          <div className="benefit-item">
+            <div className="benefit-icon">⚡</div>
+            <div className="benefit-text">
+              <h3>Accelerate Research</h3>
+              <p>Fast-track your NLP and machine learning experimentation</p>
+            </div>
+          </div>
         </div>
         
         <div className="landing-cta">
           <Link to="/app" className="enter-app-button">
-            Enter Application
+            Explore Now
           </Link>
         </div>
       </div>
@@ -105,61 +128,121 @@ const LandingPage = () => {
           justify-content: center;
           text-align: center;
           z-index: 10;
-          padding: 2rem;
-          border-radius: 12px;
+          padding: 3rem;
+          border-radius: 16px;
           backdrop-filter: blur(10px);
           background-color: rgba(26, 26, 46, 0.5);
           border: 1px solid rgba(255, 165, 0, 0.2);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-          max-width: 600px;
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+          max-width: 850px;
           margin: 0 auto;
         }
         
-        .logo-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-bottom: 2rem;
-        }
-        
-        .landing-logo {
-          height: 100px;
-          width: auto;
-          margin-bottom: 1rem;
+        .headline-container {
+          margin-bottom: 1.5rem;
+          position: relative;
         }
         
         .landing-title {
-          font-size: 3rem;
+          font-size: 4rem;
           font-weight: 700;
-          color: #f8fafc;
-          letter-spacing: 1px;
+          background: linear-gradient(135deg, #f8fafc, #FFA500);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
           margin: 0;
-          text-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+          letter-spacing: 2px;
+          text-shadow: 0 2px 10px rgba(255, 165, 0, 0.2);
+        }
+        
+        .landing-tagline {
+          font-size: 1.5rem;
+          font-weight: 500;
+          color: #e2e8f0;
+          margin: 0.5rem 0 0;
+          letter-spacing: 0.5px;
         }
         
         .landing-description {
-          font-size: 1.2rem;
+          font-size: 1.25rem;
           color: #e2e8f0;
-          max-width: 80%;
+          max-width: 85%;
           margin-bottom: 2.5rem;
+          line-height: 1.6;
+        }
+        
+        .benefits-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5rem;
+          margin-bottom: 3rem;
+          width: 100%;
+        }
+        
+        .benefit-item {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 12px;
+          padding: 1.5rem;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          border: 1px solid rgba(255, 165, 0, 0.1);
+        }
+        
+        .benefit-item:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+          background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .benefit-icon {
+          font-size: 2rem;
+          margin-bottom: 1rem;
+        }
+        
+        .benefit-text h3 {
+          color: #FFA500;
+          margin: 0 0 0.5rem;
+          font-size: 1.2rem;
+        }
+        
+        .benefit-text p {
+          color: #e2e8f0;
+          font-size: 0.95rem;
+          line-height: 1.5;
+          margin: 0;
         }
         
         .enter-app-button {
           display: inline-block;
-          padding: 0.75rem 2rem;
+          padding: 1rem 3rem;
           background: linear-gradient(135deg, #FFA500, #FF8C00);
           color: #0f172a;
           text-decoration: none;
-          border-radius: 30px;
+          border-radius: 50px;
           font-weight: 600;
-          font-size: 1.1rem;
+          font-size: 1.2rem;
           transition: all 0.3s ease;
-          box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+          box-shadow: 0 6px 15px rgba(255, 165, 0, 0.3);
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .enter-app-button:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: all 0.6s ease;
         }
         
         .enter-app-button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 15px rgba(255, 165, 0, 0.4);
+          transform: translateY(-3px);
+          box-shadow: 0 8px 20px rgba(255, 165, 0, 0.4);
+        }
+        
+        .enter-app-button:hover:before {
+          left: 100%;
         }
         
         .landing-footer {
@@ -251,22 +334,43 @@ const LandingPage = () => {
           opacity: 0.3;
         }
         
+        @media (max-width: 992px) {
+          .benefits-grid {
+            grid-template-columns: repeat(1, 1fr);
+          }
+          
+          .landing-content {
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+          }
+        }
+        
         @media (max-width: 768px) {
           .landing-content {
             width: 90%;
             padding: 1.5rem;
           }
           
-          .landing-logo {
-            height: 80px;
+          .landing-title {
+            font-size: 3rem;
           }
           
-          .landing-title {
-            font-size: 2.5rem;
+          .landing-tagline {
+            font-size: 1.2rem;
           }
           
           .landing-description {
             font-size: 1rem;
+          }
+          
+          .enter-app-button {
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+          }
+          
+          .benefit-item {
+            padding: 1.25rem;
           }
         }
       `}</style>
