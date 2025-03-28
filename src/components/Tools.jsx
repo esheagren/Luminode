@@ -26,19 +26,11 @@ const AnalogyIcon = () => (
 
 const RulerIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"></path>
-    <path d="M6 8v.01"></path>
-    <path d="M9 8v.01"></path>
-    <path d="M12 8v.01"></path>
-    <path d="M15 8v.01"></path>
-    <path d="M18 8v.01"></path>
-    <path d="M6 12v.01"></path>
-    <path d="M18 12v.01"></path>
-    <path d="M6 16v.01"></path>
-    <path d="M9 16v.01"></path>
-    <path d="M12 16v.01"></path>
-    <path d="M15 16v.01"></path>
-    <path d="M18 16v.01"></path>
+    <path d="M22 8c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8z"></path>
+    <path d="M18 16V8"></path>
+    <path d="M14 16V8"></path>
+    <path d="M10 16V8"></path>
+    <path d="M6 16V8"></path>
   </svg>
 );
 
@@ -396,9 +388,10 @@ const Tools = ({
           <button
             className={`icon-button ${rulerActive ? 'active' : ''}`}
             onClick={() => setRulerActive(!rulerActive)}
-            title="Ruler"
+            title="Measure distances between vectors using cosine similarity"
           >
             <RulerIcon />
+            <span>Measure</span>
           </button>
           
           <ViewButton 

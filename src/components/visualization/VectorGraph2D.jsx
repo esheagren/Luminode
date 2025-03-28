@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { createTooltip, removeTooltip } from './VectorTooltip';
+import { createTooltip, removeTooltip, createSimilarityTooltip } from './VectorTooltip';
 import { getPointColor, calculateCosineSimilarity, formatSimilarity } from './VectorUtils';
 import SimpleLoadingAnimation from './SimpleLoadingAnimation';
 import drawAnalogyProjection from './AnalogyProjection';
@@ -319,6 +319,9 @@ const VectorGraph2D = ({
       if (!matches || !matches[1]) return null;
       return matches[1].split(',').map(num => parseFloat(num.trim()));
     };
+    
+    // Store similarity labels for hover detection
+    const similarityLabels = [];
 
     // Draw lines between each pair of primary points
     for (let i = 0; i < primaryPoints.length; i++) {
@@ -355,8 +358,18 @@ const VectorGraph2D = ({
         const distText = formatSimilarity(distance);
         const textWidth = ctx.measureText(distText).width;
         
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-        ctx.fillRect(midX - textWidth / 2 - 5, midY - 10, textWidth + 10, 20);
+        // Background with a slight highlight to indicate interactivity
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        const labelWidth = textWidth + 10;
+        const labelHeight = 20;
+        const labelX = midX - labelWidth / 2;
+        const labelY = midY - 10;
+        ctx.fillRect(labelX, labelY, labelWidth, labelHeight);
+        
+        // Add slight border to indicate interactivity
+        ctx.strokeStyle = 'rgba(66, 133, 244, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(labelX, labelY, labelWidth, labelHeight);
         
         // Draw text
         ctx.font = '12px Arial';
@@ -364,8 +377,21 @@ const VectorGraph2D = ({
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(distText, midX, midY);
+        
+        // Store label information for hover detection
+        similarityLabels.push({
+          x: labelX,
+          y: labelY,
+          width: labelWidth,
+          height: labelHeight,
+          similarity: distText,
+          words: [point1.word, point2.word]
+        });
       }
     }
+    
+    // Store the similarity labels in a ref to access in mouse events
+    window.similarityLabels = similarityLabels;
   };
   
   // Function to draw analogy lines between points
@@ -670,7 +696,7 @@ const VectorGraph2D = ({
     }
   };
   
-  // Handle mouse interactions
+  // Handle mouse move for point and similarity label hovering
   const handleMouseMove = (e) => {
     if (!canvasRef.current || !pointsRef.current.length) return;
     
@@ -678,7 +704,29 @@ const VectorGraph2D = ({
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     
-    // Check if mouse is over any point
+    // Check if mouse is over any similarity label first (prioritize these)
+    const similarityLabels = window.similarityLabels || [];
+    let hoveredLabel = null;
+    
+    for (const label of similarityLabels) {
+      if (
+        mouseX >= label.x && 
+        mouseX <= label.x + label.width && 
+        mouseY >= label.y && 
+        mouseY <= label.y + label.height
+      ) {
+        hoveredLabel = label;
+        break;
+      }
+    }
+    
+    if (hoveredLabel) {
+      canvasRef.current.style.cursor = 'help';
+      createSimilarityTooltip(e, hoveredLabel.similarity);
+      return;
+    }
+    
+    // If not over a similarity label, check for points
     let hoveredPoint = null;
     
     for (const point of pointsRef.current) {
