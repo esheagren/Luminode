@@ -126,14 +126,14 @@ const getTooltipContent = (toolType) => {
       return `
         <div class="tooltip-title">3D Visualization</div>
         <div class="tooltip-description">
-          Toggle between 2D and 3D visualization modes. 3D mode allows you to explore word relationships in three dimensions, providing a more complete spatial understanding of semantic connections.
+          Toggle between 2D and 3D visualization modes. 3D visualization renders word embeddings in three dimensions using Principal Component Analysis (PCA) to reduce the high-dimensional embedding vectors (typically 300D) to 3D space while preserving semantic relationships.
         </div>
         <div class="tooltip-usage">
           <div class="tooltip-usage-title">How to use:</div>
           <ul class="tooltip-usage-steps">
-            <li>Click to switch between 2D and 3D modes</li>
-            <li>In 3D mode, click and drag to rotate the view</li>
-            <li>Use scroll wheel to zoom in and out</li>
+            <li>Click to switch between 2D and 3D projections</li>
+            <li>In 3D mode, click and drag to rotate the vector space</li>
+            <li>Use scroll wheel to zoom in and explore dense embedding clusters</li>
           </ul>
         </div>
       `;
@@ -141,14 +141,14 @@ const getTooltipContent = (toolType) => {
       return `
         <div class="tooltip-title">Measure Tool</div>
         <div class="tooltip-description">
-          Activate the ruler tool to measure semantic distances between words using cosine similarity. This helps you understand how closely related two words are in the embedding space.
+          Activate the ruler tool to measure semantic distances using cosine similarity. Cosine similarity calculates the cosine of the angle between two embedding vectors, providing a mathematical measure of semantic relatedness in the embedding space.
         </div>
         <div class="tooltip-usage">
           <div class="tooltip-usage-title">How to use:</div>
           <ul class="tooltip-usage-steps">
             <li>Click to activate/deactivate the measurement tool</li>
-            <li>When active, click on two words to see their similarity score</li>
-            <li>Higher values (closer to 100%) indicate words that are more semantically related</li>
+            <li>When active, click on two words to calculate their embedding vector cosine similarity</li>
+            <li>Values range from -1 to 1, displayed as -100% to 100%, where higher values indicate vectors pointing in similar directions</li>
           </ul>
         </div>
       `;
@@ -156,15 +156,15 @@ const getTooltipContent = (toolType) => {
       return `
         <div class="tooltip-title">Midpoint Tool</div>
         <div class="tooltip-description">
-          Find words that are semantically between two selected words. This tool helps discover concepts that bridge the meaning between two different words.
+          Find words that exist in the semantic space between two selected words. This tool performs vector arithmetic by averaging the normalized embedding vectors of two words and then finding nearest neighbors to this midpoint in the embedding space.
         </div>
         <div class="tooltip-usage">
           <div class="tooltip-usage-title">How to use:</div>
           <ul class="tooltip-usage-steps">
             <li>Click to activate selection mode</li>
-            <li>Select two words from the visualization</li>
-            <li>Click "Calculate Midpoint" to find words between them</li>
-            <li>Results will appear as new points in the visualization</li>
+            <li>Select two input words from the visualization</li>
+            <li>Click "Calculate Midpoint" to compute the centroid vector and find its nearest neighbors</li>
+            <li>Results show words with embedding vectors closest to the midpoint vector based on cosine similarity</li>
           </ul>
         </div>
       `;
@@ -172,15 +172,15 @@ const getTooltipContent = (toolType) => {
       return `
         <div class="tooltip-title">Analogy Tool</div>
         <div class="tooltip-description">
-          Discover analogous relationships between words. If A is to B as C is to ?, this tool will find the missing word that completes the analogy.
+          Discover analogous relationships between words using vector arithmetic. This implements the classic vector embedding operation: vec(B) - vec(A) + vec(C) = vec(D), which captures semantic relationships in the embedding space.
         </div>
         <div class="tooltip-usage">
           <div class="tooltip-usage-title">How to use:</div>
           <ul class="tooltip-usage-steps">
             <li>Click to activate analogy mode</li>
             <li>Select three words in sequence (A, B, then C)</li>
-            <li>The system will automatically find words that complete the analogy</li>
-            <li>Results show what D is in the relationship "A is to B as C is to D"</li>
+            <li>The system computes the vector operation: B - A + C</li>
+            <li>Results show words with embedding vectors closest to the resulting vector, completing the analogy "A is to B as C is to D"</li>
           </ul>
         </div>
       `;
@@ -188,15 +188,15 @@ const getTooltipContent = (toolType) => {
       return `
         <div class="tooltip-title">Slice Tool</div>
         <div class="tooltip-description">
-          Create a semantic slice between two words, showing a path of semantically connected words that form a conceptual bridge between them.
+          Create a semantic slice between two words, visualizing the path through embedding space. This tool identifies intermediary words by interpolating between embedding vectors, showing how semantic meaning transitions across the embedding manifold.
         </div>
         <div class="tooltip-usage">
           <div class="tooltip-usage-title">How to use:</div>
           <ul class="tooltip-usage-steps">
             <li>Click to activate slice mode</li>
             <li>Select a starting word and an ending word</li>
-            <li>Click "Calculate Slice" to find the connecting path</li>
-            <li>Results will show intermediate words that connect the concepts</li>
+            <li>Click "Calculate Slice" to compute the vector interpolation path</li>
+            <li>Results show words with embedding vectors that fall along the path between the two points, illustrating the continuous nature of embedding space</li>
           </ul>
         </div>
       `;
@@ -204,14 +204,14 @@ const getTooltipContent = (toolType) => {
       return `
         <div class="tooltip-title">Reset Tool</div>
         <div class="tooltip-description">
-          Clear all words and visualization data, returning the application to its initial state.
+          Clear all words and visualization data, returning the application to its initial state. This resets the vector space projection and removes all queried embedding vectors from the visualization.
         </div>
         <div class="tooltip-usage">
           <div class="tooltip-usage-title">How to use:</div>
           <ul class="tooltip-usage-steps">
-            <li>Click to remove all words from the visualization</li>
-            <li>Clears all selection modes and results</li>
-            <li>Provides a fresh start for new explorations</li>
+            <li>Click to remove all plotted word vectors from the visualization</li>
+            <li>Clears all selection modes, computed relationships, and results</li>
+            <li>Provides a fresh embedding space for new explorations</li>
           </ul>
         </div>
       `;
@@ -219,15 +219,15 @@ const getTooltipContent = (toolType) => {
       return `
         <div class="tooltip-title">Learn Section</div>
         <div class="tooltip-description">
-          Access educational resources that explain word embeddings, vector semantics, and how to interpret the visualizations in Luminode.
+          Access educational resources that explain word embeddings, vector semantics, and the mathematical foundations of the visualizations in Luminode. Learn about Principal Component Analysis (PCA), cosine similarity, and vector operations in embedding space.
         </div>
         <div class="tooltip-usage">
           <div class="tooltip-usage-title">What you'll find:</div>
           <ul class="tooltip-usage-steps">
-            <li>Explanations of core concepts</li>
-            <li>Interactive examples and demonstrations</li>
-            <li>Guides for using Luminode's features</li>
-            <li>Background on word embeddings and their applications</li>
+            <li>Explanations of vector embedding theory and dimensionality reduction</li>
+            <li>Interactive examples demonstrating vector arithmetic in semantic space</li>
+            <li>Guides for interpreting proximity and relationships in the embedding manifold</li>
+            <li>Background on how neural networks learn distributed word representations</li>
           </ul>
         </div>
       `;
@@ -235,7 +235,7 @@ const getTooltipContent = (toolType) => {
       return `
         <div class="tooltip-title">Tool Information</div>
         <div class="tooltip-description">
-          Hover over specific tools in the toolbar to learn more about their functions and how to use them.
+          Hover over specific tools in the toolbar to learn more about their vector embedding operations and usage methods.
         </div>
       `;
   }
