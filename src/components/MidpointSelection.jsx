@@ -7,7 +7,6 @@ import './ToolbarStyles.css';
 const MidpointSelection = ({ 
   selectedPoints = [], 
   onReset, 
-  onFindMidpoint, 
   onCancel,
   loading = false 
 }) => {
@@ -16,7 +15,7 @@ const MidpointSelection = ({
       <div className="toolbar-inner">
         <div className="selected-points">
           {selectedPoints.length === 0 ? (
-            <span className="no-points">No points selected yet. Click on points in the visualization.</span>
+            <span className="no-points">Click on a point in the visualization to select it.</span>
           ) : (
             <div className="point-list">
               {selectedPoints.map((word, index) => (
@@ -27,6 +26,10 @@ const MidpointSelection = ({
               
               {selectedPoints.length < 2 && (
                 <span className="point-instruction">Click to select {selectedPoints.length === 0 ? 'first' : 'second'} point</span>
+              )}
+              
+              {selectedPoints.length === 2 && loading && (
+                <span className="point-instruction">Finding midpoint...</span>
               )}
             </div>
           )}
@@ -51,14 +54,6 @@ const MidpointSelection = ({
             style={{ background: 'rgba(220, 0, 0, 0.1)', color: '#FF7272' }}
           >
             Cancel
-          </button>
-          
-          <button 
-            className="search-btn midpoint-btn"
-            onClick={onFindMidpoint}
-            disabled={selectedPoints.length !== 2 || loading}
-          >
-            {loading ? 'Finding...' : 'Find Midpoint'}
           </button>
         </div>
       </div>

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import MidpointToolbar from './MidpointToolbar';
+import MidpointSelection from './MidpointSelection';
 import AnalogyToolbar from './AnalogyToolbar';
 import ViewButton from './ViewButton';
-import MidpointSelection from './MidpointSelection';
 import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
 import './ToolbarStyles.css';
 
@@ -81,15 +80,20 @@ const Tools = ({
 
   const handleTabClick = (tab) => {
     if (tab === activeTab) {
-      setShowContent(!showContent);
+      // If clicking on midpoint tab when already active, toggle selection mode
+      if (tab === 'midpoint') {
+        toggleSelectionMode();
+      } else {
+        setShowContent(!showContent);
+      }
     } else {
       setActiveTab(tab);
       setShowContent(true);
-    }
-    
-    // Cancel selection mode when switching tabs
-    if (tab !== 'midpoint' && selectionMode) {
-      setSelectionMode(false);
+      
+      // Cancel selection mode when switching to analogy tab
+      if (tab !== 'midpoint' && selectionMode) {
+        setSelectionMode(false);
+      }
     }
   };
   
@@ -127,8 +131,21 @@ const Tools = ({
   
   // Toggle selection mode
   const toggleSelectionMode = () => {
-    setSelectionMode(!selectionMode);
+    if (selectionMode) {
+      setSelectionMode(false);
+      setSelectedPoints([]);
+    } else {
+      setSelectionMode(true);
+    }
   };
+  
+  // Handle point selection
+  React.useEffect(() => {
+    // Automatically find midpoint when two points are selected
+    if (selectedPoints.length === 2 && selectionMode) {
+      findMidpointForSelectedPoints();
+    }
+  }, [selectedPoints]);
 
   const renderToolContent = () => {
     if (!showContent) return null;
@@ -138,8 +155,10 @@ const Tools = ({
         <MidpointSelection 
           selectedPoints={selectedPoints}
           onReset={() => setSelectedPoints([])}
-          onFindMidpoint={findMidpointForSelectedPoints}
-          onCancel={() => setSelectionMode(false)}
+          onCancel={() => {
+            setSelectionMode(false);
+            setSelectedPoints([]);
+          }}
           loading={loading}
         />
       );
@@ -147,18 +166,8 @@ const Tools = ({
     
     switch (activeTab) {
       case 'midpoint':
-        return (
-          <MidpointToolbar
-            words={words}
-            numMidpoints={numMidpoints}
-            setMidpointClusters={debugSetMidpointClusters}
-            setLoading={setLoading}
-            setError={setError}
-            loading={loading}
-            wordsValid={wordsValid}
-            onEnterSelectionMode={toggleSelectionMode}
-          />
-        );
+        // We don't need to render the MidpointToolbar anymore
+        return null;
       case 'analogy':
         return (
           <AnalogyToolbar
@@ -181,8 +190,8 @@ const Tools = ({
         <div className="tool-buttons">
           <button
             className={`icon-button ${activeTab === 'midpoint' ? 'active' : ''} ${selectionMode ? 'selection-active' : ''}`}
-            onClick={() => selectionMode ? toggleSelectionMode() : handleTabClick('midpoint')}
-            disabled={loading && !selectionMode}
+            onClick={() => handleTabClick('midpoint')}
+            disabled={loading}
             title={selectionMode ? "Click to cancel selection mode" : "Midpoint"}
           >
             <MidpointIcon />
