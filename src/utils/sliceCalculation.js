@@ -109,30 +109,59 @@ export const processSliceResults = (results, word1, word2) => {
     word: word1,
     isSlice: true,
     isEndpoint: true,
-    sliceLevel: 'endpoint'
+    isMainPoint: true,
+    sliceLevel: 'endpoint',
+    sliceIndex: 0,
+    sliceDepth: 0
   });
   
   sliceCluster.words.push({
     word: word2,
     isSlice: true,
     isEndpoint: true,
-    sliceLevel: 'endpoint'
+    isMainPoint: true,
+    sliceLevel: 'endpoint',
+    sliceIndex: 1,
+    sliceDepth: 0
   });
   
   // Add slice points
   if (results.slicePoints && results.slicePoints.length > 0) {
-    results.slicePoints.forEach((point, index) => {
-      const isMainPoint = point.isMainPoint === true;
-      // The main points are the ones along the direct path
-      // Other points are neighbors of those main points
-      
+    // First add main slice points that form the path
+    const mainPoints = results.slicePoints.filter(point => 
+      point.isMainPoint === true && !point.isEndpoint
+    );
+    
+    mainPoints.forEach(point => {
+      sliceCluster.words.push({
+        word: point.word,
+        distance: point.distance || 0,
+        similarity: point.similarity,
+        isSlice: true,
+        isMainPoint: true,
+        sliceLevel: 'main',
+        sliceIndex: point.index || 0,
+        sliceDepth: point.depth || 0,
+        sliceSource: {
+          fromWords: point.fromWords || [],
+          path: point.path || []
+        }
+      });
+    });
+
+    // Then add neighbor points
+    const neighborPoints = results.slicePoints.filter(point => 
+      point.isMainPoint !== true && !point.isEndpoint
+    );
+    
+    neighborPoints.forEach(point => {
       sliceCluster.words.push({
         word: point.word,
         distance: point.distance || 0,
         isSlice: true,
-        isMainPoint: isMainPoint,
-        sliceLevel: isMainPoint ? 'main' : 'neighbor',
-        sliceIndex: point.index || index,
+        isMainPoint: false,
+        sliceLevel: 'neighbor',
+        sliceIndex: point.index || 0,
         sliceDepth: point.depth || 0,
         sliceSource: {
           fromWords: point.fromWords || [],
@@ -142,5 +171,6 @@ export const processSliceResults = (results, word1, word2) => {
     });
   }
   
+  console.log("Processed slice results:", sliceCluster);
   return sliceCluster;
 }; 

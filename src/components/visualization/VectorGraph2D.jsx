@@ -254,7 +254,17 @@ const VectorGraph2D = ({
       // Draw point
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.fillStyle = getPointColor(point.word, words, isPrimary, isContextSample, isAnalogy);
+      ctx.fillStyle = getPointColor(
+        point.word, 
+        words, 
+        isPrimary, 
+        isContextSample, 
+        isAnalogy,
+        point.isSlice,
+        point.isMainPoint,
+        point.isEndpoint,
+        point.sliceLevel
+      );
       ctx.fill();
       
       // Add highlight for selected points
@@ -279,6 +289,9 @@ const VectorGraph2D = ({
     if (rulerActive && words.length >= 2) {
       drawRulerLines(ctx, pointsRef.current);
     }
+
+    // Draw slice progression lines if slice points exist
+    drawSliceLines(ctx, pointsRef.current);
 
     // Draw analogy selection lines if in analogy mode
     if (analogyMode && selectedPoints.length > 0) {
@@ -599,105 +612,146 @@ const VectorGraph2D = ({
     });
   };
   
-  // New function to draw analogy selection lines
-  const drawAnalogySelectionLines = (ctx, points, selectedWords) => {
-    if (!points.length || selectedWords.length === 0) return;
+  // Function to draw slice progression lines showing the path through the vector space
+  const drawSliceLines = (ctx, points) => {
+    // Find slice points - these will have isSlice=true
+    const slicePoints = points.filter(point => point.isSlice === true);
     
-    console.log('Drawing analogy selection lines for words:', selectedWords);
+    // Early return if no slice points
+    if (slicePoints.length === 0) {
+      return;
+    }
     
-    // Find the selected points
-    const selectedPoints = [];
-    for (let i = 0; i < selectedWords.length; i++) {
-      const point = points.find(p => p.word === selectedWords[i]);
-      if (point) {
-        selectedPoints.push(point);
-      } else {
-        console.warn(`Could not find point for selected word: ${selectedWords[i]}`);
+    console.log('Drawing slice lines for points:', slicePoints);
+    
+    // Sort main points by depth and index to ensure correct progression
+    const mainPoints = slicePoints
+      .filter(point => point.isMainPoint === true || point.isEndpoint === true)
+      .sort((a, b) => {
+        // First sort by depth
+        if (a.sliceDepth !== b.sliceDepth) {
+          return a.sliceDepth - b.sliceDepth;
+        }
+        // Then by index if depths are the same
+        return a.sliceIndex - b.sliceIndex;
+      });
+    
+    // Draw the main progression path with a purple gradient line
+    if (mainPoints.length >= 2) {
+      // Create a linear gradient along the path
+      const firstPoint = mainPoints[0];
+      const lastPoint = mainPoints[mainPoints.length - 1];
+      const gradient = ctx.createLinearGradient(firstPoint.x, firstPoint.y, lastPoint.x, lastPoint.y);
+      
+      // Add color stops for the gradient
+      gradient.addColorStop(0, 'rgba(142, 68, 173, 1)');      // Start with deep purple
+      gradient.addColorStop(0.5, 'rgba(155, 89, 182, 0.9)');  // Middle lighter purple
+      gradient.addColorStop(1, 'rgba(142, 68, 173, 1)');      // End with deep purple
+      
+      // Connect all main points with a smooth curved line to show progression
+      ctx.beginPath();
+      ctx.moveTo(mainPoints[0].x, mainPoints[0].y);
+      
+      // Use a curved line to connect points for a smoother path
+      for (let i = 1; i < mainPoints.length; i++) {
+        const prevPoint = mainPoints[i - 1];
+        const currentPoint = mainPoints[i];
+        
+        // Draw a line segment from previous to current point
+        ctx.lineTo(currentPoint.x, currentPoint.y);
+      }
+      
+      // Style and draw the main path
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([]);  // Solid line
+      ctx.stroke();
+      
+      // Add direction arrows along the path to show progression
+      for (let i = 1; i < mainPoints.length; i++) {
+        const prevPoint = mainPoints[i - 1];
+        const currentPoint = mainPoints[i];
+        
+        // Calculate angle and midpoint for arrow placement
+        const angle = Math.atan2(currentPoint.y - prevPoint.y, currentPoint.x - prevPoint.x);
+        const midX = (prevPoint.x + currentPoint.x) / 2;
+        const midY = (prevPoint.y + currentPoint.y) / 2;
+        
+        // Draw arrow at midpoint of each segment
+        const arrowSize = 6;
+        
+        // Draw the arrow 
+        ctx.beginPath();
+        ctx.moveTo(
+          midX - Math.cos(angle - Math.PI/8) * arrowSize,
+          midY - Math.sin(angle - Math.PI/8) * arrowSize
+        );
+        ctx.lineTo(midX, midY);
+        ctx.lineTo(
+          midX - Math.cos(angle + Math.PI/8) * arrowSize,
+          midY - Math.sin(angle + Math.PI/8) * arrowSize
+        );
+        ctx.fillStyle = 'rgba(142, 68, 173, 0.9)';
+        ctx.fill();
       }
     }
     
-    // If we have at least two points (first and second selection)
-    if (selectedPoints.length >= 2) {
-      const point1 = selectedPoints[0];
-      const point2 = selectedPoints[1];
+    // Draw connections from main points to secondary neighbors (light dashed lines)
+    slicePoints.forEach(point => {
+      if (!point.isMainPoint && !point.isEndpoint && point.sliceSource && point.sliceSource.fromWords) {
+        // Get the source word that this neighbor is connected to
+        const sourceWord = point.sliceSource.fromWords[0];
+        
+        // Find the source point
+        const sourcePoint = slicePoints.find(p => p.word === sourceWord);
+        
+        if (sourcePoint) {
+          // Draw dashed line from source to neighbor
+          ctx.beginPath();
+          ctx.moveTo(sourcePoint.x, sourcePoint.y);
+          ctx.lineTo(point.x, point.y);
+          ctx.strokeStyle = 'rgba(142, 68, 173, 0.4)'; // Light purple
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 3]); // Dashed line
+          ctx.stroke();
+          ctx.setLineDash([]); // Reset to solid line
+        }
+      }
+    });
+  };
+
+  const drawAnalogySelectionLines = (ctx, points, selectedWords) => {
+    if (selectedWords.length < 2) return;
+
+    // Get the points for the selected words
+    const selectedPoints = [];
+    
+    for (const word of selectedWords) {
+      const point = points.find(p => p.word === word);
+      if (point) {
+        selectedPoints.push(point);
+      }
+    }
+    
+    // Draw lines between consecutive selected points
+    for (let i = 0; i < selectedPoints.length - 1; i++) {
+      const point1 = selectedPoints[i];
+      const point2 = selectedPoints[i + 1];
       
-      // Draw the first relationship line
       ctx.beginPath();
       ctx.moveTo(point1.x, point1.y);
       ctx.lineTo(point2.x, point2.y);
-      ctx.strokeStyle = 'rgba(255, 128, 8, 0.9)'; // Orange for selection
-      ctx.lineWidth = 2;
-      ctx.stroke();
       
-      // Add arrow to show direction
-      const angle = Math.atan2(point2.y - point1.y, point2.x - point1.x);
-      const arrowSize = 8;
-      
-      // Arrow at destination
-      const arrowX = point2.x - Math.cos(angle) * (point2.radius + 2);
-      const arrowY = point2.y - Math.sin(angle) * (point2.radius + 2);
-      
-      ctx.beginPath();
-      ctx.moveTo(
-        arrowX - Math.cos(angle - Math.PI/6) * arrowSize,
-        arrowY - Math.sin(angle - Math.PI/6) * arrowSize
-      );
-      ctx.lineTo(arrowX, arrowY);
-      ctx.lineTo(
-        arrowX - Math.cos(angle + Math.PI/6) * arrowSize,
-        arrowY - Math.sin(angle + Math.PI/6) * arrowSize
-      );
-      ctx.fillStyle = 'rgba(255, 128, 8, 0.9)';
-      ctx.fill();
-    }
-    
-    // If we have three points
-    if (selectedPoints.length >= 3) {
-      const point3 = selectedPoints[2];
-      
-      // Get any analogy result points
-      const analogyPoints = points.filter(point => point.isAnalogy);
-      
-      // Highlight the third point more prominently when waiting for results
-      if (analogyPoints.length === 0 && isSearchingAnalogy) {
-        // Add pulsing circle around the third point
-        ctx.beginPath();
-        const pulseSize = 6 + Math.sin(Date.now() / 200) * 3;
-        ctx.arc(point3.x, point3.y, point3.radius + pulseSize, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 128, 8, 0.2)';
-        ctx.fill();
+      if (analogyMode) {
+        ctx.strokeStyle = 'rgba(255, 128, 8, 0.7)'; // Orange for analogy
+      } else {
+        ctx.strokeStyle = 'rgba(66, 133, 244, 0.7)'; // Blue for regular selection
       }
       
-      // Draw lines from point3 to each analogy result
-      analogyPoints.forEach(analogyPoint => {
-        // Draw line
-        ctx.beginPath();
-        ctx.moveTo(point3.x, point3.y);
-        ctx.lineTo(analogyPoint.x, analogyPoint.y);
-        ctx.strokeStyle = 'rgba(255, 128, 8, 0.8)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        // Add arrow
-        const angle = Math.atan2(analogyPoint.y - point3.y, analogyPoint.x - point3.x);
-        const arrowSize = 8;
-        
-        const arrowX = analogyPoint.x - Math.cos(angle) * (analogyPoint.radius + 2);
-        const arrowY = analogyPoint.y - Math.sin(angle) * (analogyPoint.radius + 2);
-        
-        ctx.beginPath();
-        ctx.moveTo(
-          arrowX - Math.cos(angle - Math.PI/6) * arrowSize,
-          arrowY - Math.sin(angle - Math.PI/6) * arrowSize
-        );
-        ctx.lineTo(arrowX, arrowY);
-        ctx.lineTo(
-          arrowX - Math.cos(angle + Math.PI/6) * arrowSize,
-          arrowY - Math.sin(angle + Math.PI/6) * arrowSize
-        );
-        ctx.fillStyle = 'rgba(255, 128, 8, 0.8)';
-        ctx.fill();
-      });
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 3]); // Dashed line
+      ctx.stroke();
+      ctx.setLineDash([]); // Reset to solid line
     }
   };
   

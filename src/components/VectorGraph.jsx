@@ -124,6 +124,37 @@ const VectorGraph = ({
             console.log(`Found midpoint word ${point.word} with level ${midpointLevel}`, midpointWord);
           }
           
+          // Check if this point is part of a slice result
+          const sliceCluster = midpointWords.find(cluster => 
+            cluster.type === 'slice' && 
+            cluster.words.some(w => w.word === point.word)
+          );
+          
+          let isSlice = false;
+          let isMainPoint = false;
+          let isEndpoint = false;
+          let sliceLevel = null;
+          let sliceIndex = null;
+          let sliceDepth = null;
+          let sliceSource = null;
+          let similarity = null;
+          
+          if (sliceCluster) {
+            const sliceWord = sliceCluster.words.find(w => w.word === point.word);
+            if (sliceWord) {
+              isSlice = !!sliceWord.isSlice;
+              isMainPoint = !!sliceWord.isMainPoint;
+              isEndpoint = !!sliceWord.isEndpoint;
+              sliceLevel = sliceWord.sliceLevel || 'neighbor';
+              sliceIndex = sliceWord.sliceIndex || 0;
+              sliceDepth = sliceWord.sliceDepth || 0;
+              sliceSource = sliceWord.sliceSource || null;
+              similarity = sliceWord.similarity || null;
+              
+              console.log(`Found slice word ${point.word} with level ${sliceLevel}`, sliceWord);
+            }
+          }
+          
           return {
             ...point,
             truncatedVector: vectorMap[point.word] || `Vector for ${point.word}`,
@@ -131,7 +162,15 @@ const VectorGraph = ({
             analogySource,
             isMidpoint,
             midpointLevel,
-            midpointSource
+            midpointSource,
+            isSlice,
+            isMainPoint,
+            isEndpoint,
+            sliceLevel,
+            sliceIndex,
+            sliceDepth,
+            sliceSource,
+            similarity
           };
         });
         

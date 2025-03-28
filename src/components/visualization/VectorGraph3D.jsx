@@ -223,21 +223,27 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     
     // Process each coordinate
     coordinates.forEach(point => {
-      // Determine if this is a primary word or a related word
+      // Alternate approach for clearer gradient - use point color based on type
       const isPrimaryWord = words.includes(point.word);
+      const isContextSample = point.isContextSample === true;
+      const isAnalogy = point.isAnalogy === true;
       
-      // Get coordinates
-      const x = point.x;
-      const y = point.y;
-      const z = point.hasOwnProperty('z') ? point.z : 0; // Use z if available, otherwise 0
-      
-      // Get color for the point
-      const colorHex = getPointColor(point.word, words, isPrimaryWord);
+      const colorHex = getPointColor(
+        point.word, 
+        words, 
+        isPrimaryWord, 
+        isContextSample, 
+        isAnalogy,
+        point.isSlice,
+        point.isMainPoint,
+        point.isEndpoint,
+        point.sliceLevel
+      );
       const color = hexToThreeColor(colorHex);
       
       // Store point info for raycasting
       pointInfos.push({
-        position: new THREE.Vector3(x, y, z),
+        position: new THREE.Vector3(point.x, point.y, point.z || 0),
         word: point.word,
         color: color,
         isPrimary: isPrimaryWord,
@@ -247,16 +253,16 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       
       // Add to appropriate arrays
       if (isPrimaryWord) {
-        primaryPointsData.push(x, y, z);
+        primaryPointsData.push(point.x, point.y, point.z || 0);
         primaryPointsColors.push(color.r, color.g, color.b);
       } else {
-        pointsData.push(x, y, z);
+        pointsData.push(point.x, point.y, point.z || 0);
         pointsColors.push(color.r, color.g, color.b);
       }
       
       // Add text label for all words, not just primary ones
       const textSprite = createTextSprite(point.word, isPrimaryWord);
-      textSprite.position.set(x, y + (isPrimaryWord ? 0.7 : 0.5), z);
+      textSprite.position.set(point.x, point.y + (isPrimaryWord ? 0.7 : 0.5), point.z || 0);
       sceneRef.current.add(textSprite);
       objectsRef.current.push(textSprite);
     });

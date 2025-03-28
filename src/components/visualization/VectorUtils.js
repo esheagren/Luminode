@@ -3,8 +3,20 @@ import * as THREE from 'three';
 // Utility functions for vector visualizations
 
 // Get color for a point based on whether it's primary or not
-export const getPointColor = (word, words, isPrimary, isContextSample, isAnalogy) => {
-  if (isAnalogy) {
+export const getPointColor = (word, words, isPrimary, isContextSample, isAnalogy, isSlice, isMainPoint, isEndpoint, sliceLevel) => {
+  // Slice points get special coloring
+  if (isSlice) {
+    if (isEndpoint) {
+      // Endpoint of a slice (start/end words)
+      return '#8E44AD'; // Deep purple for endpoints
+    } else if (isMainPoint) {
+      // Main points along the slice path
+      return '#9B59B6'; // Medium purple for main slice points
+    } else {
+      // Neighboring points of the slice
+      return 'rgba(155, 89, 182, 0.7)'; // Light purple for neighbors
+    }
+  } else if (isAnalogy) {
     // Use a distinct color for analogy results
     return '#9C27B0'; // Purple for analogy results
   } else if (isPrimary) {
