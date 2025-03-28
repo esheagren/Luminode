@@ -30,6 +30,7 @@ const ViewButton = ({ viewMode, setViewMode, isCompact = false }) => {
         title={`Switch to ${viewMode === '2D' ? '3D' : '2D'} View`}
       >
         {viewMode === '2D' ? <View3DIcon /> : <View2DIcon />}
+        <span>{viewMode === '2D' ? '3D' : '2D'}</span>
         <style jsx="true">{`
           .view-toggle-compact {
             display: flex;
@@ -43,6 +44,7 @@ const ViewButton = ({ viewMode, setViewMode, isCompact = false }) => {
             font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.15s ease;
+            gap: 0.25rem;
           }
           
           .view-toggle-compact:hover {
