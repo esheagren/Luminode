@@ -312,6 +312,14 @@ const VectorGraph2D = ({
     // Early return if we don't have enough points
     if (primaryPoints.length < 2) return;
     
+    // Extract vector function (similar to 3D version)
+    const extractVector = (vecStr) => {
+      if (typeof vecStr !== 'string') return null;
+      const matches = vecStr.match(/\[(.*?)\.\.\.]/);
+      if (!matches || !matches[1]) return null;
+      return matches[1].split(',').map(num => parseFloat(num.trim()));
+    };
+
     // Draw lines between each pair of primary points
     for (let i = 0; i < primaryPoints.length; i++) {
       for (let j = i + 1; j < primaryPoints.length; j++) {
@@ -329,7 +337,15 @@ const VectorGraph2D = ({
         ctx.setLineDash([]); // Reset to solid line
         
         // Calculate distance between points for label
-        const distance = calculateCosineSimilarity(point1, point2);
+        // Extract vectors from truncatedVector property
+        const vec1 = extractVector(point1.truncatedVector);
+        const vec2 = extractVector(point2.truncatedVector);
+        
+        // Calculate similarity only if we have valid vectors
+        let distance = null;
+        if (vec1 && vec2) {
+          distance = calculateCosineSimilarity(vec1, vec2);
+        }
         
         // Draw distance label at midpoint of line
         const midX = (point1.x + point2.x) / 2;
