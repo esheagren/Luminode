@@ -6,6 +6,8 @@ import Tools from './Tools';
 import ViewButton from './ViewButton';
 import SuggestedWords from './SuggestedWords';
 import { getApiUrl } from '../utils/environment';
+import { Link } from 'react-router-dom';
+import luminodeLogo from '../assets/luminodeLogoSmall.png';
 
 const HomePage = () => {
   const [words, setWords] = useState([]);
@@ -197,6 +199,12 @@ const HomePage = () => {
       
       <div className="main-layout">
         <div className="sidebar">
+          <div className="logo-container">
+            <Link to="/" className="logo-link">
+              <img src={luminodeLogo} alt="Luminode Logo" />
+              <span className="logo-text">Luminode</span>
+            </Link>
+          </div>
           <WordInput 
             words={words}
             setWords={setWords}
@@ -323,6 +331,39 @@ const HomePage = () => {
           display: flex;
           flex: 1;
           overflow: hidden;
+        }
+
+        .logo-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-bottom: 1rem;
+          padding: 0.5rem;
+        }
+
+        .logo-link {
+          display: flex;
+          align-items: center;
+          text-decoration: none;
+          color: #f8fafc;
+          transition: opacity 0.2s ease;
+        }
+
+        .logo-link:hover {
+          opacity: 0.9;
+        }
+
+        .logo-container img {
+          height: 40px;
+          width: auto;
+          margin-right: 10px;
+        }
+
+        .logo-text {
+          font-size: 1.4rem;
+          font-weight: 700;
+          color: #f8fafc;
+          letter-spacing: 0.5px;
         }
         
         .sidebar {

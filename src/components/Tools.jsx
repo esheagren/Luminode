@@ -7,7 +7,6 @@ import ViewButton from './ViewButton';
 import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
 import { findAnalogy } from '../utils/findAnalogy';
 import { findSlice, processSliceResults } from '../utils/sliceCalculation';
-import luminodeLogo from '../assets/luminodeLogoSmall.png';
 import './ToolbarStyles.css';
 
 // Import icons from a reliable source like Feather or include SVG directly
@@ -601,12 +600,20 @@ const Tools = ({
     <div className="tools-container">
       <div className="tools-header">
         <div className="tool-buttons">
-          <Link to="/" className="logo-link">
-            <img src={luminodeLogo} alt="Luminode" className="toolbar-logo-image" />
-            <span className="logo-text">Luminode</span>
-          </Link>
-          
-          <div className="spacer"></div>
+          <ViewButton 
+            viewMode={viewMode} 
+            setViewMode={setViewMode} 
+            isCompact={true}
+          />
+
+          <button
+            className={`icon-button ${rulerActive ? 'active' : ''}`}
+            onClick={() => setRulerActive(!rulerActive)}
+            title="Measure distances between vectors using cosine similarity"
+          >
+            <RulerIcon />
+            <span>Measure</span>
+          </button>
           
           <button
             className={`icon-button ${activeTab === 'midpoint' ? 'active' : ''} ${selectionMode ? 'selection-active' : ''}`}
@@ -638,8 +645,6 @@ const Tools = ({
             <span>{sliceMode ? `Slice (${selectedPoints.length}/2)` : "Slice"}</span>
           </button>
           
-          <div className="spacer"></div>
-          
           <button
             className="icon-button reset-button"
             onClick={handleReset}
@@ -650,25 +655,12 @@ const Tools = ({
             <span>Reset</span>
           </button>
           
-          <button
-            className={`icon-button ${rulerActive ? 'active' : ''}`}
-            onClick={() => setRulerActive(!rulerActive)}
-            title="Measure distances between vectors using cosine similarity"
-          >
-            <RulerIcon />
-            <span>Measure</span>
-          </button>
+          <div className="spacer"></div>
           
           <Link to="/about" className="icon-button learn-button">
             <BookIcon />
             <span>Learn</span>
           </Link>
-          
-          <ViewButton 
-            viewMode={viewMode} 
-            setViewMode={setViewMode} 
-            isCompact={true}
-          />
         </div>
       </div>
       
