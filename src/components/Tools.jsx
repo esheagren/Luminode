@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import MidpointSelection from './MidpointSelection';
 import AnalogySelection from './AnalogySelection';
 import SliceSelection from './SliceSelection';
@@ -6,9 +7,18 @@ import ViewButton from './ViewButton';
 import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
 import { findAnalogy } from '../utils/findAnalogy';
 import { findSlice, processSliceResults } from '../utils/sliceCalculation';
+import luminodeLogo from '../assets/luminodeLogoSmall.png';
 import './ToolbarStyles.css';
 
 // Import icons from a reliable source like Feather or include SVG directly
+// Book icon for Learn button
+const BookIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+  </svg>
+);
+
 const MidpointIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10"></circle>
@@ -591,6 +601,13 @@ const Tools = ({
     <div className="tools-container">
       <div className="tools-header">
         <div className="tool-buttons">
+          <Link to="/" className="logo-link">
+            <img src={luminodeLogo} alt="Luminode" className="toolbar-logo-image" />
+            <span className="logo-text">Luminode</span>
+          </Link>
+          
+          <div className="spacer"></div>
+          
           <button
             className={`icon-button ${activeTab === 'midpoint' ? 'active' : ''} ${selectionMode ? 'selection-active' : ''}`}
             onClick={() => handleTabClick('midpoint')}
@@ -642,6 +659,11 @@ const Tools = ({
             <span>Measure</span>
           </button>
           
+          <Link to="/about" className="icon-button learn-button">
+            <BookIcon />
+            <span>Learn</span>
+          </Link>
+          
           <ViewButton 
             viewMode={viewMode} 
             setViewMode={setViewMode} 
@@ -665,7 +687,7 @@ const Tools = ({
         }
         
         .tools-header {
-          padding: 0.25rem;
+          padding: 0.15rem 0.25rem;
           border-bottom: 1px solid #222;
         }
         
@@ -676,6 +698,35 @@ const Tools = ({
           gap: 0.25rem;
         }
         
+        .logo-link {
+          display: flex;
+          align-items: center;
+          text-decoration: none;
+          color: #f8fafc;
+          font-weight: 600;
+          font-size: 1rem;
+          letter-spacing: 0.3px;
+          padding: 0.15rem 0.25rem;
+          border-radius: 4px;
+          transition: all 0.15s ease;
+          margin-right: 0.5rem;
+        }
+        
+        .logo-link:hover {
+          background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .toolbar-logo-image {
+          height: 20px;
+          width: auto;
+          margin-right: 6px;
+        }
+        
+        .logo-text {
+          white-space: nowrap;
+          font-size: 0.9rem;
+        }
+        
         .icon-button {
           display: flex;
           align-items: center;
@@ -683,9 +734,9 @@ const Tools = ({
           background: transparent;
           color: #ccc;
           border: none;
-          padding: 0.5rem 0.75rem;
+          padding: 0.3rem 0.5rem;
           border-radius: 4px;
-          font-size: 0.85rem;
+          font-size: 0.8rem;
           cursor: pointer;
           transition: all 0.15s ease;
         }
@@ -693,6 +744,19 @@ const Tools = ({
         .icon-button:hover {
           background: rgba(255, 255, 255, 0.05);
           color: white;
+        }
+        
+        .learn-button {
+          color: #FF9D42;
+        }
+        
+        .learn-button:hover {
+          background: rgba(255, 157, 66, 0.1);
+          color: #FFC837;
+        }
+        
+        .learn-button svg {
+          stroke: currentColor;
         }
         
         .icon-button.active {

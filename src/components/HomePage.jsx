@@ -13,7 +13,7 @@ const HomePage = () => {
   const [relatedClusters, setRelatedClusters] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [numNeighbors, setNumNeighbors] = useState(5); // Default to 5 neighbors
+  const [numNeighbors] = useState(5); // Default to 5 neighbors
   const [viewMode, setViewMode] = useState('2D'); // Default to 2D view
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [rulerActive, setRulerActive] = useState(false);
@@ -411,6 +411,7 @@ const HomePage = () => {
         .tools-bar {
           padding: 0;
           background-color: #0f0f10;
+          margin-bottom: 10px;
         }
         
         .graph-area {

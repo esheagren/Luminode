@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import NavBar from './components/NavBar.jsx'
 import HomePage from './components/HomePage.jsx'
 import AboutPage from './components/about/AboutPage.jsx'
 import Footer from './components/Footer.jsx'
@@ -10,7 +9,6 @@ function App() {
   return (
     <Router>
       <div className="app-wrapper">
-        <NavBar />
         <div className="app-container">
           <div className="animated-background">
             <div className="orb orb1"></div>

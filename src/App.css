@@ -18,6 +18,10 @@ body {
   height: 100vh;
   width: 100%;
   overflow: hidden;
+  flex: 1;
+  position: relative;
+  overflow-x: hidden;
+  padding-top: 10px;
 }
 
 /* Header */
@@ -38,10 +42,11 @@ body {
 
 /* Main layout - Desmos style */
 .main-layout {
-  display: flex;
-  flex: 1;
-  height: calc(100vh - 50px);
-  overflow: hidden;
+  position: relative;
+  z-index: 10;
+  min-height: calc(100vh - 60px); /* Removed navbar height adjustment, only account for footer */
+  padding-top: 0.5rem;
+  padding-bottom: 1rem;
 }
 
 /* HomePage component layout */
@@ -434,17 +439,4 @@ input:checked + .toggle-slider:before {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
-
-.app-container {
-  flex: 1;
-  position: relative;
-  overflow-x: hidden;
-}
-
-.main-layout {
-  position: relative;
-  z-index: 10;
-  min-height: calc(100vh - 60px - 80px); /* Adjust based on navbar and footer heights */
-  padding-bottom: 2rem;
 }
