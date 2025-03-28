@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import MidpointSelection from './MidpointSelection';
 import AnalogySelection from './AnalogySelection';
+import SliceSelection from './SliceSelection';
 import ViewButton from './ViewButton';
 import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
 import { findAnalogy } from '../utils/findAnalogy';
+import { findSlice, processSliceResults } from '../utils/sliceCalculation';
 import './ToolbarStyles.css';
 
 // Import icons from a reliable source like Feather or include SVG directly
@@ -21,6 +23,16 @@ const AnalogyIcon = () => (
     <path d="M10 13a2.85 2.85 0 1 1 0 5.7"></path>
     <line x1="10" y1="7" x2="17" y2="7"></line>
     <line x1="7" y1="13" x2="13" y2="13"></line>
+  </svg>
+);
+
+const SliceIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16.5 2.5l-11 19"></path>
+    <path d="M3 15a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
+    <path d="M16 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
+    <path d="M8 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
+    <path d="M20 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
   </svg>
 );
 
@@ -63,7 +75,9 @@ const Tools = ({
   setAnalogyStep,
   isSearchingAnalogy,
   setIsSearchingAnalogy,
-  setWords
+  setWords,
+  sliceMode,
+  setSliceMode
 }) => {
   const [activeTab, setActiveTab] = useState('midpoint');
   const [showContent, setShowContent] = useState(true);
@@ -81,17 +95,21 @@ const Tools = ({
     console.log(`Tab clicked: ${tab}`, { 
       currentActiveTab: activeTab, 
       selectionMode, 
-      analogyMode 
+      analogyMode,
+      sliceMode 
     });
     
     if (tab === activeTab) {
-      // If clicking on midpoint tab when already active, toggle selection mode
+      // If clicking on tab when already active, toggle appropriate mode
       if (tab === 'midpoint') {
         console.log('Toggling midpoint selection mode');
         toggleMidpointSelectionMode();
       } else if (tab === 'analogy') {
         console.log('Toggling analogy mode');
         toggleAnalogyMode();
+      } else if (tab === 'slice') {
+        console.log('Toggling slice mode');
+        toggleSliceMode();
       } else {
         setShowContent(!showContent);
       }
@@ -115,6 +133,13 @@ const Tools = ({
         setAnalogyStep(0);
         setSelectedPoints([]);
       }
+
+      // Cancel slice mode when switching away from slice tab
+      if (sliceMode && tab !== 'slice') {
+        console.log('Canceling slice mode due to tab switch');
+        setSliceMode(false);
+        setSelectedPoints([]);
+      }
       
       // Activate the appropriate mode for the tab
       if (tab === 'analogy' && !analogyMode) {
@@ -123,6 +148,9 @@ const Tools = ({
       } else if (tab === 'midpoint' && !selectionMode) {
         console.log('Activating midpoint selection mode on tab switch');
         toggleMidpointSelectionMode();
+      } else if (tab === 'slice' && !sliceMode) {
+        console.log('Activating slice mode on tab switch');
+        toggleSliceMode();
       }
     }
   };
@@ -133,8 +161,9 @@ const Tools = ({
       setSelectionMode(false);
       setSelectedPoints([]);
     } else {
-      // Ensure analogy mode is off
+      // Ensure other modes are off
       setAnalogyMode(false);
+      setSliceMode(false);
       // Turn on midpoint selection mode
       setSelectionMode(true);
     }
@@ -149,9 +178,10 @@ const Tools = ({
       setSelectedPoints([]);
       setIsSearchingAnalogy(false);
     } else {
-      // Ensure midpoint selection mode is off
+      // Ensure other modes are off
       console.log('Turning on analogy mode');
       setSelectionMode(false);
+      setSliceMode(false);
       // Turn on analogy mode
       setAnalogyMode(true);
       setAnalogyStep(0);
@@ -165,6 +195,23 @@ const Tools = ({
           selectedPoints: selectedPoints.length
         });
       }, 0);
+    }
+  };
+
+  // Toggle slice mode
+  const toggleSliceMode = () => {
+    if (sliceMode) {
+      console.log('Turning off slice mode');
+      setSliceMode(false);
+      setSelectedPoints([]);
+    } else {
+      // Ensure other modes are off
+      console.log('Turning on slice mode');
+      setSelectionMode(false);
+      setAnalogyMode(false);
+      // Turn on slice mode
+      setSliceMode(true);
+      setSelectedPoints([]);
     }
   };
   
@@ -215,6 +262,69 @@ const Tools = ({
     } catch (error) {
       console.error('Error finding midpoint:', error);
       setError(`Failed to find midpoint: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Find slice for the selected points
+  const findSliceForSelectedPoints = async () => {
+    if (selectedPoints.length !== 2) {
+      console.error('Cannot find slice: need exactly 2 words, got', selectedPoints.length);
+      setError('Please select start and end points first');
+      return;
+    }
+    
+    const [word1, word2] = selectedPoints;
+    console.log(`Finding slice between "${word1}" and "${word2}"`);
+    
+    setLoading(true);
+    
+    try {
+      console.log('Initiating slice calculation with parameters:', {
+        word1, 
+        word2, 
+        numResults: numMidpoints,
+        maxDepth: 20
+      });
+      
+      // Call the slice API
+      const results = await findSlice(word1, word2, numMidpoints, 20);
+      console.log('Slice results received:', results);
+      
+      // Process the results into visualization format
+      const sliceCluster = processSliceResults(results, word1, word2);
+      console.log('Processed slice cluster:', sliceCluster);
+      
+      // Update visualization
+      debugSetMidpointClusters([sliceCluster]);
+      
+      // Exit slice mode
+      setSliceMode(false);
+      
+    } catch (error) {
+      console.error('Error finding slice:', error);
+      
+      // Create a more user-friendly error message
+      let errorMessage = 'Failed to find slice';
+      
+      if (error.message.includes('404')) {
+        errorMessage = 'The slice API endpoint returned a 404 error. The server may need to be restarted.';
+      } else if (error.message.includes('timeout') || error.message.includes('Network Error')) {
+        errorMessage = 'Connection timed out. Please check your network and server status.';
+      } else {
+        errorMessage = `Failed to find slice: ${error.message}`;
+      }
+      
+      setError(errorMessage);
+      
+      // Log additional debugging info
+      console.debug('Slice calculation failed with details:', {
+        selectedPoints,
+        error: error.message,
+        originalError: error.originalError,
+        requestDetails: error.requestDetails
+      });
     } finally {
       setLoading(false);
     }
@@ -350,13 +460,14 @@ const Tools = ({
     console.log('Selected points updated:', {
       selectedPoints,
       selectionMode,
+      sliceMode,
       count: selectedPoints.length
     });
     
     // We no longer automatically trigger the midpoint calculation
     // This is now handled by the explicit Calculate button
     // Instead, we just log the state for debugging
-  }, [selectedPoints, selectionMode]);
+  }, [selectedPoints, selectionMode, sliceMode]);
   
   // Reset analogy selection
   const resetAnalogySelection = () => {
@@ -371,6 +482,17 @@ const Tools = ({
     setSelectedPoints([]);
     setAnalogyStep(0);
     setIsSearchingAnalogy(false);
+  };
+
+  // Reset slice selection
+  const resetSliceSelection = () => {
+    setSelectedPoints([]);
+  };
+  
+  // Cancel slice selection
+  const cancelSliceSelection = () => {
+    setSliceMode(false);
+    setSelectedPoints([]);
   };
 
   // Handler for Reset functionality
@@ -395,6 +517,12 @@ const Tools = ({
       setAnalogyStep(0);
       setSelectedPoints([]);
       setIsSearchingAnalogy(false);
+    }
+
+    // Reset slice mode
+    if (sliceMode) {
+      setSliceMode(false);
+      setSelectedPoints([]);
     }
     
     // Clear any errors
@@ -443,6 +571,18 @@ const Tools = ({
         />
       );
     }
+
+    if (sliceMode) {
+      return (
+        <SliceSelection 
+          selectedPoints={selectedPoints}
+          onReset={resetSliceSelection}
+          onCancel={cancelSliceSelection}
+          onCalculate={findSliceForSelectedPoints}
+          loading={loading}
+        />
+      );
+    }
     
     return null;
   };
@@ -454,7 +594,7 @@ const Tools = ({
           <button
             className={`icon-button ${activeTab === 'midpoint' ? 'active' : ''} ${selectionMode ? 'selection-active' : ''}`}
             onClick={() => handleTabClick('midpoint')}
-            disabled={loading || analogyMode}
+            disabled={loading || analogyMode || sliceMode}
             title={selectionMode ? "Click to cancel selection mode" : "Midpoint"}
           >
             <MidpointIcon />
@@ -464,11 +604,21 @@ const Tools = ({
           <button
             className={`icon-button ${activeTab === 'analogy' ? 'active' : ''} ${analogyMode ? 'analogy-active' : ''}`}
             onClick={() => handleTabClick('analogy')}
-            disabled={loading || selectionMode}
+            disabled={loading || selectionMode || sliceMode}
             title={analogyMode ? "Click to cancel analogy mode" : "Analogy"}
           >
             <AnalogyIcon />
             <span>{analogyMode ? `Analogy (Step ${analogyStep + 1})` : "Analogy"}</span>
+          </button>
+
+          <button
+            className={`icon-button ${activeTab === 'slice' ? 'active' : ''} ${sliceMode ? 'slice-active' : ''}`}
+            onClick={() => handleTabClick('slice')}
+            disabled={loading || selectionMode || analogyMode}
+            title={sliceMode ? "Click to cancel slice mode" : "Slice"}
+          >
+            <SliceIcon />
+            <span>{sliceMode ? `Slice (${selectedPoints.length}/2)` : "Slice"}</span>
           </button>
           
           <div className="spacer"></div>
@@ -562,6 +712,13 @@ const Tools = ({
           background: rgba(255, 128, 8, 0.15);
           color: #FF8008;
           box-shadow: inset 0 -2px 0 #FF8008;
+          animation: pulse 1.5s infinite;
+        }
+
+        .icon-button.slice-active {
+          background: rgba(142, 68, 173, 0.15);
+          color: #8E44AD;
+          box-shadow: inset 0 -2px 0 #8E44AD;
           animation: pulse 1.5s infinite;
         }
         

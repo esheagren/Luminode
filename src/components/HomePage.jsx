@@ -22,6 +22,7 @@ const HomePage = () => {
   const [analogyMode, setAnalogyMode] = useState(false);
   const [analogyStep, setAnalogyStep] = useState(0);
   const [isSearchingAnalogy, setIsSearchingAnalogy] = useState(false);
+  const [sliceMode, setSliceMode] = useState(false); // Add state for slice mode
   
   // Debug: Log the state functions
   console.log('HomePage component:', {
@@ -75,14 +76,15 @@ const HomePage = () => {
   
   // Handle point selection from the graph
   const handlePointSelected = (word) => {
-    if (!selectionMode && !analogyMode) {
-      console.log('Point selection ignored - not in selection or analogy mode:', word);
+    if (!selectionMode && !analogyMode && !sliceMode) {
+      console.log('Point selection ignored - not in selection, analogy, or slice mode:', word);
       return;
     }
     
     console.log('Point selected:', word, { 
       analogyMode, 
-      selectionMode, 
+      selectionMode,
+      sliceMode,
       analogyStep,
       currentSelectedPoints: selectedPoints 
     });
@@ -121,11 +123,11 @@ const HomePage = () => {
       return;
     }
     
-    if (selectionMode) {
+    if (selectionMode || sliceMode) {
       // Clear any previous errors
       if (error) setError(null);
       
-      // Midpoint selection logic
+      // Midpoint or Slice selection logic - they work the same way
       if (selectedPoints.includes(word)) {
         setSelectedPoints(selectedPoints.filter(p => p !== word));
       } else if (selectedPoints.length < 2) {
@@ -144,10 +146,11 @@ const HomePage = () => {
       setSelectedPoints([]);
     }
     
-    // Ensure analogy mode is off when selection mode is on
-    if (active && analogyMode) {
+    // Ensure other modes are off when selection mode is on
+    if (active) {
       setAnalogyMode(false);
       setAnalogyStep(0);
+      setSliceMode(false);
     }
   };
   
@@ -161,9 +164,26 @@ const HomePage = () => {
       setIsSearchingAnalogy(false);
     }
     
-    // Ensure selection mode is off when analogy mode is on
-    if (active && selectionMode) {
+    // Ensure other modes are off when analogy mode is on
+    if (active) {
       setSelectionMode(false);
+      setSliceMode(false);
+    }
+  };
+  
+  // Set slice mode
+  const setSliceSelectionMode = (active) => {
+    setSliceMode(active);
+    
+    if (!active) {
+      setSelectedPoints([]);
+    }
+    
+    // Ensure other modes are off when slice mode is on
+    if (active) {
+      setSelectionMode(false);
+      setAnalogyMode(false);
+      setAnalogyStep(0);
     }
   };
   
@@ -264,6 +284,8 @@ const HomePage = () => {
               isSearchingAnalogy={isSearchingAnalogy}
               setIsSearchingAnalogy={setSearchingAnalogy}
               setWords={setWords}
+              sliceMode={sliceMode}
+              setSliceMode={setSliceSelectionMode}
             />
           </div>
           
@@ -275,7 +297,7 @@ const HomePage = () => {
               viewMode={viewMode}
               setViewMode={setViewMode}
               rulerActive={rulerActive}
-              selectionMode={selectionMode}
+              selectionMode={selectionMode || sliceMode} // Treat slice mode similar to selection mode
               onPointSelected={handlePointSelected}
               selectedPoints={selectedPoints}
               analogyMode={analogyMode}

@@ -11,7 +11,19 @@ export default defineConfig({
         target: 'http://localhost:5001',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path
+        rewrite: (path) => path,
+        // Add detailed logging for debugging
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('Proxy error:', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log(`Proxying ${req.method} ${req.url} to ${proxyReq.path}`);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log(`Received ${proxyRes.statusCode} for ${req.method} ${req.url}`);
+          });
+        }
       }
     }
   },

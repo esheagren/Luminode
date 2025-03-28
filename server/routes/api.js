@@ -291,6 +291,57 @@ router.post('/findAnalogy', async (req, res) => {
   }
 });
 
+// Endpoint to find slice (cross-section) between two words
+router.post('/findSlice', async (req, res) => {
+  try {
+    const { 
+      word1, 
+      word2, 
+      numResults = 5, 
+      maxDepth = 20
+    } = req.body;
+    
+    // Validate input
+    if (!word1 || !word2) {
+      return res.status(400).json({ error: 'Both words are required' });
+    }
+    
+    // Check if words exist
+    const word1Exists = await vectorService.wordExists(word1);
+    const word2Exists = await vectorService.wordExists(word2);
+    
+    if (!word1Exists || !word2Exists) {
+      const message = generateResponseMessage(word1, word2, word1Exists, word2Exists);
+      return res.status(404).json({ error: message });
+    }
+    
+    // Get vectors for both words
+    const vector1 = await vectorService.getWordVector(word1);
+    const vector2 = await vectorService.getWordVector(word2);
+    
+    if (!vector1 || !vector2) {
+      return res.status(500).json({ error: 'Failed to retrieve word vectors' });
+    }
+    
+    // Calculate recursive slice through vector space
+    const sliceResults = await vectorService.findSlice(
+      word1, 
+      word2, 
+      numResults, 
+      maxDepth
+    );
+    
+    res.json({
+      message: 'Slice calculation completed successfully',
+      data: sliceResults
+    });
+    
+  } catch (error) {
+    console.error('Error finding slice:', error);
+    res.status(500).json({ error: 'Failed to find slice: ' + error.message });
+  }
+});
+
 // Helper function to generate appropriate response message
 function generateResponseMessage(word1, word2, word1Exists, word2Exists) {
   if (!word1Exists && !word2Exists) {
