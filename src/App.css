@@ -44,7 +44,7 @@ body {
 .main-layout {
   position: relative;
   z-index: 10;
-  min-height: calc(100vh - 60px); /* Removed navbar height adjustment, only account for footer */
+  min-height: calc(100vh - 80px); /* Adjusted for navbar height */
   padding-top: 0.5rem;
   padding-bottom: 1rem;
 }

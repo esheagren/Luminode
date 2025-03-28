@@ -5,9 +5,9 @@ import WordInput from './WordInput';
 import Tools from './Tools';
 import ViewButton from './ViewButton';
 import SuggestedWords from './SuggestedWords';
+import NavBar from './NavBar';
 import { getApiUrl } from '../utils/environment';
 import { Link } from 'react-router-dom';
-import luminodeLogo from '../assets/luminodeLogoSmall.png';
 
 const HomePage = () => {
   const [words, setWords] = useState([]);
@@ -196,15 +196,9 @@ const HomePage = () => {
 
   return (
     <div className="app-container">
-      
+      <NavBar />
       <div className="main-layout">
         <div className="sidebar">
-          <div className="logo-container">
-            <Link to="/" className="logo-link">
-              <img src={luminodeLogo} alt="Luminode Logo" />
-              <span className="logo-text">Luminode</span>
-            </Link>
-          </div>
           <WordInput 
             words={words}
             setWords={setWords}
@@ -320,7 +314,7 @@ const HomePage = () => {
         .app-container {
           display: flex;
           flex-direction: column;
-          height: 100vh;
+          height: calc(100vh - 80px); /* Adjusted for NavBar height */
         }
         
         .header {
