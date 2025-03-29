@@ -16,7 +16,8 @@
     "load-pinecone": "node server/scripts/loadEmbeddingsToPinecone.js",
     "start-server": "PORT=5001 node server/server.js",
     "restart-server": "pkill -f 'node server/server.js' || true && PORT=5001 node server/server.js",
-    "stop-server": "pkill -f 'node server/server.js' || true"
+    "stop-server": "pkill -f 'node server/server.js' || true",
+    "generate-embeddings": "node scripts/generateEmbeddings.js"
   },
   "dependencies": {
     "@pinecone-database/pinecone": "^5.1.1",

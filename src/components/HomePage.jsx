@@ -7,6 +7,7 @@ import ViewButton from './ViewButton';
 import SuggestedWords from './SuggestedWords';
 import { getApiUrl } from '../utils/environment';
 import { Link } from 'react-router-dom';
+import { hasPrecomputedEmbedding, createWordResult } from '../data/wordEmbeddings';
 
 const HomePage = () => {
   const [words, setWords] = useState([]);
@@ -45,7 +46,19 @@ const HomePage = () => {
       const updatedWords = [...words, word];
       setWords(updatedWords);
       
-      // Trigger API call to check the word and update visualization
+      // Check if we have a pre-computed embedding
+      if (hasPrecomputedEmbedding(word)) {
+        const wordResult = createWordResult(word);
+        setResponse(prev => ({
+          message: `Added word: ${word}`,
+          data: {
+            words: prev?.data?.words ? [...prev.data.words, wordResult] : [wordResult]
+          }
+        }));
+        return;
+      }
+      
+      // If no pre-computed embedding, fetch from API
       setLoading(true);
       setError(null);
       

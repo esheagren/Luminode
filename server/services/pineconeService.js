@@ -170,14 +170,27 @@ class PineconeService {
     try {
       await this.initialize();
       
+      console.log(`[PineconeService] Fetching vector for word: "${word}"`);
       const result = await this.namespace.fetch([word]);
+      
+      console.log(`[PineconeService] Raw Pinecone response:`, JSON.stringify(result, null, 2));
+      
       if (!result.records || !result.records[word]) {
+        console.log(`[PineconeService] No records found for word "${word}"`);
         return null;
       }
       
-      return result.records[word].values;
+      const vector = result.records[word].values;
+      console.log(`[PineconeService] Vector found for "${word}":`, {
+        length: vector.length,
+        type: typeof vector,
+        isArray: Array.isArray(vector),
+        sample: vector.slice(0, 3) // Show first 3 values
+      });
+      
+      return vector;
     } catch (error) {
-      console.error(`Error getting vector for word '${word}':`, error);
+      console.error(`[PineconeService] Error getting vector for word '${word}':`, error);
       throw error;
     }
   }
@@ -339,7 +352,7 @@ class PineconeService {
       
       // Limit number of words to process to prevent excessive memory usage
       const wordsToProcess = words.slice(0, 25); // Limit to 25 words maximum for serverless
-      console.log(`Processing ${wordsToProcess.length} words in Pinecone service`);
+      console.log(`[PineconeService] Processing ${wordsToProcess.length} words for coordinates`);
       
       // Get vectors for all words
       const vectors = [];
@@ -348,13 +361,17 @@ class PineconeService {
       // Process words sequentially to avoid memory pressure
       for (const word of wordsToProcess) {
         try {
+          console.log(`[PineconeService] Getting vector for word: "${word}"`);
           const vector = await this.getWordVector(word);
           if (vector) {
+            console.log(`[PineconeService] Got vector for "${word}" (length: ${vector.length})`);
             vectors.push(vector);
             validWords.push(word);
+          } else {
+            console.log(`[PineconeService] No vector found for "${word}"`);
           }
         } catch (err) {
-          console.error(`Error fetching vector for word "${word}":`, err.message);
+          console.error(`[PineconeService] Error fetching vector for word "${word}":`, err.message);
           // Continue with next word
         }
         
@@ -363,25 +380,25 @@ class PineconeService {
       }
       
       if (vectors.length === 0) {
-        return { words: [], coordinates: [] };
+        console.log('[PineconeService] No vectors found for any words');
+        return { words: [], coordinates: [], vectors: [] };
       }
       
       // Use PCA from mathHelpers to reduce dimensions
-      console.log(`Running PCA on ${vectors.length} vectors...`);
+      console.log(`[PineconeService] Running PCA on ${vectors.length} vectors...`);
       const { performPCA } = await import('../utils/mathHelpers.js');
       const coordinates = await performPCA(vectors, dimensions);
       
-      // Clear vector references to help GC
-      for (let i = 0; i < vectors.length; i++) {
-        vectors[i] = null;
-      }
+      console.log(`[PineconeService] Successfully generated coordinates and returning ${vectors.length} vectors`);
       
+      // Return both coordinates and vectors
       return {
         words: validWords,
-        coordinates
+        coordinates,
+        vectors // Include the vectors in the response
       };
     } catch (error) {
-      console.error('Error getting vector coordinates:', error);
+      console.error('[PineconeService] Error getting vector coordinates:', error);
       throw error;
     }
   }

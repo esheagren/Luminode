@@ -70,11 +70,19 @@ router.post('/getVectorCoordinates', async (req, res) => {
       return res.status(400).json({ error: 'Invalid words array' });
     }
     
+    console.log(`[API] Processing request for words:`, words);
+    
     // Validate dimensions
     const projectionDimensions = dimensions === 3 ? 3 : 2;
     
     // Use the vector service to get coordinates
     const result = await vectorService.getVectorCoordinates(words, projectionDimensions);
+    
+    console.log(`[API] Got result from vector service:`, {
+      numWords: result.words.length,
+      numVectors: result.vectors ? result.vectors.length : 0,
+      numCoordinates: result.coordinates ? result.coordinates.length : 0
+    });
     
     if (result.words.length === 0) {
       return res.status(404).json({ 
@@ -88,8 +96,7 @@ router.post('/getVectorCoordinates', async (req, res) => {
       const vector = result.vectors ? result.vectors[index] : null;
       const point = {
         word: word,
-        truncatedVector: vector ? `[${vector.slice(0, 5).join(', ')}...]` : undefined,
-        fullVector: vector
+        vector: vector // Include the full vector
       };
       
       // Add coordinates based on dimensions
@@ -107,6 +114,8 @@ router.post('/getVectorCoordinates', async (req, res) => {
     
     const invalidWords = words.filter(word => !result.words.includes(word));
     
+    console.log(`[API] Sending response with ${formattedResult.length} points and ${invalidWords.length} invalid words`);
+    
     res.json({
       message: `Vector coordinates calculated successfully in ${projectionDimensions}D`,
       data: formattedResult,
@@ -114,7 +123,7 @@ router.post('/getVectorCoordinates', async (req, res) => {
       invalidWords: invalidWords.length > 0 ? invalidWords : undefined
     });
   } catch (error) {
-    console.error('Error calculating vector coordinates:', error);
+    console.error('[API] Error calculating vector coordinates:', error);
     res.status(500).json({ error: 'Failed to calculate vector coordinates' });
   }
 });

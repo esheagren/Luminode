@@ -55,78 +55,43 @@ export default async function handler(req, res) {
     // Validate dimensions
     const projectionDimensions = dimensions === 3 ? 3 : 2;
     
-    // Get vectors for all words
-    const vectors = [];
-    const validWords = [];
-    const invalidWords = [];
+    // Use the vector service to get coordinates
+    const result = await vectorService.getVectorCoordinates(words, projectionDimensions);
     
-    // Process words to reduce memory pressure
-    for (const word of wordsToProcess) {
-      try {
-        const exists = await vectorService.wordExists(word);
-        if (exists) {
-          const vector = await vectorService.getWordVector(word);
-          if (vector) {
-            vectors.push(vector);
-            validWords.push(word);
-          } else {
-            invalidWords.push(word);
-          }
-        } else {
-          invalidWords.push(word);
-        }
-      } catch (wordError) {
-        console.error(`[API] Error processing word "${word}":`, wordError);
-        invalidWords.push(word);
-      }
-    }
-    
-    if (vectors.length === 0) {
+    if (result.words.length === 0) {
       return res.status(404).json({ 
         error: 'None of the provided words were found in the vocabulary',
-        invalidWords
+        invalidWords: words
       });
     }
     
-    console.log(`[API] Found ${vectors.length} valid vectors, running PCA...`);
-    
-    // Perform PCA to get coordinates
-    let coordinates;
-    try {
-      coordinates = await performPCA(vectors, projectionDimensions);
-    } catch (pcaError) {
-      console.error('[API] PCA calculation error:', pcaError);
-      return res.status(500).json({ 
-        error: 'PCA calculation failed', 
-        message: pcaError.message 
-      });
-    }
-    
-    // Combine words with their coordinates
-    const result = validWords.map((word, i) => {
-      const point = { word };
+    // Format the response
+    const formattedResult = result.words.map((word, index) => {
+      const vector = result.vectors ? result.vectors[index] : null;
+      const point = {
+        word: word,
+        truncatedVector: vector ? `[${vector.slice(0, 5).join(', ')}...]` : undefined,
+        fullVector: vector // Include the full vector
+      };
       
       // Add coordinates based on dimensions
       if (projectionDimensions === 2) {
-        point.x = coordinates[i][0];
-        point.y = coordinates[i][1];
+        point.x = result.coordinates[index][0];
+        point.y = result.coordinates[index][1];
       } else {
-        point.x = coordinates[i][0];
-        point.y = coordinates[i][1];
-        point.z = coordinates[i][2];
+        point.x = result.coordinates[index][0];
+        point.y = result.coordinates[index][1];
+        point.z = result.coordinates[index][2];
       }
       
       return point;
     });
     
-    // Help garbage collection
-    for (let i = 0; i < vectors.length; i++) {
-      vectors[i] = null;
-    }
+    const invalidWords = words.filter(word => !result.words.includes(word));
     
     return res.status(200).json({
       message: `Vector coordinates calculated successfully in ${projectionDimensions}D`,
-      data: result,
+      data: formattedResult,
       dimensions: projectionDimensions,
       invalidWords: invalidWords.length > 0 ? invalidWords : undefined
     });
