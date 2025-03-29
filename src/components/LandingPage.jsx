@@ -9,10 +9,7 @@ const LandingPage = () => {
   useEffect(() => {
     if (!containerRef.current) return;
     
-    // Set initial dimensions
     updateDimensions();
-    
-    // Add resize listener
     window.addEventListener('resize', updateDimensions);
     
     return () => {
@@ -39,46 +36,13 @@ const LandingPage = () => {
       </div>
       
       <div className="landing-content">
-        <div className="headline-container">
-          <h1 className="landing-title">Luminode</h1>
-          <h2 className="landing-tagline">Unlock the Power of Vector Space</h2>
-        </div>
-        
-        <div className="landing-description">
-          <p>Visualize complex data relationships in an intuitive, interactive environment that brings embeddings to life</p>
-        </div>
-        
-        <div className="benefits-grid">
-          <div className="benefit-item">
-            <div className="benefit-icon">🔍</div>
-            <div className="benefit-text">
-              <h3>Discover Patterns</h3>
-              <p>Identify hidden connections in your data through dynamic visualizations</p>
-            </div>
-          </div>
-          <div className="benefit-item">
-            <div className="benefit-icon">🧠</div>
-            <div className="benefit-text">
-              <h3>Interpret AI</h3>
-              <p>Understand how AI models perceive language and concepts</p>
-            </div>
-          </div>
-          <div className="benefit-item">
-            <div className="benefit-icon">⚡</div>
-            <div className="benefit-text">
-              <h3>Accelerate Research</h3>
-              <p>Fast-track your NLP and machine learning experimentation</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="landing-cta">
-          <Link to="/app" className="enter-app-button">
-            Explore Now
-          </Link>
-        </div>
+        <h1 className="landing-title">Luminode</h1>
+        <p className="landing-tagline">Explore the hidden relationships between words in a beautiful, interactive vector space</p>
+        <Link to="/app" className="enter-app-button">
+          Enter
+        </Link>
       </div>
-      
+
       <footer className="landing-footer">
         <div className="footer-links">
           <a href="https://github.com/esheagren/Luminode" target="_blank" rel="noopener noreferrer">
@@ -110,6 +74,7 @@ const LandingPage = () => {
           justify-content: center;
           position: relative;
           overflow: hidden;
+          background-color: #0f172a;
         }
         
         .animation-background {
@@ -128,167 +93,100 @@ const LandingPage = () => {
           justify-content: center;
           text-align: center;
           z-index: 10;
-          padding: 3rem;
-          border-radius: 16px;
-          backdrop-filter: blur(10px);
-          background-color: rgba(26, 26, 46, 0.5);
-          border: 1px solid rgba(255, 165, 0, 0.2);
-          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-          max-width: 850px;
-          margin: 0 auto;
-        }
-        
-        .headline-container {
-          margin-bottom: 1.5rem;
-          position: relative;
+          gap: 2rem;
+          max-width: 600px;
+          padding: 0 2rem;
         }
         
         .landing-title {
-          font-size: 4rem;
-          font-weight: 700;
-          background: linear-gradient(135deg, #f8fafc, #FFA500);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          font-size: 3.5rem;
+          font-weight: 300;
+          color: rgba(255, 255, 255, 0.8);
           margin: 0;
-          letter-spacing: 2px;
-          text-shadow: 0 2px 10px rgba(255, 165, 0, 0.2);
+          letter-spacing: 8px;
+          text-transform: uppercase;
+          font-family: 'Inter', sans-serif;
         }
-        
+
         .landing-tagline {
-          font-size: 1.5rem;
-          font-weight: 500;
-          color: #e2e8f0;
-          margin: 0.5rem 0 0;
-          letter-spacing: 0.5px;
-        }
-        
-        .landing-description {
-          font-size: 1.25rem;
-          color: #e2e8f0;
-          max-width: 85%;
-          margin-bottom: 2.5rem;
-          line-height: 1.6;
-        }
-        
-        .benefits-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1.5rem;
-          margin-bottom: 3rem;
-          width: 100%;
-        }
-        
-        .benefit-item {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 12px;
-          padding: 1.5rem;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-          border: 1px solid rgba(255, 165, 0, 0.1);
-        }
-        
-        .benefit-item:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-          background: rgba(255, 255, 255, 0.08);
-        }
-        
-        .benefit-icon {
-          font-size: 2rem;
-          margin-bottom: 1rem;
-        }
-        
-        .benefit-text h3 {
-          color: #FFA500;
-          margin: 0 0 0.5rem;
-          font-size: 1.2rem;
-        }
-        
-        .benefit-text p {
-          color: #e2e8f0;
-          font-size: 0.95rem;
-          line-height: 1.5;
+          font-size: 1.1rem;
+          font-weight: 300;
+          color: rgba(255, 255, 255, 0.6);
           margin: 0;
+          line-height: 1.6;
+          letter-spacing: 0.5px;
+          font-family: 'Inter', sans-serif;
         }
         
         .enter-app-button {
           display: inline-block;
-          padding: 1rem 3rem;
-          background: linear-gradient(135deg, #FFA500, #FF8C00);
-          color: #0f172a;
+          padding: 0.8rem 2.5rem;
+          background: transparent;
+          color: rgba(255, 255, 255, 0.8);
           text-decoration: none;
-          border-radius: 50px;
-          font-weight: 600;
-          font-size: 1.2rem;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 4px;
+          font-weight: 400;
+          font-size: 1rem;
+          letter-spacing: 2px;
           transition: all 0.3s ease;
-          box-shadow: 0 6px 15px rgba(255, 165, 0, 0.3);
-          position: relative;
-          overflow: hidden;
-        }
-        
-        .enter-app-button:before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-          transition: all 0.6s ease;
+          text-transform: uppercase;
         }
         
         .enter-app-button:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 8px 20px rgba(255, 165, 0, 0.4);
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.4);
+          color: rgba(255, 255, 255, 1);
         }
-        
-        .enter-app-button:hover:before {
-          left: 100%;
-        }
-        
+
         .landing-footer {
           position: absolute;
           bottom: 0;
           width: 100%;
-          padding: 1rem;
+          padding: 1.5rem;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background-color: rgba(26, 26, 46, 0.7);
+          background-color: rgba(15, 23, 42, 0.3);
           backdrop-filter: blur(5px);
+          z-index: 10;
         }
         
         .footer-links {
           display: flex;
-          gap: 1.5rem;
+          gap: 2rem;
         }
         
         .footer-links a {
-          color: #e2e8f0;
+          color: rgba(255, 255, 255, 0.6);
           text-decoration: none;
           font-size: 0.9rem;
+          font-weight: 300;
+          letter-spacing: 0.5px;
           transition: color 0.2s ease;
+          font-family: 'Inter', sans-serif;
         }
         
         .footer-links a:hover {
-          color: #FFA500;
+          color: rgba(255, 255, 255, 0.9);
         }
         
         .footer-animation {
           position: relative;
-          width: 120px;
-          height: 40px;
+          width: 100px;
+          height: 30px;
         }
         
         .node {
           position: absolute;
-          width: 8px;
-          height: 8px;
+          width: 4px;
+          height: 4px;
           border-radius: 50%;
-          background: #FFA500;
+          background: rgba(255, 255, 255, 0.4);
         }
         
         .node1 {
-          left: 10px;
+          left: 8px;
           top: 50%;
           transform: translateY(-50%);
         }
@@ -300,77 +198,68 @@ const LandingPage = () => {
         }
         
         .node3 {
-          right: 10px;
+          right: 8px;
           top: 50%;
           transform: translateY(-50%);
         }
         
         .connection {
           position: absolute;
-          height: 2px;
-          background-color: #FFA500;
-          opacity: 0.6;
+          height: 1px;
+          background-color: rgba(255, 255, 255, 0.2);
         }
         
         .connection1-2 {
-          left: 14px;
+          left: 10px;
           top: 50%;
-          width: 46px;
+          width: 40px;
           transform: translateY(-50%);
         }
         
         .connection2-3 {
-          left: calc(50% + 4px);
+          left: calc(50% + 2px);
           top: 50%;
-          width: 46px;
+          width: 40px;
           transform: translateY(-50%);
         }
         
         .connection1-3 {
-          left: 14px;
-          top: calc(50% + 4px);
-          width: 102px;
+          left: 10px;
+          top: calc(50% + 2px);
+          width: 90px;
           transform: translateY(-50%) rotate(8deg);
-          opacity: 0.3;
-        }
-        
-        @media (max-width: 992px) {
-          .benefits-grid {
-            grid-template-columns: repeat(1, 1fr);
-          }
-          
-          .landing-content {
-            padding: 2rem;
-            width: 90%;
-            max-width: 600px;
-          }
+          opacity: 0.15;
         }
         
         @media (max-width: 768px) {
-          .landing-content {
-            width: 90%;
-            padding: 1.5rem;
-          }
-          
           .landing-title {
-            font-size: 3rem;
+            font-size: 2.5rem;
+            letter-spacing: 6px;
           }
-          
+
           .landing-tagline {
-            font-size: 1.2rem;
-          }
-          
-          .landing-description {
             font-size: 1rem;
+            padding: 0 1rem;
           }
           
           .enter-app-button {
-            padding: 0.8rem 2rem;
-            font-size: 1.1rem;
+            padding: 0.6rem 2rem;
+            font-size: 0.9rem;
           }
-          
-          .benefit-item {
-            padding: 1.25rem;
+
+          .landing-footer {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+          }
+
+          .footer-links {
+            gap: 1.5rem;
+          }
+
+          .footer-animation {
+            width: 80px;
+            height: 25px;
           }
         }
       `}</style>

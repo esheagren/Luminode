@@ -1,23 +1,33 @@
-# VectorMind - Word Embedding Explorer
+# Luminode - Vector Database Visualization Software
 
-An application for exploring word embeddings, finding semantic relationships, and visualizing vector spaces. VectorMind now exclusively uses cloud-based Pinecone storage for word embeddings to ensure optimal performance!
+An educational application for exploring word embeddings, finding semantic relationships, and visualizing vector spaces. Luminode uses cloud-based Pinecone storage for word embeddings to ensure optimal performance!
 
 ## Features
 
 - Find similar words using nearest neighbor search
-- Calculate the midpoint between two words and find words in that semantic space
+- Calculate semantic midpoints between words to discover concepts in-between
 - Solve analogy problems (e.g., "man is to woman as king is to _____")
-- Visualize word vectors in 2D or 3D space using PCA
+- Explore semantic space using novel slicing technique
+- Visualize word vectors in 2D or 3D space using memory-efficient PCA
 - Optimized for serverless deployments with minimal memory usage
 
 ## Technical Details
 
 The application uses:
-- React for the frontend
+- React with Vite for the frontend
 - Express.js for the backend API
 - Pinecone vector database for cloud-based vector storage and search
 - GloVe word embeddings (200-dimensional vectors)
-- Memory-efficient PCA implementation for visualization
+- Memory-optimized PCA implementation for visualization
+- Three.js for 3D rendering of vector spaces
+
+### Memory Optimization Techniques
+
+- Matrix-free operations to avoid storing full covariance matrices
+- Power iteration instead of SVD for finding principal components
+- In-place vector normalization to reduce memory allocations
+- Periodic yielding to the JavaScript event loop for garbage collection
+- Explicit clearing of references to aid garbage collection
 
 ## Setup
 
@@ -96,6 +106,20 @@ For a detailed explanation of port configuration issues and solutions, see [PORT
 - `npm run stop-server` - Stop the backend server
 - `npm run load-pinecone` - Load word embeddings into Pinecone
 
+## Core Functionality
+
+### 1. Nearest Neighbor Search
+Finds semantically similar words based on vector proximity in the embedding space.
+
+### 2. Semantic Midpoint Calculation
+Discovers words that represent concepts between two input words by computing vector averages and finding words closest to this averaged vector.
+
+### 3. Analogy Search
+Implements the classic word analogy formula (e.g., king - man + woman = queen) to find words that complete analogies.
+
+### 4. Semantic Slicing
+A novel technique that enables exploration of the semantic space between two words through recursive traversal, creating a path of semantically related concepts.
+
 ## API Endpoints
 
 The application provides the following API endpoints:
@@ -103,6 +127,7 @@ The application provides the following API endpoints:
 - `POST /api/findNeighbors` - Find nearest neighbors for a word
 - `POST /api/findMidpoint` - Find the semantic midpoint between two words
 - `POST /api/findAnalogy` - Solve analogy problems
+- `POST /api/findSlice` - Find semantic path between two words
 - `POST /api/checkWord` - Check if a word exists in the embeddings
 
 ## Deployment
