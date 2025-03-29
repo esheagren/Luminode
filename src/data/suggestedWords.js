@@ -1,25 +1,52 @@
-// Array of 20 words for the suggested words section
+// Array of 200 words for the suggested words section, organized by categories
 const suggestedWords = [
-  "cat",
-  "dog",
-  "book",
-  "tree",
-  "house",
-  "river",
-  "ocean",
-  "mountain",
-  "happy",
-  "sad",
-  "love",
-  "time",
-  "money",
-  "work",
-  "play",
-  "food",
-  "water",
-  "music",
-  "friend",
-  "family"
+  // Animals
+  "cat", "dog", "lion", "tiger", "elephant", "giraffe", "zebra", "penguin", "dolphin", "whale",
+  "bear", "wolf", "fox", "deer", "rabbit", "horse", "monkey", "eagle", "owl", "snake",
+  
+  // Nature
+  "tree", "flower", "river", "ocean", "mountain", "forest", "beach", "desert", "sky", "sun",
+  "moon", "star", "cloud", "rain", "snow", "wind", "leaf", "grass", "garden", "lake",
+  
+  // Emotions & Feelings
+  "happy", "sad", "angry", "excited", "calm", "peaceful", "anxious", "love", "hate", "fear",
+  "joy", "hope", "worry", "pride", "shame", "guilt", "envy", "trust", "doubt", "courage",
+  
+  // Actions & Activities
+  "run", "walk", "jump", "swim", "fly", "dance", "sing", "play", "work", "study",
+  "read", "write", "sleep", "eat", "drink", "laugh", "cry", "think", "speak", "listen",
+  
+  // Objects & Items
+  "book", "phone", "computer", "chair", "table", "bed", "door", "window", "clock", "lamp",
+  "car", "bike", "train", "plane", "boat", "key", "bag", "pen", "paper", "mirror",
+  
+  // Places & Locations
+  "house", "home", "school", "office", "store", "park", "city", "town", "country", "street",
+  "building", "hospital", "library", "museum", "restaurant", "airport", "station", "market", "garden", "theater",
+  
+  // Time & Concepts
+  "time", "day", "night", "morning", "evening", "today", "tomorrow", "yesterday", "week", "month",
+  "year", "future", "past", "present", "moment", "forever", "never", "always", "soon", "late",
+  
+  // People & Relationships
+  "friend", "family", "mother", "father", "sister", "brother", "child", "baby", "teacher", "student",
+  "doctor", "neighbor", "partner", "colleague", "stranger", "leader", "hero", "enemy", "guest", "host",
+  
+  // Abstract Concepts
+  "truth", "beauty", "wisdom", "knowledge", "power", "freedom", "peace", "justice", "faith", "destiny",
+  "dream", "idea", "thought", "memory", "spirit", "soul", "mind", "life", "death", "change",
+  
+  // Elements & Materials
+  "water", "fire", "earth", "air", "metal", "wood", "stone", "glass", "plastic", "paper",
+  "gold", "silver", "iron", "steel", "copper", "oil", "gas", "ice", "steam", "smoke",
+  
+  // Food & Drink
+  "food", "bread", "rice", "meat", "fish", "fruit", "apple", "orange", "banana", "vegetable",
+  "water", "milk", "coffee", "tea", "juice", "wine", "cake", "sugar", "salt", "honey",
+  
+  // Arts & Entertainment
+  "music", "art", "dance", "movie", "book", "game", "sport", "story", "picture", "song",
+  "poetry", "painting", "theater", "concert", "festival", "show", "party", "fun", "play", "adventure"
 ];
 
 /**

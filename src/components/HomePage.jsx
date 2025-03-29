@@ -16,14 +16,13 @@ const HomePage = () => {
   const [error, setError] = useState(null);
   const [numNeighbors] = useState(5); // Default to 5 neighbors
   const [viewMode, setViewMode] = useState('2D'); // Default to 2D view
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [rulerActive, setRulerActive] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedPoints, setSelectedPoints] = useState([]);
   const [analogyMode, setAnalogyMode] = useState(false);
   const [analogyStep, setAnalogyStep] = useState(0);
   const [isSearchingAnalogy, setIsSearchingAnalogy] = useState(false);
-  const [sliceMode, setSliceMode] = useState(false); // Add state for slice mode
+  const [sliceMode, setSliceMode] = useState(false);
   
   // Debug: Log the state functions
   console.log('HomePage component:', {
@@ -208,15 +207,6 @@ const HomePage = () => {
             showWordTags={false}
           />
           
-          <div className="compact-suggestions-toggle">
-            <button 
-              className="small-toggle-btn" 
-              onClick={() => setShowSuggestions(!showSuggestions)}
-            >
-              {showSuggestions ? 'Hide Suggestions' : 'Show Suggestions'}
-            </button>
-          </div>
-          
           <div className="words-container">
             {words.length > 0 && (
               <div className="selected-words">
@@ -245,17 +235,13 @@ const HomePage = () => {
             </div>
           )}
           
-          <div className="sidebar-spacer"></div>
-          
-          {showSuggestions && (
-            <div className="suggestions-wrapper">
-              <SuggestedWords 
-                onWordSelect={handleWordSelect}
-                currentWords={words}
-                numSuggestions={8}
-              />
-            </div>
-          )}
+          <div className="suggestions-section">
+            <SuggestedWords 
+              onWordSelect={handleWordSelect}
+              currentWords={words}
+              numSuggestions={8}
+            />
+          </div>
         </div>
         
         <div className="content-area">
@@ -366,34 +352,14 @@ const HomePage = () => {
           display: flex;
           flex-direction: column;
           gap: 0.75rem;
-        }
-        
-        .compact-suggestions-toggle {
-          display: flex;
-          justify-content: flex-start;
-          margin-top: 0.25rem;
-          margin-bottom: 0.5rem;
-        }
-        
-        .small-toggle-btn {
-          background-color: transparent;
-          color: #FFC837;
-          border: 1px solid #FFC837;
-          border-radius: 4px;
-          padding: 0.25rem 0.75rem;
-          font-size: 0.8rem;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-        
-        .small-toggle-btn:hover {
-          background-color: rgba(255, 200, 55, 0.1);
+          height: 100%; /* Ensure full height */
         }
         
         .words-container {
-          max-height: 200px;
+          max-height: 120px;
           overflow-y: auto;
           margin-bottom: 0.5rem;
+          flex-shrink: 0; /* Prevent container from shrinking */
         }
         
         .selected-words {
@@ -424,14 +390,22 @@ const HomePage = () => {
           justify-content: center;
         }
         
-        .sidebar-spacer {
-          min-height: 20px;
-          flex-grow: 1;
+        .error-message {
+          color: #FF5757;
+          padding: 0.25rem 0.5rem;
+          background-color: rgba(255, 87, 87, 0.1);
+          border-radius: 4px;
+          margin-top: 0.25rem;
+          font-size: 0.8rem;
+          max-height: 60px;
+          overflow-y: auto;
+          flex-shrink: 0; /* Prevent error message from shrinking */
         }
         
-        .suggestions-wrapper {
-          margin-top: 0.5rem;
-          margin-bottom: 1rem;
+        .suggestions-section {
+          margin-top: auto; /* Push to bottom */
+          padding-top: 1rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .content-area {
@@ -460,17 +434,6 @@ const HomePage = () => {
           left: 0;
           width: 100%;
           height: 100%;
-        }
-        
-        .error-message {
-          color: #FF5757;
-          padding: 0.25rem 0.5rem;
-          background-color: rgba(255, 87, 87, 0.1);
-          border-radius: 4px;
-          margin-top: 0.25rem;
-          font-size: 0.8rem;
-          max-height: 60px;
-          overflow-y: auto;
         }
       `}</style>
     </div>
