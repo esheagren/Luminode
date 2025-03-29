@@ -1,35 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { getRandomSuggestions } from '../data/suggestedWords';
-import { getApiUrl } from '../utils/environment';
+import { hasPrecomputedEmbedding } from '../data/generatedEmbeddings';
 
 const SuggestedWords = ({ onWordSelect, currentWords, numSuggestions = 8 }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Generate new word suggestions
-  const refreshSuggestions = async () => {
+  const refreshSuggestions = () => {
     setLoading(true);
     
     // Get random words from our curated list
     const candidateWords = getRandomSuggestions(numSuggestions * 2, currentWords);
     
     try {
-      const validWords = [];
-      
-      // Check each word against the API to verify it exists in Pinecone
-      for (const word of candidateWords) {
-        if (validWords.length >= numSuggestions) break;
-        
-        try {
-          const response = await axios.post(getApiUrl('/api/checkWord'), { word });
-          if (response.data.data.word.exists) {
-            validWords.push(word);
-          }
-        } catch (error) {
-          console.error(`Error checking word ${word}:`, error);
-        }
-      }
+      // Filter words that have pre-computed embeddings
+      const validWords = candidateWords
+        .filter(word => hasPrecomputedEmbedding(word))
+        .slice(0, numSuggestions);
       
       setSuggestions(validWords);
     } catch (error) {

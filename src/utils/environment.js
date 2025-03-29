@@ -16,54 +16,27 @@ export const isProduction = () => {
 };
 
 /**
- * Gets the appropriate API server URL based on the current environment
- * @returns {string} The API URL
+ * Gets the API server URL based on the environment
+ * @returns {string} The base API URL
  */
-export const getApiServerUrl = () => {
-  // First check for the environment variable
+const getBaseUrl = () => {
   const envApiUrl = import.meta.env.VITE_API_URL;
   if (envApiUrl) {
-    console.log(`Using API URL from environment: ${envApiUrl}`);
     return envApiUrl;
   }
-  
-  // ALWAYS use relative URLs in production to avoid mixed content issues
-  if (isProduction()) {
-    return '';
-  }
-  
-  // Only use localhost in development and only when actually on localhost
-  if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
-    // In local development, always use port 5001 where the server should be running
-    return 'http://localhost:5001';
-  }
-  
-  // For any other case, use relative URLs for safety
-  return '';
+  return 'http://localhost:5003'; // Default fallback
 };
 
 /**
  * Gets the full URL for an API endpoint
- * @param {string} endpoint - The API endpoint path (e.g., '/api/checkWord')
+ * @param {string} path - The API endpoint path (e.g., '/api/checkWord')
  * @returns {string} The full URL to the API endpoint
  */
-export const getApiUrl = (endpoint) => {
-  const baseUrl = getApiServerUrl();
-  const isProductionEnv = isProduction();
-  
-  // Ensure endpoint starts with a slash if it doesn't already
-  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  
-  // Ensure path starts with /api/ in production
-  const apiPath = path.startsWith('/api/') ? path : 
-                 (path.startsWith('/') ? `/api${path}` : `/api/${path}`);
-  
-  // Create the full URL
-  const fullUrl = baseUrl ? `${baseUrl}${apiPath}` : apiPath;
-  
-  console.debug(`API URL constructed: ${fullUrl} (production: ${isProductionEnv})`);
-  
-  return fullUrl;
+export const getApiUrl = (path) => {
+  const baseUrl = getBaseUrl();
+  // Ensure path starts with /
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${baseUrl}${normalizedPath}`;
 };
 
 /**
@@ -74,7 +47,7 @@ export const logEnvironmentInfo = () => {
     console.log('Environment Info:');
     console.log(`- Host: ${window.location.hostname}`);
     console.log(`- Origin: ${window.location.origin}`);
-    console.log(`- API Server URL: ${getApiServerUrl()}`);
+    console.log(`- API Server URL: ${getBaseUrl()}`);
     console.log(`- Is Production: ${isProduction()}`);
     console.log(`- Example API URL: ${getApiUrl('/api/checkWord')}`);
     
@@ -101,7 +74,7 @@ export const initializeEnvironment = () => {
           host: window.location.hostname,
           origin: window.location.origin,
           production: isProduction(),
-          apiServer: getApiServerUrl()
+          apiServer: getBaseUrl()
         });
       }
     });
@@ -114,9 +87,10 @@ export const initializeEnvironment = () => {
 // Initialize environment when this module is loaded
 initializeEnvironment();
 
+// Export for convenience
 export default {
   isProduction,
-  getApiServerUrl,
+  getBaseUrl,
   getApiUrl,
   logEnvironmentInfo,
   initializeEnvironment
