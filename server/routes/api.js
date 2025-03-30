@@ -80,8 +80,8 @@ router.post('/getVectorCoordinates', async (req, res) => {
     
     console.log(`[API] Got result from vector service:`, {
       numWords: result.words.length,
-      numVectors: result.vectors ? result.vectors.length : 0,
-      numCoordinates: result.coordinates ? result.coordinates.length : 0
+      numCoordinates: result.coordinates ? result.coordinates.length : 0,
+      hasTruncated: !!result.truncatedVectors
     });
     
     if (result.words.length === 0) {
@@ -93,10 +93,10 @@ router.post('/getVectorCoordinates', async (req, res) => {
     
     // Format the response
     const formattedResult = result.words.map((word, index) => {
-      const vector = result.vectors ? result.vectors[index] : null;
+      const truncatedVector = result.truncatedVectors ? result.truncatedVectors[word] : null;
       const point = {
         word: word,
-        vector: vector // Include the full vector
+        truncatedVector: truncatedVector // Include the truncated vector string
       };
       
       // Add coordinates based on dimensions

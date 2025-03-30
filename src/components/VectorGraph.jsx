@@ -69,6 +69,9 @@ const VectorGraph = ({
           dimensions: viewMode === '3D' ? 3 : 2
         });
         
+        // The backend now includes truncatedVector directly in the response
+        // No need to make individual checkWord calls anymore
+        /*
         // Now fetch the actual vector data for each word for the tooltips
         const vectorPromises = uniqueWords.map(async (word) => {
           try {
@@ -87,9 +90,13 @@ const VectorGraph = ({
         const vectorMap = Object.fromEntries(
           vectorResults.map(item => [item.word, item.vector])
         );
+        */
         
-        // Combine coordinate data with vector data
-        const coordinatesWithVectors = response.data.data.map(point => {
+        // Combine coordinate data with cluster info (vector data is already in response.data.data)
+        const coordinatesWithDetails = response.data.data.map(point => {
+          // The point object from the API already contains:
+          // word, x, y, [z], truncatedVector
+          
           // Check if this point is part of an analogy result
           const analogyCluster = midpointWords.find(cluster => 
             cluster.type === 'analogy' && 
@@ -158,8 +165,7 @@ const VectorGraph = ({
           }
           
           return {
-            ...point,
-            truncatedVector: vectorMap[point.word] || `Vector for ${point.word}`,
+            ...point, // Includes word, x, y, [z], truncatedVector from API
             isAnalogy,
             analogySource,
             isMidpoint,
@@ -178,9 +184,9 @@ const VectorGraph = ({
         });
         
         // Debug the coordinates data after processing
-        console.log('Processed coordinates with clusters:', coordinatesWithVectors.filter(c => c.isMidpoint || c.isAnalogy));
+        console.log('Processed coordinates with clusters:', coordinatesWithDetails);
         
-        setCoordinates(coordinatesWithVectors);
+        setCoordinates(coordinatesWithDetails);
       } catch (error) {
         console.error('Error fetching vector coordinates:', error);
         setError('Failed to load visualization data. Please try again later.');

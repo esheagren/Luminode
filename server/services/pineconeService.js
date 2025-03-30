@@ -91,34 +91,6 @@ class PineconeService {
           }
         }
 
-        // Check if index exists
-        console.log(`Checking if index '${PINECONE_INDEX_NAME}' exists...`);
-        let indexesList;
-        try {
-          indexesList = await this.pinecone.listIndexes();
-          console.log(`Successfully retrieved indexes list. Found ${indexesList.indexes ? indexesList.indexes.length : 0} indexes.`);
-          
-          if (indexesList.indexes) {
-            console.log(`Available indexes: ${indexesList.indexes.map(idx => idx.name).join(', ')}`);
-          }
-        } catch (indexListError) {
-          console.error('Error listing Pinecone indexes:', indexListError);
-          console.error(`Error details: ${indexListError.message}, Type: ${indexListError.name}, Stack: ${indexListError.stack}`);
-          throw new Error(`Failed to list Pinecone indexes: ${indexListError.message}`);
-        }
-        
-        if (!indexesList || !indexesList.indexes) {
-          console.error('Invalid response from Pinecone API - indexes list is empty or malformed');
-          throw new Error('Failed to list Pinecone indexes - received invalid response');
-        }
-        
-        const indexExists = indexesList.indexes.some(idx => idx.name === PINECONE_INDEX_NAME);
-        
-        if (!indexExists) {
-          console.error(`Index '${PINECONE_INDEX_NAME}' does not exist. Please run the load-pinecone script first.`);
-          throw new Error(`Pinecone index '${PINECONE_INDEX_NAME}' not found`);
-        }
-        
         // Connect to the index and namespace
         console.log(`Connecting to index '${PINECONE_INDEX_NAME}' and namespace '${PINECONE_NAMESPACE}'...`);
         try {
@@ -425,61 +397,78 @@ class PineconeService {
     }
   }
 
-  // Get vector coordinates for visualization using PCA
+  // Get vector coordinates for visualization
   async getVectorCoordinates(words, dimensions = 2) {
     try {
       await this.initialize();
-      
-      // Limit number of words to process to prevent excessive memory usage
-      const wordsToProcess = words.slice(0, 25); // Limit to 25 words maximum for serverless
-      console.log(`[PineconeService] Processing ${wordsToProcess.length} words for coordinates`);
-      
-      // Get vectors for all words
+
+      // 1. Fetch vectors for all words
+      console.log(`[PineconeService] Fetching vectors for coordinates:`, words);
+      const vectorData = await this.namespace.fetch(words);
+      if (!vectorData || !vectorData.records) {
+        // Log the raw response if possible
+        console.error('[PineconeService] Failed to fetch vectors from Pinecone, response:', vectorData);
+        throw new Error('Failed to fetch vectors from Pinecone');
+      }
+      console.log(`[PineconeService] Raw fetch response for coordinates:`, Object.keys(vectorData.records));
+
+
+      // Filter out words that weren't found and collect vectors
+      const foundWords = [];
       const vectors = [];
-      const validWords = [];
-      
-      // Process words sequentially to avoid memory pressure
-      for (const word of wordsToProcess) {
-        try {
-          console.log(`[PineconeService] Getting vector for word: "${word}"`);
-          const vector = await this.getWordVector(word);
+      const truncatedVectorStrings = {}; // Store truncated strings here
+
+      words.forEach(word => {
+        if (vectorData.records[word]) {
+          const vector = vectorData.records[word].values;
           if (vector) {
-            console.log(`[PineconeService] Got vector for "${word}" (length: ${vector.length})`);
+            foundWords.push(word);
             vectors.push(vector);
-            validWords.push(word);
+            // Generate and store truncated vector string
+            const firstFive = vector.slice(0, 5);
+            truncatedVectorStrings[word] = `[${firstFive.join(', ')}...]`;
           } else {
-            console.log(`[PineconeService] No vector found for "${word}"`);
+             console.warn(`[PineconeService] Record found for "${word}" but no vector values present.`);
+             truncatedVectorStrings[word] = null; // Handle case where vector might be missing unexpectedly
           }
-        } catch (err) {
-          console.error(`[PineconeService] Error fetching vector for word "${word}":`, err.message);
-          // Continue with next word
+        } else {
+          console.warn(`[PineconeService] Word "${word}" not found in fetched records.`);
+          truncatedVectorStrings[word] = null; // Mark as null if word not found
         }
-        
-        // Release control to event loop between operations
-        await new Promise(resolve => setTimeout(resolve, 0));
-      }
-      
+      });
+
+
       if (vectors.length === 0) {
-        console.log('[PineconeService] No vectors found for any words');
-        return { words: [], coordinates: [], vectors: [] };
+        console.log('[PineconeService] No valid vectors found for any requested words.');
+        return { words: [], vectors: [], coordinates: [], truncatedVectors: {} }; // No valid vectors found
       }
-      
-      // Use PCA from mathHelpers to reduce dimensions
-      console.log(`[PineconeService] Running PCA on ${vectors.length} vectors...`);
+
+      // Ensure dimension consistency
+      const vectorDimension = vectors[0].length;
+      console.log(`[PineconeService] Fetched ${vectors.length} valid vectors (out of ${words.length} requested) with dimension ${vectorDimension}`);
+
+      // 2. Perform PCA for dimensionality reduction
       const { performPCA } = await import('../utils/mathHelpers.js');
+      // Await the result of the async performPCA function
       const coordinates = await performPCA(vectors, dimensions);
-      
-      console.log(`[PineconeService] Successfully generated coordinates and returning ${vectors.length} vectors`);
-      
-      // Return both coordinates and vectors
+      console.log(`[PineconeService] PCA completed, generated ${coordinates ? coordinates.length : 'undefined/error'} coordinate sets.`);
+
+
+      // 3. Return combined data including truncated vectors
       return {
-        words: validWords,
-        coordinates,
-        vectors // Include the vectors in the response
+        words: foundWords,
+        // No longer sending full vectors: vectors: vectors,
+        coordinates: coordinates,
+        truncatedVectors: truncatedVectorStrings // Send the map of word -> truncated string
       };
+
     } catch (error) {
-      console.error('[PineconeService] Error getting vector coordinates:', error);
-      throw error;
+      console.error(`[PineconeService] Error in getVectorCoordinates for words: ${words.join(', ')}`, error);
+      // Add more detailed error logging
+      if (error.response) {
+        console.error('[PineconeService] Pinecone API Response Error:', error.response.data);
+      }
+      throw error; // Re-throw error for the route handler
     }
   }
 
