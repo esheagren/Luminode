@@ -620,17 +620,6 @@ const Tools = ({
           </button>
           
           <button
-            className={`icon-button ${activeTab === 'midpoint' ? 'active' : ''} ${selectionMode ? 'selection-active' : ''}`}
-            onClick={() => handleTabClick('midpoint')}
-            disabled={loading || analogyMode || sliceMode}
-            onMouseEnter={(e) => createToolbarTooltip('Midpoint', e)}
-            onMouseLeave={() => removeToolbarTooltip()}
-          >
-            <MidpointIcon />
-            <span>{selectionMode ? `Select words (${selectedPoints.length}/2)` : "Midpoint"}</span>
-          </button>
-          
-          <button
             className={`icon-button ${activeTab === 'analogy' ? 'active' : ''} ${analogyMode ? 'analogy-active' : ''}`}
             onClick={() => handleTabClick('analogy')}
             disabled={loading || selectionMode || sliceMode}
