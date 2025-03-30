@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     // Find midpoint
     const midpointResult = await vectorService.findMidpoint(word1, word2, numResults);
     
-    // Format response
+    // Format response - preserve the midpoint vector information
     const results = {
       primaryMidpoint: {
         word1,
@@ -71,7 +71,10 @@ export default async function handler(req, res) {
       },
       searchMode: useExactSearch ? 'exact' : 'approximate',
       secondaryMidpoints: [],
-      tertiaryMidpoints: []
+      tertiaryMidpoints: [],
+      // Add these fields from the service response
+      inputSimilarity: midpointResult.inputSimilarity,
+      midpoint: midpointResult.midpoint
     };
     
     // Include recursive midpoint searches if requested

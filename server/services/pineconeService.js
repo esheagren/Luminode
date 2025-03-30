@@ -222,14 +222,31 @@ class PineconeService {
       let retries = 0;
       let queryResponse;
       
+      // Add minimum similarity threshold (0.5 means at least 50% similar)
+      const minScore = 0.5;
+      
+      console.log(`[PineconeService] Finding vector neighbors with parameters:`, {
+        numResults,
+        excludeWords,
+        minScore,
+        vectorLength: vector.length
+      });
+      
       while (retries < MAX_RETRIES) {
         try {
           queryResponse = await this.namespace.query({
             topK: numResults + excludeWords.length, // Add extra results to account for excluded words
             includeMetadata: true,
             vector: vector,
-            filter: { "text": { "$exists": true } }
+            filter: { "text": { "$exists": true } },
+            minScore: minScore // Add minimum similarity threshold
           });
+          
+          console.log(`[PineconeService] Query response:`, {
+            totalMatches: queryResponse.matches.length,
+            scores: queryResponse.matches.map(m => m.score).join(', ')
+          });
+          
           break; // Success, exit the loop
         } catch (error) {
           retries++;
@@ -247,10 +264,17 @@ class PineconeService {
       // Filter out excluded words
       const filteredMatches = queryResponse.matches.filter(match => !excludeWords.includes(match.id));
       
+      console.log(`[PineconeService] After filtering:`, {
+        originalCount: queryResponse.matches.length,
+        filteredCount: filteredMatches.length,
+        excludedWords: excludeWords.join(', ')
+      });
+      
       // Return the top matches up to numResults
       return filteredMatches.slice(0, numResults).map(match => ({
         word: match.id,
-        score: match.score
+        score: match.score,
+        vector: match.values // Include the actual vector for debugging
       }));
     } catch (error) {
       console.error('Error finding vector neighbors:', error);
@@ -272,6 +296,8 @@ class PineconeService {
     try {
       await this.initialize();
       
+      console.log(`[PineconeService] Finding midpoint between '${word1}' and '${word2}'`);
+      
       // Get vectors for both words
       const vector1 = await this.getWordVector(word1);
       const vector2 = await this.getWordVector(word2);
@@ -280,17 +306,53 @@ class PineconeService {
         throw new Error(`One or both words not found: '${word1}', '${word2}'`);
       }
       
+      // Calculate similarity between input words
+      const { cosineSimilarity } = await import('../utils/mathHelpers.js');
+      const inputSimilarity = cosineSimilarity(vector1, vector2);
+      
+      console.log(`[PineconeService] Input words similarity: ${inputSimilarity}`);
+      
       // Calculate midpoint
       const midpoint = this.calculateMidpoint(vector1, vector2);
       
       // Find nearest neighbors to midpoint
       const neighbors = await this.findVectorNeighbors(midpoint, numResults, [word1, word2]);
       
+      // Calculate similarities between neighbors and midpoint
+      const neighborsWithSimilarities = await Promise.all(
+        neighbors.map(async (neighbor) => {
+          const neighborVector = neighbor.vector;
+          const similarityToMidpoint = cosineSimilarity(neighborVector, midpoint);
+          const similarityToWord1 = cosineSimilarity(neighborVector, vector1);
+          const similarityToWord2 = cosineSimilarity(neighborVector, vector2);
+          
+          return {
+            ...neighbor,
+            similarities: {
+              toMidpoint: similarityToMidpoint,
+              toWord1: similarityToWord1,
+              toWord2: similarityToWord2
+            }
+          };
+        })
+      );
+      
+      console.log(`[PineconeService] Found ${neighbors.length} neighbors for midpoint`);
+      neighborsWithSimilarities.forEach((neighbor, i) => {
+        console.log(`[PineconeService] Neighbor ${i + 1}: ${neighbor.word}`, {
+          similarities: neighbor.similarities
+        });
+      });
+      
       return {
         word1,
         word2,
-        midpoint: midpoint.slice(0, 5).map(v => v.toFixed(4)) + '...', // Truncated for display
-        neighbors
+        inputSimilarity,
+        midpoint: {
+          vector: midpoint,
+          truncatedView: midpoint.slice(0, 5).map(v => v.toFixed(4)) + '...' // For display
+        },
+        neighbors: neighborsWithSimilarities
       };
     } catch (error) {
       console.error(`Error finding midpoint between '${word1}' and '${word2}':`, error);

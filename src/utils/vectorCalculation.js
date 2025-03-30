@@ -83,13 +83,21 @@ export const findMidpoint = async (
  * @returns {Object} - Formatted midpoint cluster for visualization
  */
 export const processMidpointResults = (results, word1, word2, recursionDepth = 0) => {
+  // Validate results
+  if (!results) {
+    throw new Error('No results provided to process');
+  }
+
   // Process results for visualization
   const midpointCluster = {
     type: 'midpoint',
     source: {
       word1,
       word2,
-      recursionDepth
+      recursionDepth,
+      inputSimilarity: results.inputSimilarity || 0,
+      // Handle case where midpoint information might be missing
+      midpointVector: results.midpoint?.vector || null
     },
     words: []
   };
@@ -98,23 +106,30 @@ export const processMidpointResults = (results, word1, word2, recursionDepth = 0
   const primaryMidpoint = results.primaryMidpoint;
   
   // Ensure we have nearestWords in the expected format
-  if (!primaryMidpoint.nearestWords || !Array.isArray(primaryMidpoint.nearestWords)) {
+  if (!primaryMidpoint?.nearestWords || !Array.isArray(primaryMidpoint.nearestWords)) {
     throw new Error('No midpoint results found');
   }
   
   // Add each primary midpoint word to the cluster
   primaryMidpoint.nearestWords.forEach((item, index) => {
-    // Handle both score and distance field names
-    const distanceValue = item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0);
+    // Use the similarity to midpoint as the primary score
+    const distanceValue = item.similarities ? 
+      item.similarities.toMidpoint : 
+      (item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0));
     
     midpointCluster.words.push({
       word: item.word,
-      distance: distanceValue, 
+      distance: distanceValue,
       isMidpoint: true,
       midpointLevel: 'primary',
       midpointSource: {
         fromWords: [word1, word2],
-        isPrimaryResult: index === 0
+        isPrimaryResult: index === 0,
+        similarities: item.similarities || null,
+        theoreticalMidpoint: results.midpoint ? {
+          vector: results.midpoint.vector,
+          truncatedView: results.midpoint.truncatedView
+        } : null
       }
     });
   });
@@ -128,7 +143,9 @@ export const processMidpointResults = (results, word1, word2, recursionDepth = 0
       }
       
       midpoint.nearestWords.forEach((item, index) => {
-        const distanceValue = item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0);
+        const distanceValue = item.similarities ? 
+          item.similarities.toMidpoint : 
+          (item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0));
         
         midpointCluster.words.push({
           word: item.word,
@@ -137,32 +154,8 @@ export const processMidpointResults = (results, word1, word2, recursionDepth = 0
           midpointLevel: 'secondary',
           midpointSource: {
             fromWords: midpoint.endpoints || [word1, word2],
-            isPrimaryResult: index === 0
-          }
-        });
-      });
-    });
-  }
-  
-  // Add tertiary midpoints if available
-  if (results.tertiaryMidpoints && results.tertiaryMidpoints.length > 0) {
-    results.tertiaryMidpoints.forEach(midpoint => {
-      if (!midpoint.nearestWords || !Array.isArray(midpoint.nearestWords)) {
-        console.warn('Invalid tertiary midpoint structure:', midpoint);
-        return;
-      }
-      
-      midpoint.nearestWords.forEach((item, index) => {
-        const distanceValue = item.score !== undefined ? item.score : (item.distance !== undefined ? item.distance : 0);
-        
-        midpointCluster.words.push({
-          word: item.word,
-          distance: distanceValue,
-          isMidpoint: true,
-          midpointLevel: 'tertiary',
-          midpointSource: {
-            fromWords: midpoint.endpoints || [word1, word2],
-            isPrimaryResult: index === 0
+            isPrimaryResult: index === 0,
+            similarities: item.similarities || null
           }
         });
       });
