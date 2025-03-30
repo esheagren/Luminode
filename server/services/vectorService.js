@@ -120,11 +120,6 @@ class VectorService {
         // Calculate the cosine similarity between the two nodes
         const similarity = cosineSimilarity(node1.vector, node2.vector);
         
-        // If the similarity is above threshold, we're done with this pair
-        if (similarity >= similarityThreshold) {
-          continue;
-        }
-        
         // Calculate midpoint
         const midpointVector = this.calculateMidpoint(node1.vector, node2.vector);
         

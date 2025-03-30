@@ -617,148 +617,88 @@ const VectorGraph2D = ({
     // Find all slice points
     const slicePoints = points.filter(point => point.isSlice);
     
-    // If there are no slice points, return
-    if (slicePoints.length === 0) return;
+    // If there are not enough points for a path, return
+    if (slicePoints.length < 2) return;
     
-    // Separate main points and endpoints
-    const mainPoints = slicePoints.filter(point => point.isMainPoint);
+    // Separate endpoints and intermediate points
+    const startPoint = slicePoints.find(p => p.sliceIndex === 0);
+    const endPoint = slicePoints.find(p => p.sliceIndex === 1);
+    const intermediatePoints = slicePoints.filter(p => p.sliceIndex > 1);
     
-    // Sort main points by index to ensure correct path order
-    mainPoints.sort((a, b) => a.sliceIndex - b.sliceIndex);
-    
-    // Draw connections between all main points in order
-    if (mainPoints.length >= 2) {
-      ctx.beginPath();
-      ctx.moveTo(mainPoints[0].x, mainPoints[0].y);
-      
-      // Create gradient path that transitions from deep purple to lighter purple
-      const gradient = ctx.createLinearGradient(
-        mainPoints[0].x, mainPoints[0].y, 
-        mainPoints[mainPoints.length - 1].x, mainPoints[mainPoints.length - 1].y
-      );
-      gradient.addColorStop(0, '#8E44AD');    // Start with deeper purple
-      gradient.addColorStop(1, '#9B59B6');    // End with medium purple
-      
-      ctx.strokeStyle = gradient;
-      ctx.lineWidth = 2;
-      
-      // Use a curved line to connect points for a smoother path
-      for (let i = 1; i < mainPoints.length; i++) {
-        const currentPoint = mainPoints[i];
-        const previousPoint = mainPoints[i - 1];
-        
-        // Draw a line segment from previous to current point
-        ctx.lineTo(currentPoint.x, currentPoint.y);
-        
-        // Draw the similarity value if available
-        if (currentPoint.similarity !== null && currentPoint.similarity !== undefined) {
-          // Calculate midpoint for positioning the text
-          const midX = (previousPoint.x + currentPoint.x) / 2;
-          const midY = (previousPoint.y + currentPoint.y) / 2;
-          
-          // Format the similarity as percentage
-          const similarityText = `${(currentPoint.similarity * 100).toFixed(2)}%`;
-          
-          // Save context to restore later
-          ctx.save();
-          
-          // Set text properties
-          ctx.font = '10px Arial';
-          ctx.fillStyle = 'white';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          
-          // Add background for better readability
-          const textWidth = ctx.measureText(similarityText).width;
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-          ctx.fillRect(midX - textWidth / 2 - 3, midY - 7, textWidth + 6, 14);
-          
-          // Draw the text
-          ctx.fillStyle = 'white';
-          ctx.fillText(similarityText, midX, midY);
-          
-          // Restore the context
-          ctx.restore();
-        }
-      }
-      
-      ctx.stroke();
-      
-      // Add direction arrows along the path
-      for (let i = 1; i < mainPoints.length; i++) {
-        const start = mainPoints[i - 1];
-        const end = mainPoints[i];
-        
-        // Calculate direction vector
-        const dirX = end.x - start.x;
-        const dirY = end.y - start.y;
-        const length = Math.sqrt(dirX * dirX + dirY * dirY);
-        
-        // Normalize direction vector
-        const normDirX = dirX / length;
-        const normDirY = dirY / length;
-        
-        // Calculate position 70% along the line
-        const arrowX = start.x + normDirX * length * 0.7;
-        const arrowY = start.y + normDirY * length * 0.7;
-        
-        // Draw arrow
-        const arrowSize = 5;
-        ctx.beginPath();
-        ctx.moveTo(arrowX, arrowY);
-        ctx.lineTo(
-          arrowX - arrowSize * (normDirX + normDirY * 0.5),
-          arrowY - arrowSize * (normDirY - normDirX * 0.5)
-        );
-        ctx.lineTo(
-          arrowX - arrowSize * (normDirX - normDirY * 0.5),
-          arrowY - arrowSize * (normDirY + normDirX * 0.5)
-        );
-        ctx.closePath();
-        ctx.fillStyle = '#9B59B6';
-        ctx.fill();
-      }
+    // We need at least the start and end points
+    if (!startPoint || !endPoint) {
+      console.error("Slice path missing start or end point.", { startPoint, endPoint });
+      return; // Cannot draw path without endpoints
     }
     
-    // For neighbor points, draw dashed lines to their source main points
-    const neighborPoints = slicePoints.filter(p => !p.isMainPoint && !p.isEndpoint);
+    // Sort ONLY the intermediate points by index
+    intermediatePoints.sort((a, b) => a.sliceIndex - b.sliceIndex);
     
-    // Only show the closest neighbor for each main point to avoid clutter
-    const uniqueNeighbors = new Map(); // Use map with main point as key
+    // Start drawing the path
+    ctx.beginPath();
+    // Move to the start point
+    ctx.moveTo(startPoint.x, startPoint.y);
     
-    neighborPoints.forEach(neighbor => {
-      if (neighbor.sliceSource && neighbor.sliceSource.fromWords) {
-        const sourceWord = neighbor.sliceSource.fromWords[0];
-        const sourcePoint = slicePoints.find(p => p.word === sourceWord);
-        
-        if (sourcePoint) {
-          const existingNeighbor = uniqueNeighbors.get(sourceWord);
-          
-          // If we don't have a neighbor for this source yet, or this one is closer
-          if (!existingNeighbor || 
-             (neighbor.distance && existingNeighbor.distance && 
-              neighbor.distance < existingNeighbor.distance)) {
-            uniqueNeighbors.set(sourceWord, neighbor);
-          }
-        }
-      }
-    });
+    // Create gradient path (optional, but nice)
+    const gradient = ctx.createLinearGradient(
+      startPoint.x, startPoint.y, 
+      endPoint.x, endPoint.y
+    );
+    gradient.addColorStop(0, '#8E44AD');    // Start with deeper purple
+    gradient.addColorStop(1, '#9B59B6');    // End with medium purple
     
-    // Draw the filtered neighbors
-    uniqueNeighbors.forEach((neighbor, sourceWord) => {
-      const sourcePoint = slicePoints.find(p => p.word === sourceWord);
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 2;
+    
+    // Draw lines through all intermediate points in sorted order
+    for (const intermediatePoint of intermediatePoints) {
+      ctx.lineTo(intermediatePoint.x, intermediatePoint.y);
+    }
+    
+    // Finally, draw the line to the end point
+    ctx.lineTo(endPoint.x, endPoint.y);
+    
+    // Render the complete path
+    ctx.stroke();
+    
+    // --- Draw Arrows --- 
+    // Create the full path sequence for arrow calculation
+    const fullPath = [startPoint, ...intermediatePoints, endPoint];
+
+    // Add direction arrows along the path segments
+    for (let i = 1; i < fullPath.length; i++) {
+      const start = fullPath[i - 1];
+      const end = fullPath[i];
       
-      if (sourcePoint) {
-        // Draw dashed line to neighbor
-        ctx.beginPath();
-        ctx.setLineDash([3, 3]);
-        ctx.moveTo(sourcePoint.x, sourcePoint.y);
-        ctx.lineTo(neighbor.x, neighbor.y);
-        ctx.strokeStyle = 'rgba(155, 89, 182, 0.5)';  // Light purple for neighbors
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-    });
+      // Calculate direction vector
+      const dirX = end.x - start.x;
+      const dirY = end.y - start.y;
+      const length = Math.sqrt(dirX * dirX + dirY * dirY);
+      
+      // Normalize direction vector
+      const normDirX = dirX / length;
+      const normDirY = dirY / length;
+      
+      // Calculate position 70% along the line
+      const arrowX = start.x + normDirX * length * 0.7;
+      const arrowY = start.y + normDirY * length * 0.7;
+      
+      // Draw arrow
+      const arrowSize = 5;
+      ctx.beginPath();
+      ctx.moveTo(arrowX, arrowY);
+      ctx.lineTo(
+        arrowX - arrowSize * (normDirX + normDirY * 0.5),
+        arrowY - arrowSize * (normDirY - normDirX * 0.5)
+      );
+      ctx.lineTo(
+        arrowX - arrowSize * (normDirX - normDirY * 0.5),
+        arrowY - arrowSize * (normDirY + normDirX * 0.5)
+      );
+      ctx.closePath();
+      ctx.fillStyle = '#9B59B6';
+      ctx.fill();
+    }
   };
 
   const drawAnalogySelectionLines = (ctx, points, selectedWords) => {
