@@ -122,7 +122,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     
     // Create camera with adjusted position for normalized space
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.set(10, 10, 10); // Adjusted from 20,20,20 to match new scale
+    camera.position.set(6, 6, 6);
     camera.lookAt(0, 0, 0);
     scene.add(camera);
     
@@ -136,8 +136,8 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = false;
-    controls.minDistance = 3; // Adjusted from 5 to match new scale
-    controls.maxDistance = 25; // Adjusted from 50 to match new scale
+    controls.minDistance = 2;
+    controls.maxDistance = 100;
     controls.addEventListener('change', renderThreeScene);
     controlsRef.current = controls;
     
@@ -151,12 +151,12 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     scene.add(directionalLight);
     
     // Add grid helper with size matching normalized space
-    const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222); // Adjusted from 20,20 to match new scale
+    const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222); // Increased grid size for better reference
     scene.add(gridHelper);
     objectsRef.current.push(gridHelper);
     
     // Add axes helper with size matching normalized space
-    const axesHelper = new THREE.AxesHelper(5); // Adjusted from 10 to match new scale
+    const axesHelper = new THREE.AxesHelper(5); // Increased axes length for better reference
     scene.add(axesHelper);
     objectsRef.current.push(axesHelper);
     
@@ -236,7 +236,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     const rangeZ = maxZ - minZ || 1;
     
     // Scale factor to spread points out in 3D space
-    const scale = 5; // Reduced from 10 to 5 for more compact visualization
+    const scale = 2.5; // Reduced from 3 to 1.5 for closer point spacing
     
     // Arrays to store point data
     const pointsData = [];
@@ -368,7 +368,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     const rangeZ = maxZ - minZ || 1;
     
     // Scale factor to spread points out in 3D space
-    const scale = 5; // Keep same scale as in create3DPoints
+    const scale = 1.5; // Keep same scale as in create3DPoints
     
     // Filter to only get primary words
     const primaryPoints = coordinates.filter(point => words.includes(point.word));
