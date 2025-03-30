@@ -205,6 +205,14 @@ const HomePage = () => {
     setIsSearchingAnalogy(isSearching);
   };
 
+  const triggerMidpointSelection = () => {
+    // Ensure other modes are off
+    setAnalogyMode(false);
+    setSliceMode(false);
+    // Turn on midpoint selection mode
+    setSelectionMode(true);
+  };
+
   return (
     <div className="app-container">
       <div className="main-layout">
@@ -287,6 +295,25 @@ const HomePage = () => {
               setSliceMode={setSliceSelectionMode}
             />
           </div>
+          
+          {!analogyMode && !sliceMode && (
+            <button 
+              onClick={triggerMidpointSelection} 
+              style={{
+                position: 'absolute', 
+                top: '10px', 
+                right: '100px',
+                padding: '5px 10px',
+                background: 'rgba(52, 168, 83, 0.15)',
+                color: '#34A853',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Select Points
+            </button>
+          )}
           
           <div className="graph-area">
             <VectorGraph 
