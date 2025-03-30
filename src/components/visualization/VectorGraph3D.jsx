@@ -120,9 +120,10 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     scene.background = new THREE.Color(0x0f172a); // Dark blue background
     sceneRef.current = scene;
     
-    // Create camera
+    // Create camera with adjusted position for normalized space
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.z = 15;
+    camera.position.set(10, 10, 10); // Adjusted from 20,20,20 to match new scale
+    camera.lookAt(0, 0, 0);
     scene.add(camera);
     
     // Create renderer
@@ -135,7 +136,8 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = false;
-    controls.maxDistance = 100;
+    controls.minDistance = 3; // Adjusted from 5 to match new scale
+    controls.maxDistance = 25; // Adjusted from 50 to match new scale
     controls.addEventListener('change', renderThreeScene);
     controlsRef.current = controls;
     
@@ -148,13 +150,13 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     directionalLight.position.set(1, 1, 1);
     scene.add(directionalLight);
     
-    // Add grid helper
-    const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+    // Add grid helper with size matching normalized space
+    const gridHelper = new THREE.GridHelper(10, 10, 0x444444, 0x222222); // Adjusted from 20,20 to match new scale
     scene.add(gridHelper);
     objectsRef.current.push(gridHelper);
     
-    // Add axes helper
-    const axesHelper = new THREE.AxesHelper(5);
+    // Add axes helper with size matching normalized space
+    const axesHelper = new THREE.AxesHelper(5); // Adjusted from 10 to match new scale
     scene.add(axesHelper);
     objectsRef.current.push(axesHelper);
     
@@ -214,6 +216,28 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     
     objectsRef.current = objectsRef.current.slice(0, 5); // Keep only the first 5 objects
     
+    // Find min/max values to normalize coordinates
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+    
+    coordinates.forEach(point => {
+      minX = Math.min(minX, point.x);
+      maxX = Math.max(maxX, point.x);
+      minY = Math.min(minY, point.y);
+      maxY = Math.max(maxY, point.y);
+      minZ = Math.min(minZ, point.z || 0);
+      maxZ = Math.max(maxZ, point.z || 0);
+    });
+    
+    // Calculate ranges
+    const rangeX = maxX - minX || 1;
+    const rangeY = maxY - minY || 1;
+    const rangeZ = maxZ - minZ || 1;
+    
+    // Scale factor to spread points out in 3D space
+    const scale = 5; // Reduced from 10 to 5 for more compact visualization
+    
     // Arrays to store point data
     const pointsData = [];
     const pointsColors = [];
@@ -223,6 +247,11 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     
     // Process each coordinate
     coordinates.forEach(point => {
+      // Normalize coordinates to [-scale, scale] range
+      const normalizedX = ((point.x - minX) / rangeX * 2 - 1) * scale;
+      const normalizedY = ((point.y - minY) / rangeY * 2 - 1) * scale;
+      const normalizedZ = ((point.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+      
       // Alternate approach for clearer gradient - use point color based on type
       const isPrimaryWord = words.includes(point.word);
       const isContextSample = point.isContextSample === true;
@@ -243,7 +272,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       
       // Store point info for raycasting
       pointInfos.push({
-        position: new THREE.Vector3(point.x, point.y, point.z || 0),
+        position: new THREE.Vector3(normalizedX, normalizedY, normalizedZ),
         word: point.word,
         color: color,
         isPrimary: isPrimaryWord,
@@ -253,16 +282,16 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       
       // Add to appropriate arrays
       if (isPrimaryWord) {
-        primaryPointsData.push(point.x, point.y, point.z || 0);
+        primaryPointsData.push(normalizedX, normalizedY, normalizedZ);
         primaryPointsColors.push(color.r, color.g, color.b);
       } else {
-        pointsData.push(point.x, point.y, point.z || 0);
+        pointsData.push(normalizedX, normalizedY, normalizedZ);
         pointsColors.push(color.r, color.g, color.b);
       }
       
       // Add text label for all words, not just primary ones
       const textSprite = createTextSprite(point.word, isPrimaryWord);
-      textSprite.position.set(point.x, point.y + (isPrimaryWord ? 0.7 : 0.5), point.z || 0);
+      textSprite.position.set(normalizedX, normalizedY + (isPrimaryWord ? 0.7 : 0.5), normalizedZ);
       sceneRef.current.add(textSprite);
       objectsRef.current.push(textSprite);
     });
@@ -319,6 +348,28 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     });
     rulerLinesRef.current = [];
     
+    // Find min/max values to normalize coordinates
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+    
+    coordinates.forEach(point => {
+      minX = Math.min(minX, point.x);
+      maxX = Math.max(maxX, point.x);
+      minY = Math.min(minY, point.y);
+      maxY = Math.max(maxY, point.y);
+      minZ = Math.min(minZ, point.z || 0);
+      maxZ = Math.max(maxZ, point.z || 0);
+    });
+    
+    // Calculate ranges
+    const rangeX = maxX - minX || 1;
+    const rangeY = maxY - minY || 1;
+    const rangeZ = maxZ - minZ || 1;
+    
+    // Scale factor to spread points out in 3D space
+    const scale = 5; // Keep same scale as in create3DPoints
+    
     // Filter to only get primary words
     const primaryPoints = coordinates.filter(point => words.includes(point.word));
     
@@ -328,10 +379,19 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
         const point1 = primaryPoints[i];
         const point2 = primaryPoints[j];
         
-        // Create line geometry
+        // Normalize coordinates
+        const normalizedX1 = ((point1.x - minX) / rangeX * 2 - 1) * scale;
+        const normalizedY1 = ((point1.y - minY) / rangeY * 2 - 1) * scale;
+        const normalizedZ1 = ((point1.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+        
+        const normalizedX2 = ((point2.x - minX) / rangeX * 2 - 1) * scale;
+        const normalizedY2 = ((point2.y - minY) / rangeY * 2 - 1) * scale;
+        const normalizedZ2 = ((point2.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+        
+        // Create line geometry with normalized coordinates
         const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(point1.x, point1.y, point1.z || 0),
-          new THREE.Vector3(point2.x, point2.y, point2.z || 0)
+          new THREE.Vector3(normalizedX1, normalizedY1, normalizedZ1),
+          new THREE.Vector3(normalizedX2, normalizedY2, normalizedZ2)
         ]);
         
         // Create dashed line material
@@ -351,10 +411,10 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
         sceneRef.current.add(line);
         rulerLinesRef.current.push(line);
         
-        // Calculate midpoint for label
-        const midX = (point1.x + point2.x) / 2;
-        const midY = (point1.y + point2.y) / 2;
-        const midZ = ((point1.z || 0) + (point2.z || 0)) / 2;
+        // Calculate midpoint for label using normalized coordinates
+        const midX = (normalizedX1 + normalizedX2) / 2;
+        const midY = (normalizedY1 + normalizedY2) / 2;
+        const midZ = (normalizedZ1 + normalizedZ2) / 2;
         
         // Extract vectors for similarity calculation
         const extractVector = (vecStr) => {
