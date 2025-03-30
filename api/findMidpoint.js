@@ -91,6 +91,16 @@ export default async function handler(req, res) {
     
   } catch (error) {
     console.error('Error finding midpoint:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code,
+      response: error.response ? {
+        status: error.response.status,
+        data: error.response.data
+      } : null
+    });
     return res.status(500).json({ error: 'Failed to find midpoint: ' + error.message });
   }
 } 
