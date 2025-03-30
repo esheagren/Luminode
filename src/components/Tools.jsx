@@ -89,7 +89,7 @@ const Tools = ({
   sliceMode,
   setSliceMode
 }) => {
-  const [activeTab, setActiveTab] = useState('midpoint');
+  const [activeTab, setActiveTab] = useState('analogy');
   const [showContent, setShowContent] = useState(true);
   
   // Debug: Check the type of setMidpointClusters
@@ -111,10 +111,7 @@ const Tools = ({
     
     if (tab === activeTab) {
       // If clicking on tab when already active, toggle appropriate mode
-      if (tab === 'midpoint') {
-        console.log('Toggling midpoint selection mode');
-        toggleMidpointSelectionMode();
-      } else if (tab === 'analogy') {
+      if (tab === 'analogy') {
         console.log('Toggling analogy mode');
         toggleAnalogyMode();
       } else if (tab === 'slice') {
@@ -155,9 +152,6 @@ const Tools = ({
       if (tab === 'analogy' && !analogyMode) {
         console.log('Activating analogy mode on tab switch');
         toggleAnalogyMode();
-      } else if (tab === 'midpoint' && !selectionMode) {
-        console.log('Activating midpoint selection mode on tab switch');
-        toggleMidpointSelectionMode();
       } else if (tab === 'slice' && !sliceMode) {
         console.log('Activating slice mode on tab switch');
         toggleSliceMode();
