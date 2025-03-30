@@ -29,6 +29,8 @@ The application uses:
 - Periodic yielding to the JavaScript event loop for garbage collection
 - Explicit clearing of references to aid garbage collection
 
+test
+
 ## Setup
 
 1. Clone the repository
