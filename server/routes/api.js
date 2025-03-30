@@ -302,6 +302,7 @@ router.post('/findAnalogy', async (req, res) => {
 
 // Endpoint to find slice (cross-section) between two words
 router.post('/findSlice', async (req, res) => {
+  console.log(`[API /findSlice] Received request`); // Log entry
   try {
     const { 
       word1, 
@@ -310,43 +311,57 @@ router.post('/findSlice', async (req, res) => {
       maxDepth = 20
     } = req.body;
     
+    console.log(`[API /findSlice] Body:`, { word1, word2, numResults, maxDepth }); // Log body
+    
     // Validate input
     if (!word1 || !word2) {
+      console.warn('[API /findSlice] Validation failed: Both words required.'); // Log validation fail
       return res.status(400).json({ error: 'Both words are required' });
     }
     
     // Check if words exist
+    console.log(`[API /findSlice] Checking existence for: ${word1}, ${word2}`); // Log check step
     const word1Exists = await vectorService.wordExists(word1);
     const word2Exists = await vectorService.wordExists(word2);
+    console.log(`[API /findSlice] Existence results: ${word1}=${word1Exists}, ${word2}=${word2Exists}`); // Log check result
     
     if (!word1Exists || !word2Exists) {
       const message = generateResponseMessage(word1, word2, word1Exists, word2Exists);
+      console.warn(`[API /findSlice] Word not found: ${message}`); // Log not found
       return res.status(404).json({ error: message });
     }
     
-    // Get vectors for both words
+    // Get vectors for both words (Removed - findSlice handles this internally now)
+    /*
     const vector1 = await vectorService.getWordVector(word1);
     const vector2 = await vectorService.getWordVector(word2);
     
     if (!vector1 || !vector2) {
+      console.error('[API /findSlice] Failed to retrieve word vectors');
       return res.status(500).json({ error: 'Failed to retrieve word vectors' });
     }
+    */
     
     // Calculate recursive slice through vector space
+    console.log(`[API /findSlice] Calling vectorService.findSlice for: ${word1}, ${word2}`); // Log service call
     const sliceResults = await vectorService.findSlice(
       word1, 
       word2, 
       numResults, 
       maxDepth
     );
+    console.log(`[API /findSlice] Received results from vectorService.findSlice:`, sliceResults ? `Slice points count: ${sliceResults.slicePoints?.length}` : 'null/undefined'); // Log service result summary
     
+    console.log(`[API /findSlice] Sending success response`); // Log success send
     res.json({
       message: 'Slice calculation completed successfully',
       data: sliceResults
     });
     
   } catch (error) {
-    console.error('Error finding slice:', error);
+    // Log the detailed error
+    console.error('[API /findSlice] Error finding slice:', error);
+    console.error(`[API /findSlice] Error details: Name=${error.name}, Message=${error.message}, Stack=${error.stack}`); 
     res.status(500).json({ error: 'Failed to find slice: ' + error.message });
   }
 });

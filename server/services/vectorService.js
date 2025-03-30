@@ -57,22 +57,32 @@ class VectorService {
 
   // Find slices through vector space
   async findSlice(word1, word2, numResults = 5, maxDepth = 20, distanceThreshold = 0.99) {
+    console.log(`[Service findSlice] Starting for "${word1}" and "${word2}"`); // Log entry
     // First implementation delegates to the underlying service if available
+    // This check might be incorrect if pineconeService doesn't have findSlice
+    // Assuming we are using the fallback implementation below
+    /*
     if (this.service.findSlice) {
+      console.log(`[Service findSlice] Delegating to underlying service`);
       return await this.service.findSlice(word1, word2, numResults, maxDepth);
     }
+    */
+    console.log(`[Service findSlice] Using vectorService implementation`);
     
     // If not available in underlying service, implement it here
     try {
-      console.log(`Finding slice between "${word1}" and "${word2}"`);
+      await this.initialize(); // Ensure service is initialized
+      console.log(`[Service findSlice] Service initialized. Getting vectors...`);
       
       // Get vectors for both words
       const vector1 = await this.getWordVector(word1);
       const vector2 = await this.getWordVector(word2);
       
       if (!vector1 || !vector2) {
+        console.error(`[Service findSlice] Vector missing: ${word1}=${!!vector1}, ${word2}=${!!vector2}`);
         throw new Error(`One or both word vectors not found: '${word1}', '${word2}'`);
       }
+      console.log(`[Service findSlice] Got vectors. Vector lengths: ${vector1.length}, ${vector2.length}`);
       
       // Use cosine similarity from mathHelpers
       const { cosineSimilarity } = await import('../utils/mathHelpers.js');
@@ -105,6 +115,7 @@ class VectorService {
         path: [word2]
       });
       
+      console.log(`[Service findSlice] Initialized slicePoints with endpoints.`);
       // Start with the first pair of endpoints
       let nodePairs = [{
         node1: { word: word1, vector: vector1, depth: 0, path: [word1] },
@@ -115,22 +126,29 @@ class VectorService {
       
       // Process pairs recursively until we're done
       while (nodePairs.length > 0 && slicePoints.length < 100 && currentIndex < maxDepth + 2) {
+        const currentPairIndex = nodePairs.length;
         const { node1, node2 } = nodePairs.shift();
+        console.log(`[Service findSlice] Processing pair ${currentPairIndex}: "${node1.word}" <-> "${node2.word}" at depth ${Math.max(node1.depth, node2.depth)}`);
         
         // Calculate the cosine similarity between the two nodes
         const similarity = cosineSimilarity(node1.vector, node2.vector);
+        console.log(`[Service findSlice] Pair similarity: ${similarity.toFixed(4)}`);
         
         // Calculate midpoint
         const midpointVector = this.calculateMidpoint(node1.vector, node2.vector);
+        console.log(`[Service findSlice] Calculated midpoint vector.`);
         
         // Find nearest word to the midpoint
+        console.log(`[Service findSlice] Finding neighbors for midpoint... Excluded: ${Array.from(visited)}`);
         const midpointNeighbors = await this.findVectorNeighbors(
           midpointVector, 
           numResults, 
           Array.from(visited)
         );
+        console.log(`[Service findSlice] Found ${midpointNeighbors.length} neighbors for midpoint.`);
         
         if (midpointNeighbors.length === 0) {
+          console.log(`[Service findSlice] No valid neighbors found, skipping pair.`);
           continue;
         }
         
@@ -141,6 +159,13 @@ class VectorService {
         // Get vector for the midpoint word
         const midpointWordVector = await this.getWordVector(midpointWord);
         
+        if (!midpointWordVector) {
+           console.error(`[Service findSlice] Failed to get vector for midpoint word "${midpointWord}", skipping pair.`);
+           visited.delete(midpointWord); // Allow retry if encountered differently
+           continue;
+        }
+        console.log(`[Service findSlice] Got vector for midpoint word: "${midpointWord}"`);
+        
         // Record this midpoint
         const midpointNode = {
           word: midpointWord,
@@ -150,7 +175,6 @@ class VectorService {
           path: [...new Set([...node1.path, ...node2.path, midpointWord])]
         };
         
-        // Add this midpoint to the results
         slicePoints.push({
           word: midpointWord,
           isMainPoint: true,
@@ -160,8 +184,10 @@ class VectorService {
           path: midpointNode.path,
           similarity: similarity
         });
+        console.log(`[Service findSlice] Added main midpoint: "${midpointWord}" at index ${currentIndex - 1}`);
         
         // Add secondary neighbors
+        const addedNeighbors = [];
         midpointNeighbors.slice(1).forEach((neighbor, idx) => {
           if (!visited.has(neighbor.word)) {
             visited.add(neighbor.word);
@@ -173,11 +199,16 @@ class VectorService {
               fromWords: [midpointWord],
               path: [...midpointNode.path, neighbor.word]
             });
+            addedNeighbors.push(neighbor.word);
           }
         });
+        if(addedNeighbors.length > 0) {
+           console.log(`[Service findSlice] Added secondary neighbors: ${addedNeighbors.join(', ')} at index ${currentIndex - 1}`);
+        }
         
         // Add new pairs to explore
         if (midpointNode.depth < maxDepth) {
+          console.log(`[Service findSlice] Queueing new pairs for depth ${midpointNode.depth + 1}`);
           nodePairs.push({
             node1: node1,
             node2: midpointNode
@@ -187,8 +218,11 @@ class VectorService {
             node1: midpointNode,
             node2: node2
           });
+        } else {
+          console.log(`[Service findSlice] Max depth (${maxDepth}) reached for this branch.`);
         }
       }
+      console.log(`[Service findSlice] Loop finished. Total points: ${slicePoints.length}`);
       
       return {
         word1,
@@ -198,8 +232,12 @@ class VectorService {
         slicePoints
       };
     } catch (error) {
-      console.error(`Error finding slice between '${word1}' and '${word2}':`, error);
-      throw error;
+      console.error(`[Service findSlice] Error during slice calculation between '${word1}' and '${word2}':`, error);
+      // Log more details if available
+      if (error.response) {
+        console.error(`[Service findSlice] Error Response:`, error.response.data);
+      }
+      throw error; // Re-throw error for the route handler
     }
   }
 }
