@@ -20,11 +20,21 @@ export const isProduction = () => {
  * @returns {string} The base API URL
  */
 const getBaseUrl = () => {
+  // Check for explicit API URL from environment
   const envApiUrl = import.meta.env.VITE_API_URL;
   if (envApiUrl) {
     return envApiUrl;
   }
-  return 'http://localhost:5003'; // Default fallback
+  
+  // In browser environment, use current origin for production
+  if (typeof window !== 'undefined') {
+    if (!window.location.hostname.includes('localhost')) {
+      return window.location.origin;
+    }
+  }
+  
+  // Default fallback for local development
+  return 'http://localhost:5001';
 };
 
 /**
