@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@pinecone-database/pinecone": "^5.1.1",
+    "@reduxjs/toolkit": "^2.6.1",
     "axios": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -30,6 +31,7 @@
     "morgan": "^1.10.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-redux": "^9.2.0",
     "react-router-dom": "^7.3.0",
     "three": "^0.174.0"
   },

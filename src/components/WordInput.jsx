@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+// import axios from 'axios'; // No longer needed for checkWord here
+import { useDispatch } from 'react-redux'; // Import Redux hook
+import { fetchWordData } from '../features/wordCache/wordCacheSlice'; // Import the async thunk
 import { getApiUrl } from '../utils/environment';
 
 const WordInput = ({ 
@@ -13,8 +15,9 @@ const WordInput = ({
   showWordTags = true
 }) => {
   const [wordInput, setWordInput] = useState('');
-  const [invalidWords, setInvalidWords] = useState([]);
+  // const [invalidWords, setInvalidWords] = useState([]); // Seems unused
   const inputRef = useRef(null);
+  const dispatch = useDispatch(); // Get dispatch function
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,44 +32,48 @@ const WordInput = ({
       return;
     }
     
-    // Reset previous errors and indicate loading
+    // Reset previous errors
     setError(null);
-    setLoading(true);
+    // setLoading(true); // Loading is handled by the slice
     
-    try {
-      // Call API to check if the word exists
-      const response = await axios.post(getApiUrl('/api/checkWord'), { word });
-      const data = response.data;
-      
-      if (data.data.word.exists) {
-        // Add word to the list
-        const updatedWords = [...words, word];
-        setWords(updatedWords);
-        
-        // Store word data in response
-        setResponse(prev => ({
-          message: `Added word: ${word}`,
-          data: {
-            words: prev?.data?.words 
-              ? [...prev.data.words, data.data.word] 
-              : [data.data.word]
+    console.log(`[WordInput] Dispatching fetchWordData for: ${word}`);
+    dispatch(fetchWordData(word))
+      .unwrap() // Use unwrap to easily handle resolved/rejected state
+      .then(result => {
+        // Check existence from the thunk result
+        if (result.data.exists) {
+          // Add word to the list (managed by HomePage)
+          const updatedWords = [...words, word];
+          setWords(updatedWords);
+          
+          // Store word data in response (no longer directly setting response here)
+          // setResponse(prev => ({ ... })); 
+          
+          // Clear any existing related clusters (assuming this prop is still valid)
+          if (setRelatedClusters) {
+             setRelatedClusters([]);
           }
-        }));
-        
-        // Clear any existing related clusters
-        setRelatedClusters([]);
-        
-        // Clear input
-        setWordInput('');
-      } else {
-        setError(`"${word}" is not in our dictionary`);
-      }
-    } catch (error) {
-      console.error('Error adding word:', error);
-      setError(error.response?.data?.error || `Error adding "${word}"`);
-    } finally {
-      setLoading(false);
-    }
+          
+          // Clear input
+          setWordInput('');
+        } else {
+          // Word doesn't exist in embeddings
+          setError(`"${word}" is not in our dictionary`);
+        }
+      })
+      .catch(fetchError => {
+        // Handle error from the thunk
+        console.error('[WordInput] Error adding word via thunk:', fetchError);
+        setError(fetchError.error || `Error adding "${word}"`);
+      });
+      // .finally(() => { // Loading is handled by the slice
+      //   setLoading(false);
+      // });
+
+    // Note: The original handleSubmit had logic to update visualization
+    // after removing a word. That logic seems misplaced here and was removed
+    // during previous edits or was incomplete. Removing words is handled
+    // directly in the JSX below now.
   };
 
   const handleNewWordKeyDown = (e) => {

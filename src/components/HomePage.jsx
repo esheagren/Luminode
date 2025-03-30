@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { fetchWordData } from '../features/wordCache/wordCacheSlice';
 import VectorGraph from './VectorGraph';
 import WordInput from './WordInput';
 import Tools from './Tools';
@@ -11,9 +13,7 @@ import { hasPrecomputedEmbedding, createWordResult } from '../data/wordEmbedding
 
 const HomePage = () => {
   const [words, setWords] = useState([]);
-  const [response, setResponse] = useState(null);
   const [relatedClusters, setRelatedClusters] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [numNeighbors] = useState(5); // Default to 5 neighbors
   const [viewMode, setViewMode] = useState('2D'); // Default to 2D view
@@ -24,6 +24,7 @@ const HomePage = () => {
   const [analogyStep, setAnalogyStep] = useState(0);
   const [isSearchingAnalogy, setIsSearchingAnalogy] = useState(false);
   const [sliceMode, setSliceMode] = useState(false);
+  const dispatch = useDispatch();
   
   // Debug: Log the state functions
   console.log('HomePage component:', {
@@ -48,41 +49,23 @@ const HomePage = () => {
       
       // Check if we have a pre-computed embedding
       if (hasPrecomputedEmbedding(word)) {
-        const wordResult = createWordResult(word);
-        setResponse(prev => ({
-          message: `Added word: ${word}`,
-          data: {
-            words: prev?.data?.words ? [...prev.data.words, wordResult] : [wordResult]
-          }
-        }));
         return;
       }
       
-      // If no pre-computed embedding, fetch from API
-      setLoading(true);
+      // If no pre-computed embedding, fetch via Redux thunk
       setError(null);
-      
-      axios.post(getApiUrl('/api/checkWord'), { word })
-        .then(response => {
-          const wordResult = {
-            word: word,
-            exists: response.data.data.word.exists,
-            vector: response.data.data.word.vector
-          };
-          
-          setResponse(prev => ({
-            message: `Added word: ${word}`,
-            data: {
-              words: prev?.data?.words ? [...prev.data.words, wordResult] : [wordResult]
-            }
-          }));
+
+      console.log(`[HomePage] Dispatching fetchWordData for: ${word}`);
+      dispatch(fetchWordData(word))
+        .unwrap()
+        .then((result) => {
+          if (!result.data.exists) {
+            console.warn(`Word "${word}" added but not found in embeddings.`);
+          }
         })
-        .catch(error => {
-          console.error('Error checking word:', error);
-          setError(error.response?.data?.error || 'An error occurred while processing your request');
-        })
-        .finally(() => {
-          setLoading(false);
+        .catch((fetchError) => {
+          console.error('[HomePage] Error fetching word data via thunk:', fetchError);
+          setError(fetchError.error || 'Failed to check word existence.');
         });
     }
   };
@@ -220,10 +203,10 @@ const HomePage = () => {
           <WordInput 
             words={words}
             setWords={setWords}
-            setResponse={setResponse}
-            setLoading={setLoading}
+            setResponse={setError}
+            setLoading={setError}
             setError={setError}
-            loading={loading}
+            loading={error}
             setRelatedClusters={setRelatedClusters}
             showWordTags={false}
           />
@@ -271,11 +254,10 @@ const HomePage = () => {
               words={words}
               numMidpoints={numNeighbors}
               setMidpointClusters={debugSetRelatedClusters}
-              setLoading={setLoading}
+              setLoading={setError}
               setError={setError}
-              loading={loading}
-              wordsValid={response && response.data && response.data.words && 
-                         response.data.words.some(word => word.exists)}
+              loading={error}
+              wordsValid={words.some(word => word.exists)}
               viewMode={viewMode}
               setViewMode={setViewMode}
               rulerActive={rulerActive}
