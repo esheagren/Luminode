@@ -113,8 +113,29 @@ const startServer = (port) => {
     // We're now ensuring we only use Pinecone, so this should be lightweight
     console.log('Initializing Pinecone vector service...');
     vectorService.initialize()
-      .then(() => {
+      .then(async () => {
         console.log('Vector service initialized successfully');
+        
+        // Add test for the words causing issues
+        try {
+          console.log('Testing word existence:');
+          const airportExists = await vectorService.wordExists('airport');
+          const forestExists = await vectorService.wordExists('forest');
+          console.log(`- "airport" exists: ${airportExists}`);
+          console.log(`- "forest" exists: ${forestExists}`);
+          
+          if (airportExists && forestExists) {
+            console.log('Both words exist in the database, testing midpoint calculation...');
+            try {
+              const midpoint = await vectorService.findMidpoint('airport', 'forest', 5);
+              console.log('Midpoint calculation succeeded:', midpoint.neighbors[0]);
+            } catch (midpointError) {
+              console.error('Midpoint calculation failed:', midpointError);
+            }
+          }
+        } catch (testError) {
+          console.error('Error testing word existence:', testError);
+        }
       })
       .catch(err => {
         console.error('Failed to initialize vector service:', err);

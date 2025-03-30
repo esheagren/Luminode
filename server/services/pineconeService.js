@@ -238,8 +238,7 @@ class PineconeService {
             topK: numResults + excludeWords.length, // Add extra results to account for excluded words
             includeMetadata: true,
             vector: vector,
-            filter: { "text": { "$exists": true } },
-            minScore: minScore // Add minimum similarity threshold
+            filter: { "text": { "$exists": true } }
           });
           
           console.log(`[PineconeService] Query response:`, {
@@ -299,26 +298,39 @@ class PineconeService {
       console.log(`[PineconeService] Finding midpoint between '${word1}' and '${word2}'`);
       
       // Get vectors for both words
+      console.log(`[PineconeService] Getting vector for '${word1}'...`);
       const vector1 = await this.getWordVector(word1);
+      console.log(`[PineconeService] Vector1 retrieved: ${vector1 ? 'success' : 'failed'}`);
+      
+      console.log(`[PineconeService] Getting vector for '${word2}'...`);
       const vector2 = await this.getWordVector(word2);
+      console.log(`[PineconeService] Vector2 retrieved: ${vector2 ? 'success' : 'failed'}`);
       
       if (!vector1 || !vector2) {
-        throw new Error(`One or both words not found: '${word1}', '${word2}'`);
+        const error = new Error(`One or both words not found: '${word1}' (${!!vector1}), '${word2}' (${!!vector2})`);
+        error.notFound = true;
+        throw error;
       }
       
       // Calculate similarity between input words
+      console.log(`[PineconeService] Calculating similarity between input words...`);
       const { cosineSimilarity } = await import('../utils/mathHelpers.js');
       const inputSimilarity = cosineSimilarity(vector1, vector2);
       
       console.log(`[PineconeService] Input words similarity: ${inputSimilarity}`);
       
       // Calculate midpoint
+      console.log(`[PineconeService] Calculating midpoint...`);
       const midpoint = this.calculateMidpoint(vector1, vector2);
+      console.log(`[PineconeService] Midpoint calculated successfully`);
       
       // Find nearest neighbors to midpoint
+      console.log(`[PineconeService] Finding nearest neighbors to midpoint...`);
       const neighbors = await this.findVectorNeighbors(midpoint, numResults, [word1, word2]);
+      console.log(`[PineconeService] Found ${neighbors.length} neighbors`);
       
       // Calculate similarities between neighbors and midpoint
+      console.log(`[PineconeService] Calculating similarities for neighbors...`);
       const neighborsWithSimilarities = await Promise.all(
         neighbors.map(async (neighbor) => {
           const neighborVector = neighbor.vector;
@@ -355,7 +367,13 @@ class PineconeService {
         neighbors: neighborsWithSimilarities
       };
     } catch (error) {
-      console.error(`Error finding midpoint between '${word1}' and '${word2}':`, error);
+      console.error(`[PineconeService] Error finding midpoint between '${word1}' and '${word2}':`, error);
+      console.error(`[PineconeService] Error details:`, {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        notFound: error.notFound
+      });
       throw error;
     }
   }
