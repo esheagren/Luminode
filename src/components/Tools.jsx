@@ -97,8 +97,8 @@ const Tools = ({
   sliceMode,
   setSliceMode
 }) => {
-  const [activeTab, setActiveTab] = useState('analogy');
-  const [showContent, setShowContent] = useState(true);
+  const [activeTab, setActiveTab] = useState(null);
+  const [showContent, setShowContent] = useState(false);
   const [neighborsActive, setNeighborsActive] = useState(false);
   
   // Debug: Check the type of setMidpointClusters
