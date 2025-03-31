@@ -10,7 +10,7 @@
       "maxDuration": 10
     },
     "api/getVectorCoordinates.js": {
-      "memory": 1536,
+      "memory": 1024,
       "maxDuration": 60
     },
     "api/findAnalogy.js": {
