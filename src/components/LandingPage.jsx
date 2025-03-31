@@ -100,43 +100,47 @@ const LandingPage = () => {
         
         .landing-title {
           font-size: 3.5rem;
-          font-weight: 300;
-          color: rgba(255, 255, 255, 0.8);
+          font-weight: 400;
+          color: rgba(255, 255, 255, 0.95);
           margin: 0;
           letter-spacing: 8px;
           text-transform: uppercase;
           font-family: 'Inter', sans-serif;
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
 
         .landing-tagline {
           font-size: 1.1rem;
-          font-weight: 300;
-          color: rgba(255, 255, 255, 0.6);
+          font-weight: 400;
+          color: rgba(255, 255, 255, 0.85);
           margin: 0;
           line-height: 1.6;
           letter-spacing: 0.5px;
           font-family: 'Inter', sans-serif;
+          text-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
         }
         
         .enter-app-button {
           display: inline-block;
           padding: 0.8rem 2.5rem;
           background: transparent;
-          color: rgba(255, 255, 255, 0.8);
+          color: rgba(255, 255, 255, 0.9);
           text-decoration: none;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.3);
           border-radius: 4px;
-          font-weight: 400;
+          font-weight: 500;
           font-size: 1rem;
           letter-spacing: 2px;
           transition: all 0.3s ease;
           text-transform: uppercase;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         
         .enter-app-button:hover {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(255, 255, 255, 0.4);
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 255, 255, 0.5);
           color: rgba(255, 255, 255, 1);
+          box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
         }
 
         .landing-footer {
@@ -158,17 +162,17 @@ const LandingPage = () => {
         }
         
         .footer-links a {
-          color: rgba(255, 255, 255, 0.6);
+          color: rgba(255, 255, 255, 0.75);
           text-decoration: none;
           font-size: 0.9rem;
-          font-weight: 300;
+          font-weight: 400;
           letter-spacing: 0.5px;
           transition: color 0.2s ease;
           font-family: 'Inter', sans-serif;
         }
         
         .footer-links a:hover {
-          color: rgba(255, 255, 255, 0.9);
+          color: rgba(255, 255, 255, 1);
         }
         
         .footer-animation {
