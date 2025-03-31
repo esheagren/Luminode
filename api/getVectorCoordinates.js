@@ -69,10 +69,23 @@ export default async function handler(req, res) {
     const formattedResult = result.words.map((word, index) => {
       const vector = result.vectors ? result.vectors[index] : null;
       const point = {
-        word: word,
-        truncatedVector: vector ? `[${vector.slice(0, 5).join(', ')}...]` : undefined,
-        fullVector: vector // Include the full vector
+        word: word
       };
+      
+      // Ensure we always have a consistent format for the vector data that can be used by the measurement tool
+      if (vector) {
+        // Include truncated vector in string format for visualization
+        point.truncatedVector = `[${vector.slice(0, 5).join(', ')}...]`;
+        
+        // Include a small subset of the vector for measurement calculations
+        // This reduces payload size while still allowing similarity calculations
+        point.measureVector = vector.slice(0, 10);
+        
+        // Log vector information for debugging
+        console.log(`[API] Vector for "${word}": ${point.truncatedVector} (${vector.length} dimensions)`);
+      } else {
+        console.warn(`[API] No vector available for "${word}"`);
+      }
       
       // Add coordinates based on dimensions
       if (projectionDimensions === 2) {
@@ -88,6 +101,7 @@ export default async function handler(req, res) {
     });
     
     const invalidWords = words.filter(word => !result.words.includes(word));
+    console.log(`[API] Sending response with ${formattedResult.length} points and ${invalidWords.length} invalid words`);
     
     return res.status(200).json({
       message: `Vector coordinates calculated successfully in ${projectionDimensions}D`,

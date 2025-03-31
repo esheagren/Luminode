@@ -417,15 +417,66 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
         const midZ = (normalizedZ1 + normalizedZ2) / 2;
         
         // Extract vectors for similarity calculation
-        const extractVector = (vecStr) => {
-          if (typeof vecStr !== 'string') return null;
-          const matches = vecStr.match(/\[(.*?)\.\.\.]/);
-          if (!matches || !matches[1]) return null;
-          return matches[1].split(',').map(num => parseFloat(num.trim()));
+        const extractVector = (vecStr, point) => {
+          // First try to use the measureVector if available (most accurate)
+          if (point && point.measureVector && Array.isArray(point.measureVector)) {
+            console.log('3D: Using measureVector property:', point.measureVector.length, 'elements');
+            return point.measureVector;
+          }
+          
+          // Debug information about the vector string
+          console.log('3D: Vector string to extract:', vecStr, typeof vecStr);
+          
+          if (!vecStr) {
+            console.log('3D: Missing vector string');
+            return null;
+          }
+
+          // Try different patterns to extract vector values
+          // Pattern 1: Standard format with [...] notation
+          if (typeof vecStr === 'string') {
+            let matches = vecStr.match(/\[(.*?)\.\.\.]/);
+            if (matches && matches[1]) {
+              try {
+                const values = matches[1].split(',').map(num => parseFloat(num.trim()));
+                console.log('3D: Pattern 1 extracted vector:', values.length, 'elements');
+                return values;
+              } catch (e) {
+                console.error('3D: Failed to parse vector format 1:', e);
+              }
+            }
+
+            // Pattern 2: Try to extract array content with any character separator
+            matches = vecStr.match(/\[(.*?)\]/);
+            if (matches && matches[1]) {
+              try {
+                const values = matches[1].split(/[,\s]+/).map(num => parseFloat(num.trim()));
+                console.log('3D: Pattern 2 extracted vector:', values.length, 'elements');
+                return values;
+              } catch (e) {
+                console.error('3D: Failed to parse vector format 2:', e);
+              }
+            }
+          }
+          
+          // Pattern 3: If it's already an array, use it directly
+          if (Array.isArray(vecStr)) {
+            console.log('3D: Pattern 3 using existing array:', vecStr.length, 'elements');
+            return vecStr;
+          }
+          
+          // Pattern 4: If point has a fullVector property (might be in some deployments)
+          if (point && point.fullVector && Array.isArray(point.fullVector)) {
+            console.log('3D: Pattern 4 using fullVector property:', point.fullVector.length, 'elements');
+            return point.fullVector.slice(0, 5); // Just use first few dimensions
+          }
+          
+          console.log('3D: No vector extraction patterns matched');
+          return null;
         };
         
-        const vec1 = extractVector(point1.truncatedVector);
-        const vec2 = extractVector(point2.truncatedVector);
+        const vec1 = extractVector(point1.truncatedVector, point1);
+        const vec2 = extractVector(point2.truncatedVector, point2);
         
         // Calculate similarity
         let similarityText = "N/A";

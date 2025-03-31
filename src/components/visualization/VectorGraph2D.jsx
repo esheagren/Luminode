@@ -330,12 +330,63 @@ const VectorGraph2D = ({
     // Early return if we don't have enough points
     if (primaryPoints.length < 2) return;
     
-    // Extract vector function (similar to 3D version)
-    const extractVector = (vecStr) => {
-      if (typeof vecStr !== 'string') return null;
-      const matches = vecStr.match(/\[(.*?)\.\.\.]/);
-      if (!matches || !matches[1]) return null;
-      return matches[1].split(',').map(num => parseFloat(num.trim()));
+    // Enhanced vector extraction with better error handling and debugging
+    const extractVector = (vecStr, point) => {
+      // First try to use the measureVector if available (most accurate)
+      if (point && point.measureVector && Array.isArray(point.measureVector)) {
+        console.log('Using measureVector property:', point.measureVector.length, 'elements');
+        return point.measureVector;
+      }
+      
+      // Debug information about the vector string
+      console.log('Vector string to extract:', vecStr, typeof vecStr);
+      
+      if (!vecStr) {
+        console.log('Missing vector string');
+        return null;
+      }
+
+      // Try different patterns to extract vector values
+      // Pattern 1: Standard format with [...] notation
+      if (typeof vecStr === 'string') {
+        let matches = vecStr.match(/\[(.*?)\.\.\.]/);
+        if (matches && matches[1]) {
+          try {
+            const values = matches[1].split(',').map(num => parseFloat(num.trim()));
+            console.log('Pattern 1 extracted vector:', values.length, 'elements');
+            return values;
+          } catch (e) {
+            console.error('Failed to parse vector format 1:', e);
+          }
+        }
+
+        // Pattern 2: Try to extract array content with any character separator
+        matches = vecStr.match(/\[(.*?)\]/);
+        if (matches && matches[1]) {
+          try {
+            const values = matches[1].split(/[,\s]+/).map(num => parseFloat(num.trim()));
+            console.log('Pattern 2 extracted vector:', values.length, 'elements');
+            return values;
+          } catch (e) {
+            console.error('Failed to parse vector format 2:', e);
+          }
+        }
+      }
+      
+      // Pattern 3: If it's already an array, use it directly
+      if (Array.isArray(vecStr)) {
+        console.log('Pattern 3 using existing array:', vecStr.length, 'elements');
+        return vecStr;
+      }
+      
+      // Pattern 4: If point has a fullVector property (might be in some deployments)
+      if (point && point.fullVector && Array.isArray(point.fullVector)) {
+        console.log('Pattern 4 using fullVector property:', point.fullVector.length, 'elements');
+        return point.fullVector.slice(0, 5); // Just use first few dimensions
+      }
+      
+      console.log('No vector extraction patterns matched');
+      return null;
     };
     
     // Store similarity labels for hover detection
@@ -346,6 +397,18 @@ const VectorGraph2D = ({
       for (let j = i + 1; j < primaryPoints.length; j++) {
         const point1 = primaryPoints[i];
         const point2 = primaryPoints[j];
+        
+        // Debug point info
+        console.log('Ruler point data:', {
+          point1: {
+            word: point1.word,
+            hasVector: !!point1.truncatedVector
+          },
+          point2: {
+            word: point2.word,
+            hasVector: !!point2.truncatedVector
+          }
+        });
         
         // Draw line between points
         ctx.beginPath();
@@ -359,13 +422,22 @@ const VectorGraph2D = ({
         
         // Calculate distance between points for label
         // Extract vectors from truncatedVector property
-        const vec1 = extractVector(point1.truncatedVector);
-        const vec2 = extractVector(point2.truncatedVector);
+        const vec1 = extractVector(point1.truncatedVector, point1);
+        const vec2 = extractVector(point2.truncatedVector, point2);
+        
+        // Log vector extraction results
+        console.log('Extracted vectors:', {
+          vec1: vec1 ? `${vec1.length} elements` : 'null',
+          vec2: vec2 ? `${vec2.length} elements` : 'null'
+        });
         
         // Calculate similarity only if we have valid vectors
         let distance = null;
         if (vec1 && vec2) {
           distance = calculateCosineSimilarity(vec1, vec2);
+          console.log('Calculated similarity:', distance);
+        } else {
+          console.log('Cannot calculate similarity: missing vectors');
         }
         
         // Draw distance label at midpoint of line
