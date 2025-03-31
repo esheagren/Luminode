@@ -368,7 +368,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     const rangeZ = maxZ - minZ || 1;
     
     // Scale factor to spread points out in 3D space
-    const scale = 1.5; // Keep same scale as in create3DPoints
+    const scale = 2.5; // Use the same scale factor as in create3DPoints
     
     // Filter to only get primary words
     const primaryPoints = coordinates.filter(point => words.includes(point.word));
@@ -600,6 +600,28 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     });
     analogyLinesRef.current = [];
     
+    // Find min/max values to normalize coordinates
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+    
+    coordinates.forEach(point => {
+      minX = Math.min(minX, point.x);
+      maxX = Math.max(maxX, point.x);
+      minY = Math.min(minY, point.y);
+      maxY = Math.max(maxY, point.y);
+      minZ = Math.min(minZ, point.z || 0);
+      maxZ = Math.max(maxZ, point.z || 0);
+    });
+    
+    // Calculate ranges
+    const rangeX = maxX - minX || 1;
+    const rangeY = maxY - minY || 1;
+    const rangeZ = maxZ - minZ || 1;
+    
+    // Scale factor to spread points out in 3D space
+    const scale = 2.5; // Use the same scale as in create3DPoints
+    
     // Find primary words and analogy points
     const primaryPoints = coordinates.filter(point => words.includes(point.word));
     const analogyPoints = coordinates.filter(point => point.isAnalogy);
@@ -619,10 +641,19 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
         const sourcePoint = coordinates.find(p => p.word === word3);
         if (!sourcePoint) return;
         
+        // Normalize coordinates
+        const normalizedX1 = ((sourcePoint.x - minX) / rangeX * 2 - 1) * scale;
+        const normalizedY1 = ((sourcePoint.y - minY) / rangeY * 2 - 1) * scale;
+        const normalizedZ1 = ((sourcePoint.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+        
+        const normalizedX2 = ((analogyPoint.x - minX) / rangeX * 2 - 1) * scale;
+        const normalizedY2 = ((analogyPoint.y - minY) / rangeY * 2 - 1) * scale;
+        const normalizedZ2 = ((analogyPoint.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+        
         // Create line geometry
         const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(sourcePoint.x, sourcePoint.y, sourcePoint.z || 0),
-          new THREE.Vector3(analogyPoint.x, analogyPoint.y, analogyPoint.z || 0)
+          new THREE.Vector3(normalizedX1, normalizedY1, normalizedZ1),
+          new THREE.Vector3(normalizedX2, normalizedY2, normalizedZ2)
         ]);
         
         // Create dashed line material for analogy connections
@@ -649,10 +680,19 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       const point1 = primaryPoints[0];
       const point2 = primaryPoints[1];
       
+      // Normalize coordinates
+      const normalizedX1 = ((point1.x - minX) / rangeX * 2 - 1) * scale;
+      const normalizedY1 = ((point1.y - minY) / rangeY * 2 - 1) * scale;
+      const normalizedZ1 = ((point1.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+      
+      const normalizedX2 = ((point2.x - minX) / rangeX * 2 - 1) * scale;
+      const normalizedY2 = ((point2.y - minY) / rangeY * 2 - 1) * scale;
+      const normalizedZ2 = ((point2.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+      
       // Create line geometry
       const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(point1.x, point1.y, point1.z || 0),
-        new THREE.Vector3(point2.x, point2.y, point2.z || 0)
+        new THREE.Vector3(normalizedX1, normalizedY1, normalizedZ1),
+        new THREE.Vector3(normalizedX2, normalizedY2, normalizedZ2)
       ]);
       
       // Create dashed line material
