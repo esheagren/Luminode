@@ -88,3 +88,4 @@ export default wordCacheSlice.reducer;
 export const selectWordData = (state, word) => state.wordCache.data[word];
 export const selectWordStatus = (state, word) => state.wordCache.status[word];
 export const selectWordError = (state, word) => state.wordCache.error[word];
+

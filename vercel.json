@@ -17,6 +17,10 @@
       "memory": 512,
       "maxDuration": 30
     },
+    "api/findSlice.js": {
+      "memory": 512,
+      "maxDuration": 30
+    },
     "api/init.js": {
       "memory": 128,
       "maxDuration": 5
