@@ -6,6 +6,7 @@ import EmbeddingExplanation from './EmbeddingExplanation';
 import Disclaimer from './Disclaimer';
 import MiniVisualizer from './MiniVisualizer';
 import InteractiveExamples from './InteractiveExamples';
+import Footer from '../Footer';
 
 const AboutPage = () => {
   const containerRef = useRef(null);
@@ -115,6 +116,8 @@ const AboutPage = () => {
           </div>
         </div>
       </div>
+      
+      <Footer />
       
       <style jsx="true">{`
         .about-page {
