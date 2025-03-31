@@ -19,6 +19,11 @@ const WordInput = ({
   const inputRef = useRef(null);
   const dispatch = useDispatch(); // Get dispatch function
 
+  // Determine placeholder text based on number of words
+  const getPlaceholderText = () => {
+    return words.length < 2 ? "Add 2+ Words" : "Add Another Word";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -125,7 +130,7 @@ const WordInput = ({
           type="text"
           value={wordInput}
           onChange={(e) => setWordInput(e.target.value)}
-          placeholder="Add another word"
+          placeholder={getPlaceholderText()}
           disabled={loading}
           onKeyPress={(e) => {
             if (e.key === 'Enter') {
