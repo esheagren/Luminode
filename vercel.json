@@ -21,6 +21,10 @@
       "memory": 512,
       "maxDuration": 30
     },
+    "api/findNeighbors.js": {
+      "memory": 256,
+      "maxDuration": 10
+    },
     "api/init.js": {
       "memory": 128,
       "maxDuration": 5

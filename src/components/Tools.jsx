@@ -7,6 +7,7 @@ import ViewButton from './ViewButton';
 import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
 import { findAnalogy } from '../utils/findAnalogy';
 import { findSlice, processSliceResults } from '../utils/sliceCalculation';
+import { findNeighbors, processNeighborsResults } from '../utils/findNeighbors';
 import { createToolbarTooltip, removeToolbarTooltip } from './ToolbarTooltip';
 import './ToolbarStyles.css';
 
@@ -56,6 +57,17 @@ const RulerIcon = () => (
   </svg>
 );
 
+const NeighborsIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="8"></circle>
+    <circle cx="12" cy="12" r="3"></circle>
+    <line x1="12" y1="2" x2="12" y2="4"></line>
+    <line x1="12" y1="20" x2="12" y2="22"></line>
+    <line x1="20" y1="12" x2="22" y2="12"></line>
+    <line x1="2" y1="12" x2="4" y2="12"></line>
+  </svg>
+);
+
 // Wrapper function for better debugging of setMidpointClusters
 const createDebugSetMidpointClusters = (setMidpointClusters) => {
   return (clusters) => {
@@ -91,6 +103,7 @@ const Tools = ({
 }) => {
   const [activeTab, setActiveTab] = useState('analogy');
   const [showContent, setShowContent] = useState(true);
+  const [neighborsActive, setNeighborsActive] = useState(false);
   
   // Debug: Check the type of setMidpointClusters
   console.log('Tools component:', {
@@ -499,7 +512,65 @@ const Tools = ({
     setSelectedPoints([]);
   };
 
-  // Handler for Reset functionality
+  // Handle finding neighbors for all words in the visualization
+  const handleNeighborsToggle = async () => {
+    // Toggle the state
+    const newState = !neighborsActive;
+    setNeighborsActive(newState);
+    
+    if (!newState) {
+      // If turning off, clear visualizations
+      debugSetMidpointClusters([]);
+      return;
+    }
+    
+    // Continue only if turning on
+    if (words.length === 0) {
+      setError('Please add some words first');
+      setNeighborsActive(false); // Revert
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      // Find nearest neighbors for each word
+      const neighborsClusters = [];
+      
+      // Process words sequentially to avoid overwhelming the API
+      for (const word of words) {
+        try {
+          console.log(`Finding neighbors for ${word}`);
+          const results = await findNeighbors(word, 4); // 4 neighbors per word
+          
+          if (results && results.nearestWords) {
+            const cluster = processNeighborsResults(results, word);
+            neighborsClusters.push(cluster);
+          }
+        } catch (wordError) {
+          console.error(`Error finding neighbors for "${word}":`, wordError);
+          // Continue with other words even if one fails
+        }
+      }
+      
+      // Update visualization with all clusters
+      if (neighborsClusters.length > 0) {
+        console.log(`Found neighbors for ${neighborsClusters.length} words`);
+        debugSetMidpointClusters(neighborsClusters);
+      } else {
+        setError('No neighbors found for any words');
+        setNeighborsActive(false); // Revert
+      }
+    } catch (error) {
+      console.error('Error finding neighbors:', error);
+      setError(`Failed to find neighbors: ${error.message}`);
+      setNeighborsActive(false); // Revert on error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Reset functionality
   const handleReset = () => {
     console.log('Resetting all words and visualization');
     
@@ -527,6 +598,11 @@ const Tools = ({
     if (sliceMode) {
       setSliceMode(false);
       setSelectedPoints([]);
+    }
+    
+    // Reset neighbors mode
+    if (neighborsActive) {
+      setNeighborsActive(false);
     }
     
     // Clear any errors
@@ -611,6 +687,17 @@ const Tools = ({
           >
             <RulerIcon />
             <span>Measure</span>
+          </button>
+          
+          <button
+            className={`icon-button ${neighborsActive ? 'active' : ''}`}
+            onClick={handleNeighborsToggle}
+            disabled={loading || words.length === 0}
+            onMouseEnter={(e) => createToolbarTooltip('Neighbors', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
+          >
+            <NeighborsIcon />
+            <span>Neighbors</span>
           </button>
           
           <button
