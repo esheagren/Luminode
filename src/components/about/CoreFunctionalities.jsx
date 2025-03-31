@@ -415,8 +415,8 @@ const CoreFunctionalities = () => {
     <div className="about-section">
       <h2>Core Technologies</h2>
       <p>
-        Luminode combines several cutting-edge AI and vector search technologies to deliver 
-        powerful semantic search and exploration capabilities:
+        Luminode combines several cutting-edge vector technologies to deliver 
+        powerful semantic search and word relationship capabilities:
       </p>
 
       <div className="functionality-section">
@@ -425,19 +425,19 @@ const CoreFunctionalities = () => {
           <div className="text-content">
             <p>
               Luminode uses <span className="highlight">Principal Component Analysis (PCA)</span> to transform high-dimensional 
-              embeddings (hundreds of dimensions) into visualizable 2D or 3D representations.
+              word embeddings (hundreds of dimensions) into visualizable 2D or 3D representations.
             </p>
             <p>
               PCA works by identifying the directions (principal components) that capture the maximum variance 
-              in the data, effectively preserving the most important relationships while reducing dimensions.
+              in the word vectors, effectively preserving the most important relationships while reducing dimensions.
             </p>
             <div className="tech-details">
               <h4>Technical Details:</h4>
               <ul>
-                <li>Maintains linear relationships between embeddings</li>
-                <li>Computationally efficient for large datasets</li>
+                <li>Maintains linear relationships between word embeddings</li>
+                <li>Computationally efficient for large word collections</li>
                 <li>Preserves global structure better than t-SNE or UMAP</li>
-                <li>Helps reduce noise in the underlying embeddings</li>
+                <li>Helps reduce noise in the underlying word vectors</li>
               </ul>
             </div>
           </div>
@@ -452,7 +452,7 @@ const CoreFunctionalities = () => {
               />
             </div>
             <div className="visual-caption">
-              PCA projection showing semantic clusters in the embedding space
+              PCA projection showing semantic clusters of related words
             </div>
           </div>
         </div>
@@ -464,19 +464,19 @@ const CoreFunctionalities = () => {
           <div className="text-content">
             <p>
               Luminode leverages the <span className="highlight">Hierarchical Navigable Small World (HNSW)</span> graph 
-              algorithm to perform lightning-fast approximate nearest neighbor searches in the embedding space.
+              algorithm to perform lightning-fast searches for similar words in the embedding space.
             </p>
             <p>
-              HNSW creates multi-layered graphs where semantically similar items are connected, allowing Luminode 
-              to quickly navigate to the most relevant results without scanning the entire database.
+              HNSW creates multi-layered graphs where semantically similar words are connected, allowing Luminode 
+              to quickly navigate to the most relevant results without scanning the entire word database.
             </p>
             <div className="tech-details">
               <h4>Technical Details:</h4>
               <ul>
                 <li>Sub-linear query time (logarithmic complexity)</li>
                 <li>High recall rate (typically 90-100% of exact search results)</li>
-                <li>Optimized for high-dimensional vector search</li>
-                <li>Integrated with Pinecone vector database for production performance</li>
+                <li>Optimized for high-dimensional word vectors</li>
+                <li>Compatible with various vector database implementations</li>
               </ul>
             </div>
           </div>
@@ -502,7 +502,7 @@ const CoreFunctionalities = () => {
               />
             </div>
             <div className="visual-caption">
-              Visualization of nearest neighbors to "{selectedWord}" using HNSW-based search
+              Visualization of nearest words to "{selectedWord}" using HNSW-based search
             </div>
           </div>
         </div>
@@ -514,20 +514,20 @@ const CoreFunctionalities = () => {
           <div className="text-content">
             <p>
               Luminode enables semantic exploration through <span className="highlight">vector arithmetic</span> operations 
-              in the embedding space. By treating word meanings as vectors, we can manipulate and combine 
-              concepts mathematically.
+              on word vectors. By treating word meanings as mathematical objects, we can manipulate and combine 
+              words in ways that reveal semantic relationships.
             </p>
             <p>
-              One powerful application is finding the semantic midpoint between concepts, revealing 
-              words that bridge different domains or represent hybrid ideas.
+              One powerful application is finding the semantic midpoint between words, revealing 
+              terms that bridge different domains or represent hybrid concepts.
             </p>
             <div className="tech-details">
               <h4>Technical Implementation:</h4>
               <ul>
-                <li>Vector averaging to find semantic midpoints</li>
+                <li>Vector averaging to find semantic midpoints between words</li>
                 <li>Multiple interpolation methods (linear, spherical)</li>
-                <li>Adjustable weighting for concept blending</li>
-                <li>Filtered by distance thresholds for relevance</li>
+                <li>Adjustable weighting for word meaning blending</li>
+                <li>Filtered by similarity thresholds for relevance</li>
               </ul>
             </div>
           </div>
@@ -542,7 +542,7 @@ const CoreFunctionalities = () => {
               />
             </div>
             <div className="visual-caption">
-              Vector midpoint between "science" and "art" reveals interdisciplinary concepts
+              Vector midpoint between the words "science" and "art" reveals interdisciplinary terms
             </div>
           </div>
         </div>
@@ -554,10 +554,10 @@ const CoreFunctionalities = () => {
           <div className="text-content">
             <p>
               Luminode uses <span className="highlight">cosine similarity</span> as its primary metric for comparing 
-              embedding vectors. This measures the angle between vectors rather than their magnitude.
+              word vectors. This measures the angle between vectors rather than their magnitude.
             </p>
             <p>
-              Cosine similarity is particularly well-suited for text embeddings because it focuses on the 
+              Cosine similarity is particularly well-suited for word embeddings because it focuses on the 
               direction (semantic orientation) of vectors while being less sensitive to vector length.
             </p>
             <div className="tech-details">
@@ -569,9 +569,9 @@ const CoreFunctionalities = () => {
                 Where A·B is the dot product, and ||A|| and ||B|| are the vector magnitudes
               </p>
               <ul className="formula-properties">
-                <li>Range: -1 (opposite) to 1 (identical)</li>
+                <li>Range: -1 (opposite meaning) to 1 (identical meaning)</li>
                 <li>Less affected by the "curse of dimensionality"</li>
-                <li>Effective for sparse high-dimensional vectors</li>
+                <li>Effective for sparse high-dimensional word vectors</li>
               </ul>
             </div>
           </div>
@@ -586,82 +586,86 @@ const CoreFunctionalities = () => {
               />
             </div>
             <div className="visual-caption">
-              Cosine similarity measurement between "king" and "queen" vectors
+              Cosine similarity measurement between word vectors for "king" and "queen"
             </div>
           </div>
         </div>
       </div>
 
       <div className="functionality-section">
-        <h3>Vector Database (Pinecone)</h3>
+        <h3>Vector Database Technology</h3>
         <p>
-          Luminode is powered by <span className="highlight">Pinecone</span>, a cloud-native vector database optimized 
-          for similarity search at scale. This enables Luminode to:
+          Vector databases are specialized systems designed to store, index, and efficiently query large collections of word embeddings.
+          Luminode uses one such system to power its semantic search capabilities:
         </p>
         <div className="tech-box">
           <div className="tech-box-item">
             <div className="tech-icon">⚡</div>
             <div className="tech-description">
-              <h4>High-Performance Search</h4>
-              <p>Execute complex semantic queries in milliseconds, even with millions of vectors</p>
+              <h4>Efficient Vector Storage</h4>
+              <p>Optimized data structures for storing high-dimensional word vectors with minimal memory footprint</p>
             </div>
           </div>
           <div className="tech-box-item">
             <div className="tech-icon">🔍</div>
             <div className="tech-description">
-              <h4>Metadata Filtering</h4>
-              <p>Combine semantic similarity with traditional filters (date, category, author, etc.)</p>
+              <h4>Advanced Indexing</h4>
+              <p>Specialized indexing techniques (like HNSW) that enable fast retrieval of similar words</p>
             </div>
           </div>
           <div className="tech-box-item">
             <div className="tech-icon">📊</div>
             <div className="tech-description">
-              <h4>Dynamic Indexing</h4>
-              <p>Automatically update and re-index as new content is added to the knowledge base</p>
+              <h4>Flexible Metadata</h4>
+              <p>Support for additional word properties (like part of speech, frequency, etc.) to enhance search capabilities</p>
             </div>
           </div>
           <div className="tech-box-item">
             <div className="tech-icon">🔄</div>
             <div className="tech-description">
-              <h4>Horizontal Scaling</h4>
-              <p>Seamlessly handle growing data volumes through distributed architecture</p>
+              <h4>Scalable Architecture</h4>
+              <p>Ability to handle millions of word vectors with consistent performance as vocabulary grows</p>
             </div>
           </div>
         </div>
+        <p className="vector-db-note">
+          Luminode selected Pinecone from among several leading vector database options (including Weaviate, Milvus, Qdrant, and others) 
+          for its combination of performance, ease of integration, and cloud-native architecture.
+        </p>
       </div>
 
       <div className="functionality-section">
         <h3>LLaMA Embedding Architecture</h3>
         <p>
           At the foundation of Luminode is <span className="highlight">LLaMA</span>, a state-of-the-art language model from Meta AI 
-          that provides rich contextual embeddings for semantic understanding.
+          that provides rich contextual embeddings for words and phrases.
         </p>
         <div className="architecture-diagram">
           <div className="architecture-layer">
-            <div className="layer-label">User Input</div>
+            <div className="layer-label">Input</div>
             <div className="layer-box user-input">
-              <span>"What's the impact of climate change on coastal cities?"</span>
+              Individual word or phrase
             </div>
           </div>
           <div className="architecture-arrow">↓</div>
           <div className="architecture-layer">
-            <div className="layer-label">LLaMA Embedding</div>
+            <div className="layer-label">Processing</div>
             <div className="layer-box embedding">
-              <span>Contextual Vector [768 dimensions]</span>
+              Contextual Vector [768 dimensions]
             </div>
           </div>
           <div className="architecture-arrow">↓</div>
           <div className="architecture-layer">
-            <div className="layer-label">HNSW Search (Pinecone)</div>
+            <div className="layer-label">Search</div>
             <div className="layer-box search">
-              <span>Finding similar vectors through navigable graph</span>
+              HNSW Search (Finding similar word vectors)
             </div>
           </div>
           <div className="architecture-arrow">↓</div>
           <div className="architecture-layer">
-            <div className="layer-label">Results</div>
+            <div className="layer-label">Output</div>
             <div className="layer-box results">
-              <span>Semantically relevant documents ranked by cosine similarity</span>
+              Semantically similar words ranked by similarity
             </div>
           </div>
         </div>
@@ -922,6 +926,15 @@ const CoreFunctionalities = () => {
         .architecture-arrow {
           font-size: 1.5rem;
           color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .vector-db-note {
+          margin-top: 1.5rem;
+          font-style: italic;
+          padding: 1rem;
+          background-color: rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          border-left: 3px solid rgba(255, 165, 0, 0.5);
         }
         
         @media (max-width: 768px) {

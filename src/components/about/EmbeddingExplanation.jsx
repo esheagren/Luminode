@@ -136,24 +136,22 @@ const EmbeddingExplanation = () => {
       <div className="tab-content">
         <h3>Vector Embeddings Explained</h3>
         <p>
-          Vector embeddings are the foundation of modern AI language understanding. They transform words, 
-          sentences, or entire documents into numerical vectors in a high-dimensional space, enabling 
-          machines to process meaning mathematically.
+          Vector embeddings are the foundation of modern AI language understanding. They transform individual words
+          into numerical vectors in a high-dimensional space, enabling machines to process word meanings mathematically.
         </p>
         <p>
-          In this "semantic space," items with similar meanings are positioned closer together. Instead of treating 
-          words as isolated symbols, embeddings capture relationships based on context and usage patterns in large 
-          text corpora.
+          In this "semantic space," words with similar meanings are positioned closer together. Instead of treating 
+          words as isolated symbols, embeddings capture relationships based on usage patterns in language.
         </p>
         
         <div className="vector-example">
-          <h4>Example: Embedding as a Vector</h4>
+          <h4>Example: Word as a Vector</h4>
           <div className="vector-box">
             <div className="word-label">
-              "machine learning" = [0.123, -0.456, 0.789, 0.012, -0.345, ... ]
+              "dog" = [0.123, -0.456, 0.789, 0.012, -0.345, ... ]
             </div>
             <div className="vector-note">
-              LLaMA embeddings typically have hundreds of dimensions, each capturing different semantic aspects
+              LLaMA embeddings typically have hundreds of dimensions, each capturing different semantic aspects of the word
             </div>
             
             {showFullVector ? (
@@ -179,16 +177,15 @@ const EmbeddingExplanation = () => {
   const renderVisualizationTab = () => {
     return (
       <div className="tab-content">
-        <h3>Visualizing Embeddings</h3>
+        <h3>Visualizing Word Embeddings</h3>
         <p>
-          To make high-dimensional embeddings understandable, Luminode projects them from their native space 
+          To make high-dimensional word embeddings understandable, Luminode projects them from their native space 
           (typically hundreds of dimensions) down to 2D or 3D using dimensionality reduction techniques.
         </p>
         <p>
           Luminode uses <span className="highlight">Principal Component Analysis (PCA)</span> to find the most 
-          informative dimensions in the data, preserving as much variance as possible in the reduced representation. 
-          This allows users to visually explore semantic relationships that would otherwise remain hidden in the 
-          high-dimensional space.
+          informative dimensions in the word data, preserving as much variance as possible in the reduced representation. 
+          This allows users to visually explore semantic relationships between words that would otherwise remain hidden.
         </p>
         
         <div className="visual-example">
@@ -200,30 +197,30 @@ const EmbeddingExplanation = () => {
               <div className="step-number">1</div>
               <div className="step-description">
                 <span className="step-title">High-dimensional Space</span>
-                <p>Embeddings exist in hundreds of dimensions, impossible to visualize directly</p>
+                <p>Word embeddings exist in hundreds of dimensions, impossible to visualize directly</p>
               </div>
             </div>
             <div className="step">
               <div className="step-number">2</div>
               <div className="step-description">
                 <span className="step-title">Find Principal Components</span>
-                <p>PCA identifies the directions with maximum variance in the data</p>
+                <p>PCA identifies the directions with maximum variance in the word vectors</p>
               </div>
             </div>
             <div className="step">
               <div className="step-number">3</div>
               <div className="step-description">
                 <span className="step-title">Project to Lower Dimensions</span>
-                <p>Data is projected onto 2-3 dimensions while preserving relationships</p>
+                <p>Words are projected onto 2-3 dimensions while preserving their relationships</p>
               </div>
             </div>
           </div>
           
           <div className="comparison-note">
             <p>
-              <span className="highlight">Note:</span> Some relationships visible in the full embedding space may 
+              <span className="highlight">Note:</span> Some word relationships visible in the full embedding space may 
               be lost in the projection. Alternative techniques like t-SNE or UMAP could reveal different aspects 
-              of the data structure.
+              of the word relationship structure.
             </p>
           </div>
         </div>
@@ -234,39 +231,39 @@ const EmbeddingExplanation = () => {
   const renderEmbeddingTypesTab = () => {
     return (
       <div className="tab-content">
-        <h3>Types of Embeddings</h3>
+        <h3>Types of Word Embeddings</h3>
         
         <div className="embedding-type">
-          <h4>LLaMA: Contextual Embeddings (Used by Luminode)</h4>
+          <h4>LLaMA: Contextual Word Embeddings (Used by Luminode)</h4>
           <p>
             Luminode leverages <span className="highlight">LLaMA (Large Language Model Meta AI)</span> to generate 
-            rich, contextual embeddings that capture the nuanced meaning of text.
+            rich, contextual embeddings that capture the nuanced meaning of words.
           </p>
           <div className="embedding-details">
             <ul>
               <li>
-                <strong>Context-aware:</strong> The same word has different embeddings depending on surrounding text, 
+                <strong>Context-aware:</strong> The same word has different embeddings depending on surrounding context, 
                 capturing nuances of meaning
               </li>
               <li>
-                <strong>Foundation model:</strong> Trained on massive text corpora, capturing deep semantic relationships
+                <strong>Foundation model:</strong> Trained on massive text corpora, capturing deep word relationships
               </li>
               <li>
                 <strong>Transformer-based:</strong> Uses attention mechanisms to understand relationships between words
               </li>
               <li>
-                <strong>High dimensionality:</strong> Typically hundreds of dimensions per embedding
+                <strong>High dimensionality:</strong> Typically hundreds of dimensions per word embedding
               </li>
             </ul>
             
             <div className="example-box">
-              <div className="example-title">Example: Context Changes Meaning</div>
+              <div className="example-title">Example: Context Changes Word Meaning</div>
               <p>The word "bank" has different embeddings in:</p>
               <ul className="example-list">
                 <li>"I deposited money at the bank" (financial institution)</li>
                 <li>"We sat by the river bank" (shoreline)</li>
               </ul>
-              <p>Contextual embeddings capture these distinct meanings appropriately.</p>
+              <p>Contextual embeddings capture these distinct word meanings appropriately.</p>
             </div>
           </div>
         </div>
@@ -286,10 +283,10 @@ const EmbeddingExplanation = () => {
                 <strong>Co-occurrence based:</strong> Created by analyzing how often words appear together
               </li>
               <li>
-                <strong>Efficient but limited:</strong> Simpler than contextual models but miss nuanced uses
+                <strong>Efficient but limited:</strong> Simpler than contextual models but miss nuanced word uses
               </li>
               <li>
-                <strong>Linear relationships:</strong> Famous for capturing analogies like "king - man + woman ≈ queen"
+                <strong>Linear relationships:</strong> Famous for capturing word analogies like "king - man + woman ≈ queen"
               </li>
             </ul>
           </div>

@@ -53,7 +53,7 @@ const InteractiveExamples = () => {
         <h3>HNSW Vector Search</h3>
         <p>
           Explore how Luminode uses Hierarchical Navigable Small World (HNSW) graph algorithms to 
-          efficiently find semantically similar concepts in vector space.
+          efficiently find semantically similar words in vector space.
         </p>
         
         <div className="interactive-demo">
@@ -107,23 +107,24 @@ const InteractiveExamples = () => {
             <ol>
               <li>
                 <strong>HNSW Graph Algorithm:</strong> Creates a multi-layered graph structure that connects 
-                semantically similar vectors, allowing for efficient navigation through the embedding space 
+                semantically similar word vectors, allowing for efficient navigation through the embedding space 
                 without checking every vector.
               </li>
               <li>
-                <strong>Pinecone Vector Database:</strong> Stores and indexes embedding vectors for efficient 
-                retrieval, with automatic scaling and optimization for ANN search.
+                <strong>Vector Database:</strong> Stores and indexes word embedding vectors for efficient 
+                retrieval. Luminode uses Pinecone, but other options include Weaviate, Milvus, and Qdrant - 
+                each optimized for vector similarity search.
               </li>
               <li>
-                <strong>Cosine Similarity:</strong> Measures the angle between vectors using:
+                <strong>Cosine Similarity:</strong> Measures the angle between word vectors using:
               </li>
             </ol>
             <div className="formula">
               similarity(A, B) = cos(θ) = (A·B) / (||A|| × ||B||)
             </div>
             <p>
-              This enables sub-millisecond search performance even with millions of vectors,
-              making it possible to quickly find content related to any query concept.
+              This enables sub-millisecond search performance even with millions of word vectors,
+              making it possible to quickly find words related to any query word.
             </p>
           </div>
         )}
@@ -136,7 +137,7 @@ const InteractiveExamples = () => {
       <div className="example-section">
         <h3>Vector Arithmetic Operations</h3>
         <p>
-          Luminode leverages the mathematical properties of vector embeddings to discover 
+          Luminode leverages the mathematical properties of word vectors to discover 
           semantic relationships through vector operations.
         </p>
         
@@ -158,7 +159,7 @@ const InteractiveExamples = () => {
           <div className="results-container">
             <h4>Vector midpoint between "{selectedPair.replace('_', ' and ')}":</h4>
             <div className="tech-note">
-              Using dimensional averaging in embedding space with HNSW search
+              Using vector averaging in embedding space
             </div>
             <div className="word-cloud">
               {sampleMidpoints[selectedPair].map((word, index) => (
@@ -192,7 +193,7 @@ const InteractiveExamples = () => {
             </p>
             <ol>
               <li>
-                <strong>Embedding Transformation:</strong> Converts concepts to high-dimensional LLaMA vectors
+                <strong>Embedding Transformation:</strong> Converts words to high-dimensional LLaMA vectors
               </li>
               <li>
                 <strong>Vector Arithmetic:</strong> Combines vectors through mathematical operations:
@@ -201,15 +202,15 @@ const InteractiveExamples = () => {
                 </div>
               </li>
               <li>
-                <strong>Nearest Neighbor Search:</strong> Uses Pinecone's HNSW index to efficiently find 
-                vectors closest to the calculated midpoint
+                <strong>Nearest Neighbor Search:</strong> Uses an HNSW index to efficiently find 
+                word vectors closest to the calculated midpoint
               </li>
               <li>
-                <strong>Result Ranking:</strong> Orders results by cosine similarity to the midpoint vector
+                <strong>Result Ranking:</strong> Orders resulting words by cosine similarity to the midpoint vector
               </li>
             </ol>
             <p>
-              This technique reveals semantic relationships that wouldn't be discoverable through 
+              This technique reveals word relationships that wouldn't be discoverable through 
               traditional keyword search, demonstrating the power of vector-based semantic representations.
             </p>
           </div>
@@ -223,8 +224,8 @@ const InteractiveExamples = () => {
       <div className="example-section">
         <h3>Semantic Analogies in Vector Space</h3>
         <p>
-          Explore how LLaMA embeddings capture complex linguistic relationships, allowing 
-          Luminode to solve analogy problems through vector arithmetic.
+          Explore how LLaMA embeddings capture relationships between individual words, allowing 
+          Luminode to solve word analogies through vector arithmetic.
         </p>
         
         <div className="interactive-demo">
@@ -243,7 +244,7 @@ const InteractiveExamples = () => {
           </div>
           
           <div className="results-container">
-            <h4>Vector analogy completion for "{selectedAnalogy.replace(/_/g, ' : ').replace(/: ([^:]+)$/, ' : ?')}":</h4>
+            <h4>Word analogy completion for "{selectedAnalogy.replace(/_/g, ' : ').replace(/: ([^:]+)$/, ' : ?')}":</h4>
             <div className="tech-note">
               Using V<sub>result</sub> ≈ V<sub>{selectedAnalogy.split('_')[1]}</sub> - V<sub>{selectedAnalogy.split('_')[0]}</sub> + V<sub>{selectedAnalogy.split('_')[2]}</sub>
             </div>
@@ -273,33 +274,33 @@ const InteractiveExamples = () => {
         
         {showTechnicalDetails.analogy && (
           <div className="technical-details">
-            <h4>Vector-based Analogy Resolution</h4>
+            <h4>Vector-based Word Analogy Resolution</h4>
             <p>
-              Analogy completion demonstrates how semantic relationships are encoded as vector transformations 
+              Word analogy completion demonstrates how semantic relationships between words are encoded as vector transformations 
               in embedding space. For the analogy "A is to B as C is to D":
             </p>
             <div className="formula">
               V<sub>D</sub> ≈ V<sub>B</sub> - V<sub>A</sub> + V<sub>C</sub>
             </div>
             <p>
-              The vector difference (V<sub>B</sub> - V<sub>A</sub>) captures the semantic relationship between A and B. 
-              Adding this difference to V<sub>C</sub> transforms it in the same way, yielding vectors close to V<sub>D</sub>.
+              The vector difference (V<sub>B</sub> - V<sub>A</sub>) captures the semantic relationship between words A and B. 
+              Adding this difference to V<sub>C</sub> transforms it in the same way, yielding vectors close to word D.
             </p>
             <p>
               Implementation details:
             </p>
             <ol>
               <li>
-                <strong>LLaMA Embedding:</strong> Converts words to contextual vectors
+                <strong>LLaMA Embedding:</strong> Converts individual words to contextual vectors
               </li>
               <li>
-                <strong>Vector Operations:</strong> Performs arithmetic on the high-dimensional vectors
+                <strong>Vector Operations:</strong> Performs arithmetic on the high-dimensional word vectors
               </li>
               <li>
-                <strong>HNSW Search:</strong> Efficiently finds the closest vectors to the result
+                <strong>HNSW Search:</strong> Efficiently finds the closest word vectors to the result
               </li>
               <li>
-                <strong>Filtering:</strong> Applies relevance thresholds to ensure quality matches
+                <strong>Filtering:</strong> Applies relevance thresholds to ensure quality word matches
               </li>
             </ol>
           </div>
@@ -310,10 +311,10 @@ const InteractiveExamples = () => {
   
   return (
     <div className="interactive-examples">
-      <h2>Explore Luminode's Vector Technologies</h2>
+      <h2>Explore Word Vector Operations</h2>
       <p>
-        These interactive examples demonstrate how Luminode's underlying vector technologies enable 
-        powerful semantic search and discovery capabilities.
+        These interactive examples demonstrate how Luminode's underlying word vector technologies enable 
+        powerful semantic search and discovery capabilities through mathematical operations on word meanings.
       </p>
       
       <div className="example-tabs">
@@ -321,19 +322,19 @@ const InteractiveExamples = () => {
           className={`example-tab ${activeExample === 'nearest' ? 'active' : ''}`}
           onClick={() => setActiveExample('nearest')}
         >
-          Vector Search
+          Similar Words
         </button>
         <button 
           className={`example-tab ${activeExample === 'midpoint' ? 'active' : ''}`}
           onClick={() => setActiveExample('midpoint')}
         >
-          Vector Arithmetic
+          Word Combinations
         </button>
         <button 
           className={`example-tab ${activeExample === 'analogy' ? 'active' : ''}`}
           onClick={() => setActiveExample('analogy')}
         >
-          Semantic Analogies
+          Word Analogies
         </button>
       </div>
       
@@ -345,9 +346,10 @@ const InteractiveExamples = () => {
       
       <div className="try-full-app">
         <p>
-          These examples use simplified demonstrations of Luminode's technology stack.
+          These examples use simplified demonstrations of Luminode's word vector technology.
           The full application implements these capabilities at scale using LLaMA embeddings, 
-          Pinecone vector database, and HNSW approximate nearest neighbor search.
+          vector database storage, and HNSW approximate nearest neighbor search to efficiently 
+          navigate the semantic space of words and concepts.
         </p>
       </div>
       

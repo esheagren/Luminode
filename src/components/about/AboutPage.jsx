@@ -89,19 +89,19 @@ const AboutPage = () => {
               className={`tab-button ${activeTab === 'embeddings' ? 'active' : ''}`}
               onClick={() => setActiveTab('embeddings')}
             >
-              Vector Embeddings
+              Word Embeddings
             </button>
             <button 
               className={`tab-button ${activeTab === 'technologies' ? 'active' : ''}`}
               onClick={() => setActiveTab('technologies')}
             >
-              Core Technologies
+              Vector Technologies
             </button>
             <button 
               className={`tab-button ${activeTab === 'examples' ? 'active' : ''}`}
               onClick={() => setActiveTab('examples')}
             >
-              Try It
+              Interactive Examples
             </button>
             <button 
               className={`tab-button ${activeTab === 'limitations' ? 'active' : ''}`}

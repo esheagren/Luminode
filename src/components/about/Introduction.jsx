@@ -125,25 +125,25 @@ const Introduction = () => {
       <div className="intro-header">
         <h2>Welcome to Luminode</h2>
         <div className="animated-tagline">
-          <span className="highlight">AI-Powered</span> Semantic Search & Discovery
+          <span className="highlight">Vector-Based</span> Semantic Search & Discovery
         </div>
       </div>
       
       <div className="intro-content">
         <p className="lead-paragraph">
-          Luminode is a cutting-edge application that leverages advanced AI technologies to represent and 
-          search information based on <span className="highlight">semantic similarity</span> rather than exact keyword matching. 
-          Using vector embeddings, similarity metrics, and nearest-neighbor search, Luminode finds 
-          connections that traditional search engines might miss.
+          Luminode is a cutting-edge application that represents words and concepts as mathematical vectors, 
+          enabling search based on <span className="highlight">semantic similarity</span> rather than exact keyword matching. 
+          Vector embeddings are a fundamental building block for understanding how modern AI systems represent meaning mathematically, 
+          allowing Luminode to find connections that traditional search engines might miss.
         </p>
         
         <div className="vector-visualization">
           <h3>The Semantic Space</h3>
           <p>
             At the core of Luminode is the concept of a <span className="highlight">semantic space</span> — 
-            a high-dimensional space where words and concepts with similar meanings cluster together. 
+            a high-dimensional space where words with similar meanings cluster together. 
             This is made possible through <span className="highlight">vector embeddings</span> from LLaMA, 
-            allowing Luminode to understand the meaning behind your queries.
+            allowing Luminode to understand the meaning of individual words and their relationships to other concepts.
           </p>
           <div className="canvas-container">
             <canvas 
@@ -156,7 +156,7 @@ const Introduction = () => {
           </div>
           <div className="visualization-caption">
             A simplified 2D representation of word vectors in semantic space. In reality, Luminode works with 
-            embeddings in hundreds of dimensions, capturing subtle relationships between concepts.
+            individual words encoded as vectors with hundreds of dimensions, capturing subtle semantic relationships.
           </div>
         </div>
         
@@ -171,14 +171,14 @@ const Introduction = () => {
             </div>
             <div className="card-content">
               <p>
-                Luminode uses <span className="highlight">LLaMA</span> to transform text into rich, contextual 
-                vector embeddings that capture the semantic meaning of content.
+                Luminode uses <span className="highlight">LLaMA</span> to transform words into rich, contextual 
+                vector embeddings that capture their semantic meaning.
               </p>
               {expandedSection === 'embeddings' && (
                 <p>
-                  Unlike static word vectors, LLaMA's contextual embeddings consider surrounding text, 
-                  allowing the same word to have different representations based on its usage. These embeddings 
-                  position similar concepts closer together in a high-dimensional space.
+                  Unlike static word vectors, LLaMA's contextual embeddings represent each word based on its surrounding context, 
+                  allowing the same word to have different representations based on usage. In the embedding space, 
+                  related words like "dog" and "puppy" position closer together than unrelated words like "dog" and "computer".
                 </p>
               )}
             </div>
@@ -195,13 +195,13 @@ const Introduction = () => {
             <div className="card-content">
               <p>
                 Luminode uses <span className="highlight">cosine similarity</span> to measure how closely related 
-                two pieces of content are in the semantic space.
+                two words are in the semantic space.
               </p>
               {expandedSection === 'similarity' && (
                 <p>
-                  Cosine similarity measures the angle between vectors, focusing on their orientation rather than 
-                  magnitude. This approach is ideal for finding conceptually similar content even when expressed 
-                  with different words, making search results more intuitive and relevant.
+                  Cosine similarity measures the angle between word vectors, focusing on their orientation rather than 
+                  magnitude. This allows Luminode to identify that "monarch" and "king" are similar concepts even though 
+                  they're different words, making search results more intuitive and relevant.
                 </p>
               )}
             </div>
@@ -217,14 +217,14 @@ const Introduction = () => {
             </div>
             <div className="card-content">
               <p>
-                Finding relevant content quickly is powered by <span className="highlight">HNSW</span> (Hierarchical Navigable Small 
+                Finding similar words quickly is powered by <span className="highlight">HNSW</span> (Hierarchical Navigable Small 
                 World) graph algorithm for approximate nearest neighbor search.
               </p>
               {expandedSection === 'search' && (
                 <p>
                   HNSW creates a multi-layered graph structure that enables Luminode to navigate the semantic space 
-                  efficiently, examining only a fraction of possible candidates while maintaining high accuracy. 
-                  This technology delivers millisecond-speed results even with large datasets.
+                  efficiently, examining only a fraction of possible word vectors while maintaining high accuracy. 
+                  This technology delivers millisecond-speed results even when searching millions of words.
                 </p>
               )}
             </div>
@@ -242,14 +242,15 @@ const Introduction = () => {
             </div>
             <div className="card-content">
               <p>
-                Luminode leverages <span className="highlight">Pinecone</span>, a specialized vector database optimized for 
-                high-performance similarity search.
+                Vector databases are specialized systems designed to store, index, and efficiently query embedding vectors.
               </p>
               {expandedSection === 'database' && (
                 <p>
-                  Pinecone handles the storage, indexing, and querying of embedding vectors at scale, allowing 
-                  Luminode to maintain fast response times regardless of dataset size. This cloud-based service 
-                  ensures reliable performance without the complexity of managing custom infrastructure.
+                  Luminode uses <span className="highlight">Pinecone</span> for vector storage, which was selected for its 
+                  developer-friendly API and cloud-native architecture. Other major vector databases include Weaviate, 
+                  Milvus, and Qdrant, each with different strengths in areas like metadata filtering, scalability, and 
+                  deployment options. Vector databases differ from traditional databases by optimizing for similarity 
+                  search rather than exact matches.
                 </p>
               )}
             </div>
@@ -265,14 +266,14 @@ const Introduction = () => {
             </div>
             <div className="card-content">
               <p>
-                To visualize high-dimensional data, Luminode employs <span className="highlight">Principal Component Analysis (PCA)</span> 
+                To visualize high-dimensional word vectors, Luminode employs <span className="highlight">Principal Component Analysis (PCA)</span> 
                 to project vectors into explorable 2D or 3D spaces.
               </p>
               {expandedSection === 'visualization' && (
                 <p>
                   PCA identifies the most important dimensions in the data, preserving as much variance as possible 
-                  in the reduced space. This allows users to see clusters, trends, and relationships that would be 
-                  impossible to visualize in the original high-dimensional embedding space.
+                  in the reduced space. This allows users to see how words cluster together by meaning (like "king", "queen", "monarch" 
+                  forming a royalty cluster) that would be impossible to visualize in the original high-dimensional embedding space.
                 </p>
               )}
             </div>
