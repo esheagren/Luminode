@@ -278,25 +278,6 @@ const HomePage = () => {
             />
           </div>
           
-          {!analogyMode && !sliceMode && (
-            <button 
-              onClick={triggerMidpointSelection} 
-              style={{
-                position: 'absolute', 
-                top: '10px', 
-                right: '100px',
-                padding: '5px 10px',
-                background: 'rgba(52, 168, 83, 0.15)',
-                color: '#34A853',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Select Points
-            </button>
-          )}
-          
           <div className="graph-area">
             <VectorGraph 
               words={words}
