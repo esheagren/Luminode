@@ -184,6 +184,22 @@ const getTooltipContent = (toolType) => {
           </ul>
         </div>
       `;
+    case 'Neighbors':
+      return `
+        <div class="tooltip-title">Neighbors Tool</div>
+        <div class="tooltip-description">
+          Find the nearest semantic neighbors for all words in your visualization. This tool identifies the most similar words to each of your selected words based on cosine similarity in the embedding space, revealing the local semantic neighborhood structure.
+        </div>
+        <div class="tooltip-usage">
+          <div class="tooltip-usage-title">How to use:</div>
+          <ul class="tooltip-usage-steps">
+            <li>Click to activate/deactivate the neighbors search</li>
+            <li>When activated, the tool automatically finds the 4 closest neighbors for each word</li>
+            <li>Neighbors are connected to their source words with lines indicating semantic similarity</li>
+            <li>The closer a neighbor is positioned, the more semantically similar it is to the source word</li>
+          </ul>
+        </div>
+      `;
     case 'Slice':
       return `
         <div class="tooltip-title">Slice Tool</div>
