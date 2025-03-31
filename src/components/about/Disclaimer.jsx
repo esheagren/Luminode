@@ -14,23 +14,124 @@ const Disclaimer = () => {
   return (
     <div className="about-section disclaimer">
       <div className="disclaimer-header">
-        <h2>Technical Limitations</h2>
+        <h2>Limitations</h2>
         <div className="disclaimer-subtitle">
-          Understanding the constraints of vector search technologies
+          Understanding the constraints and implications of vector-based meaning
         </div>
       </div>
       
       <p>
-        While Luminode leverages cutting-edge AI technologies to deliver powerful semantic search capabilities, 
-        it's important to understand the inherent limitations of the underlying technologies.
-      </p>
-      <p>
-        These limitations are not bugs but rather <span className="highlight">technical constraints</span> that affect 
-        all systems built on vector embeddings and approximate nearest neighbor search.
+        While Luminode's vector-based approach provides powerful semantic search capabilities, 
+        it's important to understand both the societal and technical limitations of these technologies.
       </p>
       
       <div className="limitations-container">
-        <h3>Key Technical Limitations</h3>
+        <h3>Humanistic & Cultural Limitations</h3>
+        
+        <div className={`limitation-card ${expandedExample === 'societal' ? 'expanded' : ''}`} onClick={() => toggleExample('societal')}>
+          <div className="limitation-header">
+            <div className="limitation-icon">👥</div>
+            <h4>Representation of Social Biases</h4>
+            <div className="expand-icon">{expandedExample === 'societal' ? '−' : '+'}</div>
+          </div>
+          <div className="limitation-content">
+            <p>
+              Word vectors reflect how language is used in society, including inherent biases in how 
+              we talk about different groups of people and concepts.
+            </p>
+            {expandedExample === 'societal' && (
+              <div className="example-box">
+                <div className="example-title">Examples:</div>
+                <ul>
+                  <li>
+                    <strong>Occupational Stereotypes:</strong> In many embedding spaces, "doctor" may be 
+                    closer to "man" than to "woman", while "teacher" or "nurse" may show the reverse pattern
+                  </li>
+                  <li>
+                    <strong>Cultural Assumptions:</strong> Embeddings trained on Western text corpora may associate 
+                    certain cultural concepts (like holidays or foods) with specific regions or values
+                  </li>
+                  <li>
+                    <strong>Historical Context:</strong> Word embeddings encode the historical usage of terms, 
+                    including outdated stereotypes or associations
+                  </li>
+                </ul>
+                <div className="visual-hint">
+                  These biases aren't "bugs" but reflections of language usage patterns in training data.
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className={`limitation-card ${expandedExample === 'cultural' ? 'expanded' : ''}`} onClick={() => toggleExample('cultural')}>
+          <div className="limitation-header">
+            <div className="limitation-icon">🌍</div>
+            <h4>Cross-Cultural Limitations</h4>
+            <div className="expand-icon">{expandedExample === 'cultural' ? '−' : '+'}</div>
+          </div>
+          <div className="limitation-content">
+            <p>
+              Word embeddings are often trained on dominant language varieties and may not properly represent 
+              concepts from minoritized languages or cultures.
+            </p>
+            {expandedExample === 'cultural' && (
+              <div className="example-box">
+                <div className="example-title">Implications:</div>
+                <ul>
+                  <li>
+                    <strong>Language Varities:</strong> Concepts specific to non-dominant dialects, languages or 
+                    cultural contexts may be poorly represented
+                  </li>
+                  <li>
+                    <strong>Translation Gaps:</strong> Concepts that lack direct translation between languages 
+                    (like "hygge" or "saudade") may be distorted in embedding space
+                  </li>
+                  <li>
+                    <strong>Internet Bias:</strong> Training corpora often overrepresent internet-active populations, 
+                    skewing representation toward certain demographics
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className={`limitation-card ${expandedExample === 'language' ? 'expanded' : ''}`} onClick={() => toggleExample('language')}>
+          <div className="limitation-header">
+            <div className="limitation-icon">🔤</div>
+            <h4>Language Evolution & Context</h4>
+            <div className="expand-icon">{expandedExample === 'language' ? '−' : '+'}</div>
+          </div>
+          <div className="limitation-content">
+            <p>
+              Word meanings change over time, and embeddings capture a static snapshot of language
+              that may gradually become outdated.
+            </p>
+            {expandedExample === 'language' && (
+              <div className="example-box">
+                <div className="example-title">Challenges:</div>
+                <ul>
+                  <li>
+                    <strong>Temporal Drift:</strong> New meanings emerge for existing words (like "viral" or "cloud"), 
+                    which won't be represented in older embeddings
+                  </li>
+                  <li>
+                    <strong>Neologisms:</strong> Newly coined terms may be entirely absent or poorly represented
+                  </li>
+                  <li>
+                    <strong>Contextual Subtlety:</strong> Even contextual embeddings struggle with irony, metaphor, 
+                    and cultural references that require shared background knowledge
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      <div className="limitations-container">
+        <h3>Technical Limitations</h3>
         
         <div className={`limitation-card ${expandedExample === 'embeddings' ? 'expanded' : ''}`} onClick={() => toggleExample('embeddings')}>
           <div className="limitation-header">
@@ -204,9 +305,9 @@ const Disclaimer = () => {
       <div className="insight-box">
         <h3>The Future of Vector Search Technology</h3>
         <p>
-          These limitations represent active areas of research in the vector database and machine learning 
-          communities. Future improvements in embedding models, ANN algorithms, and vector database 
-          technology will continue to address these challenges.
+          Many of these limitations represent active areas of research in the vector database and machine learning 
+          communities. Ongoing work in debiasing embeddings, contextual understanding, and efficient algorithms 
+          continues to address both technical and ethical challenges.
         </p>
         <p>
           Despite these constraints, vector search technologies like those used in Luminode represent a 

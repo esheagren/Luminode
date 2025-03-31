@@ -113,7 +113,7 @@ const AboutPage = () => {
               className={`tab-button ${activeTab === 'limitations' ? 'active' : ''}`}
               onClick={() => setActiveTab('limitations')}
             >
-              Technical Limitations
+              Limitations
             </button>
           </div>
           
@@ -211,7 +211,7 @@ const AboutPage = () => {
           background-color: rgba(26, 26, 46, 0.8);
           border-radius: 12px;
           padding: 2rem;
-          max-width: 900px;
+          max-width: 1000px;
           width: 100%;
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
           backdrop-filter: blur(10px);
