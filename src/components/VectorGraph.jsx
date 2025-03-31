@@ -64,33 +64,43 @@ const VectorGraph = ({
         console.log(`Fetching ${viewMode} coordinates for words:`, uniqueWords);
         
         // Get the vector coordinates for visualization
-        const response = await axios.post(getApiUrl('/api/getVectorCoordinates'), { 
+        const apiUrl = getApiUrl('/api/getVectorCoordinates');
+        console.log('API URL for vectors:', apiUrl);
+        
+        const response = await axios.post(apiUrl, { 
           words: uniqueWords,
           dimensions: viewMode === '3D' ? 3 : 2
         });
         
-        // The backend now includes truncatedVector directly in the response
-        // No need to make individual checkWord calls anymore
-        /*
-        // Now fetch the actual vector data for each word for the tooltips
-        const vectorPromises = uniqueWords.map(async (word) => {
-          try {
-            const vectorResponse = await axios.post(getApiUrl('/api/checkWord'), { word });
-            return {
-              word,
-              vector: vectorResponse.data.data.word.vector
-            };
-          } catch (error) {
-            console.error(`Error fetching vector for ${word}:`, error);
-            return { word, vector: null };
-          }
+        console.log('API response received:', {
+          status: response.status,
+          dataLength: response.data?.data?.length || 0,
+          message: response.data?.message,
+          invalidWords: response.data?.invalidWords || []
         });
+
+        // Check if we have vector data for measurement
+        const vectorStats = response.data.data.reduce((stats, point) => {
+          if (point.measureVector) stats.withMeasureVector++;
+          if (point.truncatedVector) stats.withTruncatedVector++;
+          return stats;
+        }, { withMeasureVector: 0, withTruncatedVector: 0 });
         
-        const vectorResults = await Promise.all(vectorPromises);
-        const vectorMap = Object.fromEntries(
-          vectorResults.map(item => [item.word, item.vector])
-        );
-        */
+        console.log('Vector data stats:', vectorStats, 
+          `${vectorStats.withMeasureVector} of ${response.data.data.length} points have measureVector data (${Math.round(vectorStats.withMeasureVector / response.data.data.length * 100)}%)`);
+
+        // Sample the first point to see its structure
+        if (response.data.data.length > 0) {
+          const samplePoint = response.data.data[0];
+          console.log('Sample point structure:', {
+            word: samplePoint.word,
+            hasMeasureVector: !!samplePoint.measureVector,
+            measureVectorType: samplePoint.measureVector ? typeof samplePoint.measureVector : 'N/A',
+            measureVectorLength: Array.isArray(samplePoint.measureVector) ? samplePoint.measureVector.length : 'N/A',
+            hasTruncatedVector: !!samplePoint.truncatedVector,
+            truncatedVectorType: typeof samplePoint.truncatedVector
+          });
+        }
         
         // Combine coordinate data with cluster info (vector data is already in response.data.data)
         const coordinatesWithDetails = response.data.data.map(point => {

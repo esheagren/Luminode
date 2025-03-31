@@ -454,12 +454,13 @@ class PineconeService {
       console.log(`[PineconeService] PCA completed, generated ${coordinates ? coordinates.length : 'undefined/error'} coordinate sets.`);
 
 
-      // 3. Return combined data including truncated vectors
+      // 3. Return combined data including vectors for measurement
       return {
         words: foundWords,
-        // No longer sending full vectors: vectors: vectors,
+        // Include full vectors for measurement calculations
+        vectors: vectors,
         coordinates: coordinates,
-        truncatedVectors: truncatedVectorStrings // Send the map of word -> truncated string
+        truncatedVectors: truncatedVectorStrings
       };
 
     } catch (error) {

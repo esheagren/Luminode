@@ -332,10 +332,30 @@ const VectorGraph2D = ({
     
     // Enhanced vector extraction with better error handling and debugging
     const extractVector = (vecStr, point) => {
+      // Enhanced debugging
+      console.log('Attempting to extract vector for:', point?.word || 'unknown word');
+    
       // First try to use the measureVector if available (most accurate)
       if (point && point.measureVector && Array.isArray(point.measureVector)) {
         console.log('Using measureVector property:', point.measureVector.length, 'elements');
         return point.measureVector;
+      }
+      
+      // Try to use vectors array if available (fallback for direct JSON conversion)
+      if (point && point.vectors && Array.isArray(point.vectors)) {
+        console.log('Using vectors array property:', point.vectors.length, 'elements');
+        return point.vectors;
+      }
+
+      // Special fallback: If we have coordinates but no vectors, create synthetic vectors
+      // This allows for visual measurement even if real vector data is missing
+      if (point && point.x !== undefined && point.y !== undefined) {
+        const syntheticVector = [point.x, point.y];
+        if (point.z !== undefined) {
+          syntheticVector.push(point.z);
+        }
+        console.log('FALLBACK: Created synthetic vector from coordinates:', syntheticVector);
+        return syntheticVector;
       }
       
       // Debug information about the vector string

@@ -50,15 +50,16 @@ export default async function handler(req, res) {
     
     // Limit number of words to process to prevent excessive memory usage
     const wordsToProcess = words.slice(0, 25); // Limit to 25 words maximum for serverless function
-    console.log(`[API] Processing ${wordsToProcess.length} words for coordinates`);
+    console.log(`[API] Processing ${wordsToProcess.length} words for coordinates: ${wordsToProcess.join(', ')}`);
     
     // Validate dimensions
     const projectionDimensions = dimensions === 3 ? 3 : 2;
     
     // Use the vector service to get coordinates
-    const result = await vectorService.getVectorCoordinates(words, projectionDimensions);
+    const result = await vectorService.getVectorCoordinates(wordsToProcess, projectionDimensions);
+    console.log(`[API] Got result with ${result.words?.length || 0} words and ${result.vectors?.length || 0} vectors`);
     
-    if (result.words.length === 0) {
+    if (!result.words || result.words.length === 0) {
       return res.status(404).json({ 
         error: 'None of the provided words were found in the vocabulary',
         invalidWords: words
@@ -77,8 +78,8 @@ export default async function handler(req, res) {
         // Include truncated vector in string format for visualization
         point.truncatedVector = `[${vector.slice(0, 5).join(', ')}...]`;
         
-        // Include a small subset of the vector for measurement calculations
-        // This reduces payload size while still allowing similarity calculations
+        // Include vector data for measurement calculations
+        // Using 10 dimensions is enough for good similarity calculations while keeping payload small
         point.measureVector = vector.slice(0, 10);
         
         // Log vector information for debugging
@@ -102,6 +103,14 @@ export default async function handler(req, res) {
     
     const invalidWords = words.filter(word => !result.words.includes(word));
     console.log(`[API] Sending response with ${formattedResult.length} points and ${invalidWords.length} invalid words`);
+    
+    // Log vector presence for debugging
+    const vectorStats = formattedResult.reduce((stats, point) => {
+      if (point.measureVector) stats.withVector++;
+      else stats.withoutVector++;
+      return stats;
+    }, { withVector: 0, withoutVector: 0 });
+    console.log(`[API] Vector stats: ${vectorStats.withVector} points with vector, ${vectorStats.withoutVector} without`);
     
     return res.status(200).json({
       message: `Vector coordinates calculated successfully in ${projectionDimensions}D`,
