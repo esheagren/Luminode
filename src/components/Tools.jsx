@@ -30,20 +30,16 @@ const MidpointIcon = () => (
 
 const AnalogyIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 3a2.85 2.85 0 1 1 0 5.7"></path>
-    <path d="M10 13a2.85 2.85 0 1 1 0 5.7"></path>
-    <line x1="10" y1="7" x2="17" y2="7"></line>
-    <line x1="7" y1="13" x2="13" y2="13"></line>
+    <circle cx="7" cy="8" r="2"></circle>
+    <circle cx="7" cy="16" r="2"></circle>
+    <circle cx="17" cy="8" r="2"></circle>
+    <circle cx="17" cy="16" r="2"></circle>
   </svg>
 );
 
 const SliceIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16.5 2.5l-11 19"></path>
-    <path d="M3 15a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
-    <path d="M16 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
-    <path d="M8 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
-    <path d="M20 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="19" x2="19" y2="5"></line>
   </svg>
 );
 
