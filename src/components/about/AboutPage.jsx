@@ -7,6 +7,7 @@ import Disclaimer from './Disclaimer';
 import MiniVisualizer from './MiniVisualizer';
 import InteractiveExamples from './InteractiveExamples';
 import Footer from '../Footer';
+import { Link } from 'react-router-dom';
 
 const AboutPage = () => {
   const containerRef = useRef(null);
@@ -75,7 +76,12 @@ const AboutPage = () => {
       </div>
       
       <div className="content">
-        <h1>About Luminode</h1>
+        <div className="header-container">
+          <h1>About Luminode</h1>
+          <Link to="/app" className="back-button">
+            Back to App
+          </Link>
+        </div>
         
         <div className="about-container">
           <div className="tabs">
@@ -115,6 +121,12 @@ const AboutPage = () => {
             {renderTabContent()}
           </div>
         </div>
+        
+        <div className="bottom-navigation">
+          <Link to="/app" className="back-button large">
+            Return to Application
+          </Link>
+        </div>
       </div>
       
       <Footer />
@@ -146,10 +158,53 @@ const AboutPage = () => {
           color: white;
         }
         
+        .header-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          margin-bottom: 2rem;
+          width: 100%;
+          position: relative;
+        }
+        
         h1 {
           font-size: 3rem;
-          margin-bottom: 2rem;
           text-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+          margin: 0;
+          text-align: center;
+        }
+        
+        .back-button {
+          background-color: rgba(255, 165, 0, 0.2);
+          color: #FFA500;
+          border: 1px solid rgba(255, 165, 0, 0.5);
+          border-radius: 4px;
+          padding: 0.5rem 1rem;
+          font-size: 0.9rem;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          display: inline-block;
+        }
+        
+        .back-button:hover {
+          background-color: rgba(255, 165, 0, 0.3);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .back-button.large {
+          font-size: 1.1rem;
+          padding: 0.75rem 1.5rem;
+          margin: 2rem 0;
+        }
+        
+        .bottom-navigation {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+          margin-top: 2rem;
         }
         
         .about-container {
@@ -227,6 +282,10 @@ const AboutPage = () => {
             text-align: center;
             padding: 0.5rem;
             font-size: 0.9rem;
+          }
+          
+          h1 {
+            font-size: 2.5rem;
           }
         }
       `}</style>
