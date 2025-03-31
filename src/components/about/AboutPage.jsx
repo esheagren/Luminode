@@ -54,7 +54,7 @@ const AboutPage = () => {
         );
       case 'embeddings':
         return <EmbeddingExplanation />;
-      case 'features':
+      case 'technologies':
         return <CoreFunctionalities />;
       case 'examples':
         return isLoaded ? <InteractiveExamples /> : <div className="loading-placeholder">Loading examples...</div>;
@@ -89,13 +89,13 @@ const AboutPage = () => {
               className={`tab-button ${activeTab === 'embeddings' ? 'active' : ''}`}
               onClick={() => setActiveTab('embeddings')}
             >
-              Word Embeddings
+              Vector Embeddings
             </button>
             <button 
-              className={`tab-button ${activeTab === 'features' ? 'active' : ''}`}
-              onClick={() => setActiveTab('features')}
+              className={`tab-button ${activeTab === 'technologies' ? 'active' : ''}`}
+              onClick={() => setActiveTab('technologies')}
             >
-              Features
+              Core Technologies
             </button>
             <button 
               className={`tab-button ${activeTab === 'examples' ? 'active' : ''}`}
@@ -107,7 +107,7 @@ const AboutPage = () => {
               className={`tab-button ${activeTab === 'limitations' ? 'active' : ''}`}
               onClick={() => setActiveTab('limitations')}
             >
-              Limitations
+              Technical Limitations
             </button>
           </div>
           

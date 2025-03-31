@@ -50,15 +50,15 @@ const InteractiveExamples = () => {
   const renderNearestNeighbors = () => {
     return (
       <div className="example-section">
-        <h3>Nearest Neighbor Search</h3>
+        <h3>HNSW Vector Search</h3>
         <p>
-          Discover words that are semantically similar to a query word. This reveals how 
-          the embedding space organizes related concepts.
+          Explore how Luminode uses Hierarchical Navigable Small World (HNSW) graph algorithms to 
+          efficiently find semantically similar concepts in vector space.
         </p>
         
         <div className="interactive-demo">
           <div className="demo-controls">
-            <label>Select a word:</label>
+            <label>Select a query word:</label>
             <div className="select-container">
               <select 
                 value={selectedWord} 
@@ -72,7 +72,8 @@ const InteractiveExamples = () => {
           </div>
           
           <div className="results-container">
-            <h4>Words similar to "{selectedWord}":</h4>
+            <h4>Nearest neighbors to "{selectedWord}" in vector space:</h4>
+            <div className="tech-note">Results ranked by cosine similarity</div>
             <div className="word-cloud">
               {sampleNearestNeighbors[selectedWord].map((word, index) => (
                 <div 
@@ -99,32 +100,30 @@ const InteractiveExamples = () => {
         
         {showTechnicalDetails.nearest && (
           <div className="technical-details">
-            <h4>How It Works</h4>
+            <h4>How Vector Search Works in Luminode</h4>
             <p>
-              Luminode uses two approaches to find nearest neighbors:
+              Luminode implements vector search using:
             </p>
             <ol>
               <li>
-                <strong>Approximate Nearest Neighbors (ANN):</strong> Uses specialized data structures 
-                to quickly find similar words without checking every word in the database. This is 
-                implemented using algorithms like Hierarchical Navigable Small Worlds (HNSW) for 
-                efficient high-dimensional search.
+                <strong>HNSW Graph Algorithm:</strong> Creates a multi-layered graph structure that connects 
+                semantically similar vectors, allowing for efficient navigation through the embedding space 
+                without checking every vector.
               </li>
               <li>
-                <strong>Exact Search:</strong> Computes the cosine similarity between the query word 
-                and every word in the database, then ranks them. This is more precise but computationally 
-                intensive for large vocabularies.
+                <strong>Pinecone Vector Database:</strong> Stores and indexes embedding vectors for efficient 
+                retrieval, with automatic scaling and optimization for ANN search.
+              </li>
+              <li>
+                <strong>Cosine Similarity:</strong> Measures the angle between vectors using:
               </li>
             </ol>
-            <p>
-              The similarity between words is measured using cosine similarity, which compares the 
-              angle between word vectors rather than their magnitude:
-            </p>
             <div className="formula">
               similarity(A, B) = cos(θ) = (A·B) / (||A|| × ||B||)
             </div>
             <p>
-              Where A·B is the dot product of the vectors, and ||A|| and ||B|| are their magnitudes.
+              This enables sub-millisecond search performance even with millions of vectors,
+              making it possible to quickly find content related to any query concept.
             </p>
           </div>
         )}
@@ -135,14 +134,15 @@ const InteractiveExamples = () => {
   const renderMidpointSearch = () => {
     return (
       <div className="example-section">
-        <h3>Recursive Midpoint Search</h3>
+        <h3>Vector Arithmetic Operations</h3>
         <p>
-          Explore the semantic space between words to discover concepts that bridge different ideas.
+          Luminode leverages the mathematical properties of vector embeddings to discover 
+          semantic relationships through vector operations.
         </p>
         
         <div className="interactive-demo">
           <div className="demo-controls">
-            <label>Select word pair:</label>
+            <label>Select vector combination:</label>
             <div className="select-container">
               <select 
                 value={selectedPair} 
@@ -156,7 +156,10 @@ const InteractiveExamples = () => {
           </div>
           
           <div className="results-container">
-            <h4>Words at the midpoint between "{selectedPair.replace('_', ' and ')}":</h4>
+            <h4>Vector midpoint between "{selectedPair.replace('_', ' and ')}":</h4>
+            <div className="tech-note">
+              Using dimensional averaging in embedding space with HNSW search
+            </div>
             <div className="word-cloud">
               {sampleMidpoints[selectedPair].map((word, index) => (
                 <div 
@@ -183,35 +186,32 @@ const InteractiveExamples = () => {
         
         {showTechnicalDetails.midpoint && (
           <div className="technical-details">
-            <h4>How It Works</h4>
+            <h4>Vector Operations in LLaMA Embedding Space</h4>
             <p>
-              The midpoint search works by:
+              Luminode performs semantic exploration through:
             </p>
             <ol>
               <li>
-                <strong>Vector averaging:</strong> Computing the average of the word vectors 
-                (e.g., (vector_ocean + vector_mountain) / 2)
+                <strong>Embedding Transformation:</strong> Converts concepts to high-dimensional LLaMA vectors
               </li>
               <li>
-                <strong>Similarity search:</strong> Finding words whose vectors are closest to 
-                this average vector
+                <strong>Vector Arithmetic:</strong> Combines vectors through mathematical operations:
+                <div className="formula">
+                  V<sub>midpoint</sub> = (V<sub>A</sub> + V<sub>B</sub>) / 2
+                </div>
               </li>
               <li>
-                <strong>Recursive exploration:</strong> Allowing users to continue exploring by 
-                selecting new midpoints between results
+                <strong>Nearest Neighbor Search:</strong> Uses Pinecone's HNSW index to efficiently find 
+                vectors closest to the calculated midpoint
+              </li>
+              <li>
+                <strong>Result Ranking:</strong> Orders results by cosine similarity to the midpoint vector
               </li>
             </ol>
             <p>
-              This technique reveals words that represent a blend of the input concepts, often 
-              showing surprising connections or bridging concepts that might not be immediately 
-              obvious.
+              This technique reveals semantic relationships that wouldn't be discoverable through 
+              traditional keyword search, demonstrating the power of vector-based semantic representations.
             </p>
-            <p>
-              Mathematically, for words A and B with embedding vectors V<sub>A</sub> and V<sub>B</sub>:
-            </p>
-            <div className="formula">
-              V<sub>midpoint</sub> = (V<sub>A</sub> + V<sub>B</sub>) / 2
-            </div>
           </div>
         )}
       </div>
@@ -221,14 +221,15 @@ const InteractiveExamples = () => {
   const renderAnalogies = () => {
     return (
       <div className="example-section">
-        <h3>Word Analogies</h3>
+        <h3>Semantic Analogies in Vector Space</h3>
         <p>
-          Explore how word embeddings can solve analogy problems like "king is to queen as man is to ___?"
+          Explore how LLaMA embeddings capture complex linguistic relationships, allowing 
+          Luminode to solve analogy problems through vector arithmetic.
         </p>
         
         <div className="interactive-demo">
           <div className="demo-controls">
-            <label>Select analogy:</label>
+            <label>Select analogy pattern:</label>
             <div className="select-container">
               <select 
                 value={selectedAnalogy} 
@@ -242,7 +243,10 @@ const InteractiveExamples = () => {
           </div>
           
           <div className="results-container">
-            <h4>Completing the analogy "{selectedAnalogy.replace(/_/g, ' : ').replace(/: ([^:]+)$/, ' : ?')}":</h4>
+            <h4>Vector analogy completion for "{selectedAnalogy.replace(/_/g, ' : ').replace(/: ([^:]+)$/, ' : ?')}":</h4>
+            <div className="tech-note">
+              Using V<sub>result</sub> ≈ V<sub>{selectedAnalogy.split('_')[1]}</sub> - V<sub>{selectedAnalogy.split('_')[0]}</sub> + V<sub>{selectedAnalogy.split('_')[2]}</sub>
+            </div>
             <div className="word-cloud">
               {sampleAnalogies[selectedAnalogy].map((word, index) => (
                 <div 
@@ -269,30 +273,35 @@ const InteractiveExamples = () => {
         
         {showTechnicalDetails.analogy && (
           <div className="technical-details">
-            <h4>How It Works</h4>
+            <h4>Vector-based Analogy Resolution</h4>
             <p>
-              Word analogies are solved using vector arithmetic. For the analogy "A is to B as C is to D", 
-              we can find D using:
+              Analogy completion demonstrates how semantic relationships are encoded as vector transformations 
+              in embedding space. For the analogy "A is to B as C is to D":
             </p>
             <div className="formula">
               V<sub>D</sub> ≈ V<sub>B</sub> - V<sub>A</sub> + V<sub>C</sub>
             </div>
             <p>
-              For example, to solve "king : queen :: man : ?":
-            </p>
-            <div className="formula">
-              V<sub>?</sub> ≈ V<sub>queen</sub> - V<sub>king</sub> + V<sub>man</sub>
-            </div>
-            <p>
-              This works because the vector difference between related pairs (like king and queen) 
-              often captures the relationship between them (in this case, a gender relationship). 
-              Adding this difference to another word (man) shifts it in the same way, resulting in 
-              the analogous word (woman).
+              The vector difference (V<sub>B</sub> - V<sub>A</sub>) captures the semantic relationship between A and B. 
+              Adding this difference to V<sub>C</sub> transforms it in the same way, yielding vectors close to V<sub>D</sub>.
             </p>
             <p>
-              This remarkable property of word embeddings was one of the early discoveries that 
-              demonstrated how these models capture meaningful semantic relationships.
+              Implementation details:
             </p>
+            <ol>
+              <li>
+                <strong>LLaMA Embedding:</strong> Converts words to contextual vectors
+              </li>
+              <li>
+                <strong>Vector Operations:</strong> Performs arithmetic on the high-dimensional vectors
+              </li>
+              <li>
+                <strong>HNSW Search:</strong> Efficiently finds the closest vectors to the result
+              </li>
+              <li>
+                <strong>Filtering:</strong> Applies relevance thresholds to ensure quality matches
+              </li>
+            </ol>
           </div>
         )}
       </div>
@@ -301,10 +310,10 @@ const InteractiveExamples = () => {
   
   return (
     <div className="interactive-examples">
-      <h2>Try Luminode's Core Features</h2>
+      <h2>Explore Luminode's Vector Technologies</h2>
       <p>
-        Explore these interactive examples to get a taste of what Luminode can do. 
-        Each example demonstrates a key functionality of the full application.
+        These interactive examples demonstrate how Luminode's underlying vector technologies enable 
+        powerful semantic search and discovery capabilities.
       </p>
       
       <div className="example-tabs">
@@ -312,19 +321,19 @@ const InteractiveExamples = () => {
           className={`example-tab ${activeExample === 'nearest' ? 'active' : ''}`}
           onClick={() => setActiveExample('nearest')}
         >
-          Nearest Neighbors
+          Vector Search
         </button>
         <button 
           className={`example-tab ${activeExample === 'midpoint' ? 'active' : ''}`}
           onClick={() => setActiveExample('midpoint')}
         >
-          Midpoint Search
+          Vector Arithmetic
         </button>
         <button 
           className={`example-tab ${activeExample === 'analogy' ? 'active' : ''}`}
           onClick={() => setActiveExample('analogy')}
         >
-          Word Analogies
+          Semantic Analogies
         </button>
       </div>
       
@@ -336,8 +345,9 @@ const InteractiveExamples = () => {
       
       <div className="try-full-app">
         <p>
-          These examples use pre-computed results for demonstration. 
-          Try the full Luminode application to explore thousands of words and create your own visualizations!
+          These examples use simplified demonstrations of Luminode's technology stack.
+          The full application implements these capabilities at scale using LLaMA embeddings, 
+          Pinecone vector database, and HNSW approximate nearest neighbor search.
         </p>
       </div>
       
@@ -470,6 +480,13 @@ const InteractiveExamples = () => {
           background-color: rgba(0, 0, 0, 0.2);
           border-radius: 8px;
           padding: 1rem;
+        }
+        
+        .tech-note {
+          font-size: 0.9rem;
+          color: rgba(255, 165, 0, 0.8);
+          font-style: italic;
+          margin: 0.5rem 0;
         }
         
         .word-cloud {

@@ -14,117 +14,187 @@ const Disclaimer = () => {
   return (
     <div className="about-section disclaimer">
       <div className="disclaimer-header">
-        <h2>A Note on Limitations</h2>
+        <h2>Technical Limitations</h2>
         <div className="disclaimer-subtitle">
-          Understanding the alien nature of machine "understanding"
+          Understanding the constraints of vector search technologies
         </div>
       </div>
       
       <p>
-        As you explore Luminode, you may notice that some words appear completely unrelated 
-        despite being placed near each other, or that certain relationships seem counterintuitive 
-        or even incorrect.
+        While Luminode leverages cutting-edge AI technologies to deliver powerful semantic search capabilities, 
+        it's important to understand the inherent limitations of the underlying technologies.
       </p>
       <p>
-        This is not a bug, but rather a reminder of the fundamentally <span className="highlight">alien nature</span> of how 
-        these systems "understand" language. Word embeddings capture statistical patterns in 
-        language use, not human conceptual understanding.
+        These limitations are not bugs but rather <span className="highlight">technical constraints</span> that affect 
+        all systems built on vector embeddings and approximate nearest neighbor search.
       </p>
       
       <div className="limitations-container">
-        <h3>Key Limitations to Keep in Mind</h3>
+        <h3>Key Technical Limitations</h3>
         
-        <div className={`limitation-card ${expandedExample === 'bias' ? 'expanded' : ''}`} onClick={() => toggleExample('bias')}>
+        <div className={`limitation-card ${expandedExample === 'embeddings' ? 'expanded' : ''}`} onClick={() => toggleExample('embeddings')}>
           <div className="limitation-header">
-            <div className="limitation-icon">B</div>
-            <h4>Cultural and Historical Biases</h4>
-            <div className="expand-icon">{expandedExample === 'bias' ? '−' : '+'}</div>
+            <div className="limitation-icon">🧠</div>
+            <h4>LLaMA Embedding Limitations</h4>
+            <div className="expand-icon">{expandedExample === 'embeddings' ? '−' : '+'}</div>
           </div>
           <div className="limitation-content">
             <p>
-              Embeddings are trained on real-world text that contains biases present in society and history.
-              These biases become encoded in the vector space.
+              While LLaMA provides rich contextual embeddings, their quality depends on the model's training data 
+              and understanding of language.
             </p>
-            {expandedExample === 'bias' && (
+            {expandedExample === 'embeddings' && (
               <div className="example-box">
-                <div className="example-title">Example:</div>
-                <p>
-                  Occupation words may show gender biases (e.g., "nurse" might be closer to "woman" than "man"),
-                  reflecting statistical patterns in the training data rather than inherent truths.
-                </p>
+                <div className="example-title">Technical Details:</div>
+                <ul>
+                  <li>
+                    <strong>Training Data Biases:</strong> Embeddings may reflect biases present in the training corpus
+                  </li>
+                  <li>
+                    <strong>Domain-Specific Knowledge:</strong> Performance varies based on domain representation in training
+                  </li>
+                  <li>
+                    <strong>Out-of-Domain Queries:</strong> Novel concepts or specialized terminology may be poorly embedded
+                  </li>
+                  <li>
+                    <strong>Language Limitations:</strong> Performance degrades for non-English languages and multilingual content
+                  </li>
+                </ul>
               </div>
             )}
           </div>
         </div>
         
-        <div className={`limitation-card ${expandedExample === 'polysemy' ? 'expanded' : ''}`} onClick={() => toggleExample('polysemy')}>
+        <div className={`limitation-card ${expandedExample === 'ann' ? 'expanded' : ''}`} onClick={() => toggleExample('ann')}>
           <div className="limitation-header">
-            <div className="limitation-icon">P</div>
-            <h4>Polysemy (Multiple Meanings)</h4>
-            <div className="expand-icon">{expandedExample === 'polysemy' ? '−' : '+'}</div>
+            <div className="limitation-icon">🔍</div>
+            <h4>Approximate Nearest Neighbor Trade-offs</h4>
+            <div className="expand-icon">{expandedExample === 'ann' ? '−' : '+'}</div>
           </div>
           <div className="limitation-content">
             <p>
-              Words with multiple meanings are represented by a single vector, which must somehow
-              capture all possible senses of the word.
+              HNSW search provides near-instant results but sacrifices some accuracy compared to brute-force search,
+              resulting in a precision-speed trade-off.
             </p>
-            {expandedExample === 'polysemy' && (
+            {expandedExample === 'ann' && (
               <div className="example-box">
-                <div className="example-title">Example:</div>
-                <p>
-                  The word "bank" has to represent both "financial institution" and "river bank" in a single vector.
-                  This can lead to unexpected placements where "bank" might appear near both "money" and "river".
-                </p>
+                <div className="example-title">Technical Details:</div>
+                <ul>
+                  <li>
+                    <strong>Approximate Results:</strong> Some true nearest neighbors might be missed (typically 5-10%)
+                  </li>
+                  <li>
+                    <strong>Parameter Sensitivity:</strong> Performance depends on proper index configuration (M, ef_construction, ef_search)
+                  </li>
+                  <li>
+                    <strong>Memory Requirements:</strong> HNSW indices use more memory than some other ANN algorithms
+                  </li>
+                  <li>
+                    <strong>Update Complexity:</strong> Dynamic insertion is more complex than in some other index structures
+                  </li>
+                </ul>
               </div>
             )}
           </div>
         </div>
         
-        <div className={`limitation-card ${expandedExample === 'reduction' ? 'expanded' : ''}`} onClick={() => toggleExample('reduction')}>
+        <div className={`limitation-card ${expandedExample === 'cosine' ? 'expanded' : ''}`} onClick={() => toggleExample('cosine')}>
           <div className="limitation-header">
-            <div className="limitation-icon">D</div>
-            <h4>Dimensionality Reduction</h4>
-            <div className="expand-icon">{expandedExample === 'reduction' ? '−' : '+'}</div>
+            <div className="limitation-icon">📐</div>
+            <h4>Cosine Similarity Constraints</h4>
+            <div className="expand-icon">{expandedExample === 'cosine' ? '−' : '+'}</div>
           </div>
           <div className="limitation-content">
             <p>
-              Visualizing high-dimensional vectors in 2D or 3D necessarily loses information,
-              so some relationships visible in the full embedding space may be obscured.
+              While cosine similarity is well-suited for semantic search, it has limitations in capturing
+              certain types of relationships between concepts.
             </p>
-            {expandedExample === 'reduction' && (
+            {expandedExample === 'cosine' && (
               <div className="example-box">
-                <div className="example-title">Example:</div>
-                <p>
-                  Two words might appear far apart in a 2D visualization but could be very close in the
-                  original 300-dimensional space along dimensions not captured in the projection.
-                </p>
+                <div className="example-title">Technical Details:</div>
+                <ul>
+                  <li>
+                    <strong>Magnitude Insensitivity:</strong> Ignores vector length which might contain useful information
+                  </li>
+                  <li>
+                    <strong>Symmetric Measurement:</strong> Direction of relationship is not captured (A→B same as B→A)
+                  </li>
+                  <li>
+                    <strong>Linear Relationships:</strong> Complex, non-linear relationships may not be well-represented
+                  </li>
+                  <li>
+                    <strong>False Connections:</strong> May detect similarities between unrelated concepts that share context
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className={`limitation-card ${expandedExample === 'pca' ? 'expanded' : ''}`} onClick={() => toggleExample('pca')}>
+          <div className="limitation-header">
+            <div className="limitation-icon">📊</div>
+            <h4>Dimensionality Reduction Information Loss</h4>
+            <div className="expand-icon">{expandedExample === 'pca' ? '−' : '+'}</div>
+          </div>
+          <div className="limitation-content">
+            <p>
+              PCA visualization necessarily discards information from the original high-dimensional space,
+              potentially obscuring certain relationships.
+            </p>
+            {expandedExample === 'pca' && (
+              <div className="example-box">
+                <div className="example-title">Technical Details:</div>
+                <ul>
+                  <li>
+                    <strong>Variance Focus:</strong> PCA captures dimensions with highest variance, not necessarily semantic meaning
+                  </li>
+                  <li>
+                    <strong>Linear Projection:</strong> Cannot represent non-linear manifolds in the data effectively
+                  </li>
+                  <li>
+                    <strong>Projection Distortion:</strong> Distance relationships in visualization don't match original space
+                  </li>
+                  <li>
+                    <strong>Feature Interpretation:</strong> Principal components often blend multiple original features, making interpretation difficult
+                  </li>
+                </ul>
                 <div className="visual-hint">
-                  Imagine trying to represent a 3D object like a sphere with just a 2D circle —
-                  you lose information about depth.
+                  Important semantic relationships may exist along dimensions not captured in the visualization.
                 </div>
               </div>
             )}
           </div>
         </div>
         
-        <div className={`limitation-card ${expandedExample === 'context' ? 'expanded' : ''}`} onClick={() => toggleExample('context')}>
+        <div className={`limitation-card ${expandedExample === 'scale' ? 'expanded' : ''}`} onClick={() => toggleExample('scale')}>
           <div className="limitation-header">
-            <div className="limitation-icon">C</div>
-            <h4>Context-Free Representation</h4>
-            <div className="expand-icon">{expandedExample === 'context' ? '−' : '+'}</div>
+            <div className="limitation-icon">⚖️</div>
+            <h4>Scaling Challenges</h4>
+            <div className="expand-icon">{expandedExample === 'scale' ? '−' : '+'}</div>
           </div>
           <div className="limitation-content">
             <p>
-              Traditional word embeddings don't capture how word meaning changes based on surrounding words.
-              Each word has a fixed representation regardless of context.
+              Vector databases face technical challenges when scaling to extremely large datasets 
+              with billions of vectors.
             </p>
-            {expandedExample === 'context' && (
+            {expandedExample === 'scale' && (
               <div className="example-box">
-                <div className="example-title">Example:</div>
-                <p>
-                  The word "light" has the same vector whether it means "not heavy" or "electromagnetic radiation".
-                  More modern language models like BERT and GPT address this limitation with contextual embeddings.
-                </p>
+                <div className="example-title">Technical Details:</div>
+                <ul>
+                  <li>
+                    <strong>Memory Consumption:</strong> High-quality indices require significant RAM
+                  </li>
+                  <li>
+                    <strong>Query Latency:</strong> Performance can degrade with very large collections
+                  </li>
+                  <li>
+                    <strong>Index Build Time:</strong> Initial indexing of large collections can be time-consuming
+                  </li>
+                  <li>
+                    <strong>Distributed Coordination:</strong> Maintaining consistency across shards adds complexity
+                  </li>
+                </ul>
               </div>
             )}
           </div>
@@ -132,17 +202,16 @@ const Disclaimer = () => {
       </div>
       
       <div className="insight-box">
-        <h3>The Value of Limitations</h3>
+        <h3>The Future of Vector Search Technology</h3>
         <p>
-          These limitations make Luminode not just a tool for exploring language, but also 
-          for understanding the gap between human and machine comprehension. The surprising, 
-          unexpected, or seemingly incorrect relationships you discover can be the most 
-          enlightening, revealing how differently these systems process meaning compared to 
-          human intuition.
+          These limitations represent active areas of research in the vector database and machine learning 
+          communities. Future improvements in embedding models, ANN algorithms, and vector database 
+          technology will continue to address these challenges.
         </p>
         <p>
-          By exploring these "alien" patterns of understanding, we gain insight into both 
-          the power and limitations of computational approaches to language.
+          Despite these constraints, vector search technologies like those used in Luminode represent a 
+          revolutionary approach to information retrieval that significantly outperforms traditional 
+          keyword-based search in many real-world applications.
         </p>
       </div>
 
@@ -316,6 +385,20 @@ const Disclaimer = () => {
         
         .insight-box p:last-child {
           margin-bottom: 0;
+        }
+        
+        ul {
+          margin-left: 1.5rem;
+          margin-bottom: 0.5rem;
+        }
+        
+        li {
+          margin-bottom: 0.5rem;
+          font-size: 1rem;
+        }
+        
+        strong {
+          color: #FFA500;
         }
       `}</style>
     </div>

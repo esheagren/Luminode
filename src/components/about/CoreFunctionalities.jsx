@@ -413,25 +413,33 @@ const CoreFunctionalities = () => {
   
   return (
     <div className="about-section">
-      <h2>Core Functionalities</h2>
+      <h2>Core Technologies</h2>
       <p>
-        Luminode offers several powerful tools to help you explore word embeddings and 
-        discover semantic relationships:
+        Luminode combines several cutting-edge AI and vector search technologies to deliver 
+        powerful semantic search and exploration capabilities:
       </p>
 
       <div className="functionality-section">
-        <h3>Spatial Visualization (2D & 3D)</h3>
+        <h3>Dimensionality Reduction with PCA</h3>
         <div className="content-with-visual">
           <div className="text-content">
             <p>
-              Luminode renders word relationships spatially in both 2D and 3D using Principal Component 
-              Analysis (PCA). This technique reduces the high-dimensional embedding space (typically 
-              300 dimensions) down to 2 or 3 dimensions that you can visualize.
+              Luminode uses <span className="highlight">Principal Component Analysis (PCA)</span> to transform high-dimensional 
+              embeddings (hundreds of dimensions) into visualizable 2D or 3D representations.
             </p>
             <p>
-              This allows you to see at a glance how words cluster together based on meaning, revealing 
-              patterns that would be impossible to detect by looking at the raw numbers.
+              PCA works by identifying the directions (principal components) that capture the maximum variance 
+              in the data, effectively preserving the most important relationships while reducing dimensions.
             </p>
+            <div className="tech-details">
+              <h4>Technical Details:</h4>
+              <ul>
+                <li>Maintains linear relationships between embeddings</li>
+                <li>Computationally efficient for large datasets</li>
+                <li>Preserves global structure better than t-SNE or UMAP</li>
+                <li>Helps reduce noise in the underlying embeddings</li>
+              </ul>
+            </div>
           </div>
           <div className="visual-demo">
             <div className="canvas-container">
@@ -444,29 +452,33 @@ const CoreFunctionalities = () => {
               />
             </div>
             <div className="visual-caption">
-              Words with similar meanings cluster together in the embedding space
+              PCA projection showing semantic clusters in the embedding space
             </div>
           </div>
         </div>
       </div>
 
       <div className="functionality-section">
-        <h3>Nearest Neighbor Search</h3>
+        <h3>HNSW-Powered Nearest Neighbor Search</h3>
         <div className="content-with-visual">
           <div className="text-content">
             <p>
-              Discover words that are semantically similar to your query using two approaches:
+              Luminode leverages the <span className="highlight">Hierarchical Navigable Small World (HNSW)</span> graph 
+              algorithm to perform lightning-fast approximate nearest neighbor searches in the embedding space.
             </p>
-            <ul>
-              <li>
-                <strong>Approximate Nearest Neighbors (ANN):</strong> A fast search method that quickly 
-                finds similar words, ideal for exploration and discovery.
-              </li>
-              <li>
-                <strong>Exact Search:</strong> A more precise but computationally intensive method that 
-                finds the mathematically closest words in the embedding space.
-              </li>
-            </ul>
+            <p>
+              HNSW creates multi-layered graphs where semantically similar items are connected, allowing Luminode 
+              to quickly navigate to the most relevant results without scanning the entire database.
+            </p>
+            <div className="tech-details">
+              <h4>Technical Details:</h4>
+              <ul>
+                <li>Sub-linear query time (logarithmic complexity)</li>
+                <li>High recall rate (typically 90-100% of exact search results)</li>
+                <li>Optimized for high-dimensional vector search</li>
+                <li>Integrated with Pinecone vector database for production performance</li>
+              </ul>
+            </div>
           </div>
           <div className="visual-demo">
             <div className="select-container">
@@ -490,25 +502,34 @@ const CoreFunctionalities = () => {
               />
             </div>
             <div className="visual-caption">
-              Finding words similar to "{selectedWord}" in the embedding space
+              Visualization of nearest neighbors to "{selectedWord}" using HNSW-based search
             </div>
           </div>
         </div>
       </div>
 
       <div className="functionality-section">
-        <h3>Recursive Midpoint Search</h3>
+        <h3>Vector Space Manipulation</h3>
         <div className="content-with-visual">
           <div className="text-content">
             <p>
-              This unique feature allows you to explore the "semantic midpoint" between two or more words. 
-              By taking cross-sections of the embedding space, you can discover concepts that bridge 
-              different ideas or represent a blend of multiple concepts.
+              Luminode enables semantic exploration through <span className="highlight">vector arithmetic</span> operations 
+              in the embedding space. By treating word meanings as vectors, we can manipulate and combine 
+              concepts mathematically.
             </p>
             <p>
-              For example, the midpoint between "science" and "art" might reveal words related to 
-              design, creativity, and innovation.
+              One powerful application is finding the semantic midpoint between concepts, revealing 
+              words that bridge different domains or represent hybrid ideas.
             </p>
+            <div className="tech-details">
+              <h4>Technical Implementation:</h4>
+              <ul>
+                <li>Vector averaging to find semantic midpoints</li>
+                <li>Multiple interpolation methods (linear, spherical)</li>
+                <li>Adjustable weighting for concept blending</li>
+                <li>Filtered by distance thresholds for relevance</li>
+              </ul>
+            </div>
           </div>
           <div className="visual-demo">
             <div className="canvas-container">
@@ -521,25 +542,38 @@ const CoreFunctionalities = () => {
               />
             </div>
             <div className="visual-caption">
-              The midpoint between "science" and "art" reveals bridging concepts
+              Vector midpoint between "science" and "art" reveals interdisciplinary concepts
             </div>
           </div>
         </div>
       </div>
 
       <div className="functionality-section">
-        <h3>Semantic Distance Measurement</h3>
+        <h3>Cosine Similarity Measurement</h3>
         <div className="content-with-visual">
           <div className="text-content">
             <p>
-              Luminode includes a "ruler" tool that measures the semantic distance between words using 
-              cosine similarity. This mathematical measure reveals how closely related two words are in 
-              the embedding space.
+              Luminode uses <span className="highlight">cosine similarity</span> as its primary metric for comparing 
+              embedding vectors. This measures the angle between vectors rather than their magnitude.
             </p>
             <p>
-              Words with a cosine similarity close to 1 are very similar in meaning, while those closer 
-              to 0 have little semantic relationship.
+              Cosine similarity is particularly well-suited for text embeddings because it focuses on the 
+              direction (semantic orientation) of vectors while being less sensitive to vector length.
             </p>
+            <div className="tech-details">
+              <h4>Mathematical Formula:</h4>
+              <div className="formula">
+                similarity(A,B) = cos(θ) = (A·B)/(||A||·||B||)
+              </div>
+              <p className="formula-explanation">
+                Where A·B is the dot product, and ||A|| and ||B|| are the vector magnitudes
+              </p>
+              <ul className="formula-properties">
+                <li>Range: -1 (opposite) to 1 (identical)</li>
+                <li>Less affected by the "curse of dimensionality"</li>
+                <li>Effective for sparse high-dimensional vectors</li>
+              </ul>
+            </div>
           </div>
           <div className="visual-demo">
             <div className="canvas-container">
@@ -552,26 +586,83 @@ const CoreFunctionalities = () => {
               />
             </div>
             <div className="visual-caption">
-              Measuring semantic similarity between "king" and "queen"
+              Cosine similarity measurement between "king" and "queen" vectors
             </div>
           </div>
         </div>
       </div>
 
       <div className="functionality-section">
-        <h3>Word Analogies</h3>
+        <h3>Vector Database (Pinecone)</h3>
         <p>
-          Explore analogical relationships between words, such as "king is to queen as man is to woman." 
-          This functionality demonstrates how word embeddings capture complex linguistic relationships 
-          and can be used to solve analogy problems.
+          Luminode is powered by <span className="highlight">Pinecone</span>, a cloud-native vector database optimized 
+          for similarity search at scale. This enables Luminode to:
         </p>
+        <div className="tech-box">
+          <div className="tech-box-item">
+            <div className="tech-icon">⚡</div>
+            <div className="tech-description">
+              <h4>High-Performance Search</h4>
+              <p>Execute complex semantic queries in milliseconds, even with millions of vectors</p>
+            </div>
+          </div>
+          <div className="tech-box-item">
+            <div className="tech-icon">🔍</div>
+            <div className="tech-description">
+              <h4>Metadata Filtering</h4>
+              <p>Combine semantic similarity with traditional filters (date, category, author, etc.)</p>
+            </div>
+          </div>
+          <div className="tech-box-item">
+            <div className="tech-icon">📊</div>
+            <div className="tech-description">
+              <h4>Dynamic Indexing</h4>
+              <p>Automatically update and re-index as new content is added to the knowledge base</p>
+            </div>
+          </div>
+          <div className="tech-box-item">
+            <div className="tech-icon">🔄</div>
+            <div className="tech-description">
+              <h4>Horizontal Scaling</h4>
+              <p>Seamlessly handle growing data volumes through distributed architecture</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="functionality-section">
+        <h3>LLaMA Embedding Architecture</h3>
         <p>
-          By manipulating vectors (adding and subtracting word embeddings), Luminode can find words 
-          that complete analogies, offering insights into how language models represent relationships.
+          At the foundation of Luminode is <span className="highlight">LLaMA</span>, a state-of-the-art language model from Meta AI 
+          that provides rich contextual embeddings for semantic understanding.
         </p>
-        <div className="analogy-example">
-          <div className="analogy-formula">
-            <span className="analogy-word">king</span> - <span className="analogy-word">man</span> + <span className="analogy-word">woman</span> ≈ <span className="analogy-result">queen</span>
+        <div className="architecture-diagram">
+          <div className="architecture-layer">
+            <div className="layer-label">User Input</div>
+            <div className="layer-box user-input">
+              <span>"What's the impact of climate change on coastal cities?"</span>
+            </div>
+          </div>
+          <div className="architecture-arrow">↓</div>
+          <div className="architecture-layer">
+            <div className="layer-label">LLaMA Embedding</div>
+            <div className="layer-box embedding">
+              <span>Contextual Vector [768 dimensions]</span>
+            </div>
+          </div>
+          <div className="architecture-arrow">↓</div>
+          <div className="architecture-layer">
+            <div className="layer-label">HNSW Search (Pinecone)</div>
+            <div className="layer-box search">
+              <span>Finding similar vectors through navigable graph</span>
+            </div>
+          </div>
+          <div className="architecture-arrow">↓</div>
+          <div className="architecture-layer">
+            <div className="layer-label">Results</div>
+            <div className="layer-box results">
+              <span>Semantically relevant documents ranked by cosine similarity</span>
+            </div>
           </div>
         </div>
       </div>
@@ -595,6 +686,13 @@ const CoreFunctionalities = () => {
           font-size: 1.4rem;
         }
         
+        h4 {
+          color: #FFA500;
+          margin-top: 0.8rem;
+          margin-bottom: 0.5rem;
+          font-size: 1.1rem;
+        }
+        
         p {
           line-height: 1.6;
           margin-bottom: 1rem;
@@ -612,8 +710,9 @@ const CoreFunctionalities = () => {
           font-size: 1.1rem;
         }
         
-        strong {
+        .highlight {
           color: #FFA500;
+          font-weight: bold;
         }
         
         .functionality-section {
@@ -679,36 +778,150 @@ const CoreFunctionalities = () => {
           cursor: pointer;
         }
         
-        .analogy-example {
+        .tech-details {
+          background-color: rgba(0, 0, 0, 0.3);
+          border-radius: 8px;
+          padding: 1rem;
+          margin-top: 1rem;
+          border-left: 3px solid rgba(255, 165, 0, 0.5);
+        }
+        
+        .tech-details h4 {
+          margin-top: 0;
+        }
+        
+        .tech-details ul {
+          margin-bottom: 0;
+        }
+        
+        .formula {
+          background-color: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+          padding: 0.8rem;
+          text-align: center;
+          font-family: 'Courier New', monospace;
+          font-size: 1.1rem;
+          margin: 1rem 0;
+        }
+        
+        .formula-explanation {
+          font-size: 0.9rem;
+          color: rgba(255, 255, 255, 0.7);
+          text-align: center;
+          margin: 0.5rem 0 1rem;
+          font-style: italic;
+        }
+        
+        .formula-properties {
+          font-size: 0.95rem;
+        }
+        
+        .tech-box {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1.5rem;
+          margin-top: 1.5rem;
+        }
+        
+        .tech-box-item {
           background-color: rgba(0, 0, 0, 0.3);
           border-radius: 8px;
           padding: 1.5rem;
-          margin-top: 1rem;
-          text-align: center;
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          transition: all 0.3s ease;
         }
         
-        .analogy-formula {
-          font-family: monospace;
-          font-size: 1.2rem;
-          color: white;
+        .tech-box-item:hover {
+          border-color: rgba(255, 165, 0, 0.3);
+          transform: translateY(-3px);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
-        .analogy-word {
-          color: #FFA500;
-          font-weight: bold;
-          padding: 0.3rem 0.6rem;
+        .tech-icon {
+          font-size: 1.8rem;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           background-color: rgba(255, 165, 0, 0.1);
-          border-radius: 4px;
-          margin: 0 0.3rem;
+          border-radius: 50%;
+          flex-shrink: 0;
         }
         
-        .analogy-result {
-          color: #FFA500;
-          font-weight: bold;
-          padding: 0.3rem 0.6rem;
-          background-color: rgba(255, 165, 0, 0.3);
+        .tech-description {
+          flex: 1;
+        }
+        
+        .tech-description h4 {
+          margin-top: 0;
+          margin-bottom: 0.5rem;
+        }
+        
+        .tech-description p {
+          font-size: 1rem;
+          margin-bottom: 0;
+        }
+        
+        .architecture-diagram {
+          background-color: rgba(0, 0, 0, 0.3);
+          border-radius: 8px;
+          padding: 2rem;
+          margin-top: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        
+        .architecture-layer {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+          max-width: 500px;
+        }
+        
+        .layer-label {
+          font-size: 0.9rem;
+          color: rgba(255, 255, 255, 0.7);
+          margin-bottom: 0.5rem;
+        }
+        
+        .layer-box {
+          padding: 1rem;
           border-radius: 4px;
-          margin: 0 0.3rem;
+          width: 100%;
+          text-align: center;
+          font-size: 1rem;
+        }
+        
+        .user-input {
+          background-color: rgba(255, 165, 0, 0.1);
+          border: 1px solid rgba(255, 165, 0, 0.3);
+        }
+        
+        .embedding {
+          background-color: rgba(33, 150, 243, 0.1);
+          border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+        
+        .search {
+          background-color: rgba(76, 175, 80, 0.1);
+          border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        
+        .results {
+          background-color: rgba(156, 39, 176, 0.1);
+          border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+        
+        .architecture-arrow {
+          font-size: 1.5rem;
+          color: rgba(255, 255, 255, 0.5);
         }
         
         @media (max-width: 768px) {
@@ -719,6 +932,10 @@ const CoreFunctionalities = () => {
           
           .text-content, .visual-demo {
             width: 100%;
+          }
+          
+          .tech-box {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>

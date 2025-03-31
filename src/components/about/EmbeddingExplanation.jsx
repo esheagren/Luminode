@@ -134,27 +134,42 @@ const EmbeddingExplanation = () => {
   const renderConceptTab = () => {
     return (
       <div className="tab-content">
-        <h3>What Are Word Embeddings?</h3>
+        <h3>Vector Embeddings Explained</h3>
         <p>
-          Word embeddings are a fundamental concept for understanding how large language models work. 
-          They are mathematical representations of words in a multi-dimensional space, where each word 
-          is represented as a vector (a list of numbers).
+          Vector embeddings are the foundation of modern AI language understanding. They transform words, 
+          sentences, or entire documents into numerical vectors in a high-dimensional space, enabling 
+          machines to process meaning mathematically.
         </p>
         <p>
-          Unlike traditional dictionaries that define words using other words, embeddings capture meaning 
-          based on how words are used in context. Words that appear in similar contexts will have similar 
-          embeddings, positioned closer together in the vector space.
-        </p>
-        <p>
-          For example, the words "king" and "queen" might be close to each other because they share 
-          similar contexts, while both might be somewhat distant from "apple" or "bicycle."
+          In this "semantic space," items with similar meanings are positioned closer together. Instead of treating 
+          words as isolated symbols, embeddings capture relationships based on context and usage patterns in large 
+          text corpora.
         </p>
         
         <div className="vector-example">
-          <h4>Example: Word as a Vector</h4>
+          <h4>Example: Embedding as a Vector</h4>
           <div className="vector-box">
-            <div className="word-label">king = [0.123, -0.456, 0.789, 0.012, -0.345, ... ]</div>
-            <div className="vector-note">A typical word embedding has 300 dimensions</div>
+            <div className="word-label">
+              "machine learning" = [0.123, -0.456, 0.789, 0.012, -0.345, ... ]
+            </div>
+            <div className="vector-note">
+              LLaMA embeddings typically have hundreds of dimensions, each capturing different semantic aspects
+            </div>
+            
+            {showFullVector ? (
+              <div className="full-vector">
+                <p>Full vector (first 20 dimensions):</p>
+                <code>[0.123, -0.456, 0.789, 0.012, -0.345, 0.678, -0.901, 0.234, -0.567, 0.890, 
+                       -0.123, 0.456, -0.789, -0.012, 0.345, -0.678, 0.901, -0.234, 0.567, -0.890, ...]</code>
+                <button className="toggle-vector" onClick={() => setShowFullVector(false)}>
+                  Show Less
+                </button>
+              </div>
+            ) : (
+              <button className="toggle-vector" onClick={() => setShowFullVector(true)}>
+                Show Example Vector
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -166,79 +181,118 @@ const EmbeddingExplanation = () => {
       <div className="tab-content">
         <h3>Visualizing Embeddings</h3>
         <p>
-          To make word embeddings understandable, Luminode projects them from their high-dimensional 
-          space (typically 300 dimensions) down to 2D or 3D using techniques like Principal Component 
-          Analysis (PCA).
+          To make high-dimensional embeddings understandable, Luminode projects them from their native space 
+          (typically hundreds of dimensions) down to 2D or 3D using dimensionality reduction techniques.
         </p>
         <p>
-          This allows you to see at a glance how words cluster together based on meaning, revealing 
-          patterns that would be impossible to detect by looking at the raw numbers.
+          Luminode uses <span className="highlight">Principal Component Analysis (PCA)</span> to find the most 
+          informative dimensions in the data, preserving as much variance as possible in the reduced representation. 
+          This allows users to visually explore semantic relationships that would otherwise remain hidden in the 
+          high-dimensional space.
         </p>
         
         <div className="visual-example">
           <div className="visual-note">
-            In a visualization, similar words appear closer together:
+            <span className="highlight">How dimensionality reduction works:</span>
           </div>
-          <div className="word-clusters">
-            <div className="cluster">
-              <div className="cluster-label">Animals</div>
-              <div className="cluster-words">
-                <span className="cluster-word">dog</span>
-                <span className="cluster-word">cat</span>
-                <span className="cluster-word">animal</span>
+          <div className="dimension-steps">
+            <div className="step">
+              <div className="step-number">1</div>
+              <div className="step-description">
+                <span className="step-title">High-dimensional Space</span>
+                <p>Embeddings exist in hundreds of dimensions, impossible to visualize directly</p>
               </div>
             </div>
-            <div className="cluster">
-              <div className="cluster-label">Royalty</div>
-              <div className="cluster-words">
-                <span className="cluster-word">king</span>
-                <span className="cluster-word">queen</span>
-                <span className="cluster-word">royal</span>
+            <div className="step">
+              <div className="step-number">2</div>
+              <div className="step-description">
+                <span className="step-title">Find Principal Components</span>
+                <p>PCA identifies the directions with maximum variance in the data</p>
               </div>
             </div>
-            <div className="cluster">
-              <div className="cluster-label">Technology</div>
-              <div className="cluster-words">
-                <span className="cluster-word">computer</span>
-                <span className="cluster-word">software</span>
-                <span className="cluster-word">digital</span>
+            <div className="step">
+              <div className="step-number">3</div>
+              <div className="step-description">
+                <span className="step-title">Project to Lower Dimensions</span>
+                <p>Data is projected onto 2-3 dimensions while preserving relationships</p>
               </div>
             </div>
+          </div>
+          
+          <div className="comparison-note">
+            <p>
+              <span className="highlight">Note:</span> Some relationships visible in the full embedding space may 
+              be lost in the projection. Alternative techniques like t-SNE or UMAP could reveal different aspects 
+              of the data structure.
+            </p>
           </div>
         </div>
       </div>
     );
   };
   
-  const renderGloveTab = () => {
+  const renderEmbeddingTypesTab = () => {
     return (
       <div className="tab-content">
-        <h3>GloVe Embeddings</h3>
-        <p>
-          Luminode uses GloVe (Global Vectors for Word Representation) embeddings, which are created by 
-          analyzing patterns in vast amounts of text. These embeddings capture rich semantic relationships 
-          between words, including:
-        </p>
-        <ul>
-          <li>Synonyms and related concepts</li>
-          <li>Analogical relationships (e.g., "man is to woman as king is to queen")</li>
-          <li>Hierarchical relationships</li>
-          <li>Cultural associations</li>
-        </ul>
-        <p>
-          By visualizing these embeddings, Luminode makes abstract mathematical concepts tangible and 
-          explorable, offering insights into how machines "understand" language.
-        </p>
+        <h3>Types of Embeddings</h3>
         
-        <div className="glove-info">
-          <h4>How GloVe Works</h4>
+        <div className="embedding-type">
+          <h4>LLaMA: Contextual Embeddings (Used by Luminode)</h4>
           <p>
-            GloVe embeddings are created by analyzing how often words appear together in a large corpus of text.
-            Words that frequently appear in similar contexts will have similar vector representations.
+            Luminode leverages <span className="highlight">LLaMA (Large Language Model Meta AI)</span> to generate 
+            rich, contextual embeddings that capture the nuanced meaning of text.
           </p>
+          <div className="embedding-details">
+            <ul>
+              <li>
+                <strong>Context-aware:</strong> The same word has different embeddings depending on surrounding text, 
+                capturing nuances of meaning
+              </li>
+              <li>
+                <strong>Foundation model:</strong> Trained on massive text corpora, capturing deep semantic relationships
+              </li>
+              <li>
+                <strong>Transformer-based:</strong> Uses attention mechanisms to understand relationships between words
+              </li>
+              <li>
+                <strong>High dimensionality:</strong> Typically hundreds of dimensions per embedding
+              </li>
+            </ul>
+            
+            <div className="example-box">
+              <div className="example-title">Example: Context Changes Meaning</div>
+              <p>The word "bank" has different embeddings in:</p>
+              <ul className="example-list">
+                <li>"I deposited money at the bank" (financial institution)</li>
+                <li>"We sat by the river bank" (shoreline)</li>
+              </ul>
+              <p>Contextual embeddings capture these distinct meanings appropriately.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="embedding-type secondary">
+          <h4>GloVe: Static Word Embeddings</h4>
           <p>
-            This allows the embeddings to capture semantic relationships without explicit human supervision.
+            Prior to contextual models, static embeddings like <span className="highlight">GloVe (Global Vectors for Word Representation)</span> 
+            were widely used and are still relevant for understanding how word meanings are captured mathematically.
           </p>
+          <div className="embedding-details">
+            <ul>
+              <li>
+                <strong>Static vectors:</strong> Each word has a single fixed vector regardless of context
+              </li>
+              <li>
+                <strong>Co-occurrence based:</strong> Created by analyzing how often words appear together
+              </li>
+              <li>
+                <strong>Efficient but limited:</strong> Simpler than contextual models but miss nuanced uses
+              </li>
+              <li>
+                <strong>Linear relationships:</strong> Famous for capturing analogies like "king - man + woman ≈ queen"
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     );
@@ -246,7 +300,7 @@ const EmbeddingExplanation = () => {
   
   return (
     <div className="about-section">
-      <h2>Understanding Word Embeddings</h2>
+      <h2>Understanding Vector Embeddings</h2>
       
       <div className="embedding-tabs">
         <button 
@@ -262,17 +316,17 @@ const EmbeddingExplanation = () => {
           Visualization
         </button>
         <button 
-          className={`embedding-tab ${activeTab === 'glove' ? 'active' : ''}`}
-          onClick={() => setActiveTab('glove')}
+          className={`embedding-tab ${activeTab === 'types' ? 'active' : ''}`}
+          onClick={() => setActiveTab('types')}
         >
-          GloVe Embeddings
+          Embedding Types
         </button>
       </div>
       
       <div className="embedding-content">
         {activeTab === 'concept' && renderConceptTab()}
         {activeTab === 'visualization' && renderVisualizationTab()}
-        {activeTab === 'glove' && renderGloveTab()}
+        {activeTab === 'types' && renderEmbeddingTypesTab()}
       </div>
 
       <style jsx="true">{`
@@ -388,6 +442,44 @@ const EmbeddingExplanation = () => {
           font-size: 0.9rem;
         }
         
+        .toggle-vector {
+          background-color: rgba(255, 165, 0, 0.2);
+          border: 1px solid rgba(255, 165, 0, 0.5);
+          color: white;
+          border-radius: 4px;
+          padding: 0.3rem 0.6rem;
+          margin-top: 1rem;
+          cursor: pointer;
+          font-size: 0.9rem;
+          transition: all 0.3s ease;
+        }
+        
+        .toggle-vector:hover {
+          background-color: rgba(255, 165, 0, 0.3);
+        }
+        
+        .full-vector {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .full-vector p {
+          margin-bottom: 0.5rem;
+          font-size: 0.9rem;
+          color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .full-vector code {
+          display: block;
+          word-break: break-all;
+          white-space: pre-wrap;
+          line-height: 1.5;
+          font-size: 0.85rem;
+          color: rgba(255, 255, 255, 0.9);
+          margin-bottom: 1rem;
+        }
+        
         .visual-example {
           background-color: rgba(26, 26, 46, 0.8);
           border-radius: 8px;
@@ -398,51 +490,109 @@ const EmbeddingExplanation = () => {
         
         .visual-note {
           margin-bottom: 1rem;
-          font-style: italic;
         }
         
-        .word-clusters {
+        .highlight {
+          color: #FFA500;
+          font-weight: bold;
+        }
+        
+        .dimension-steps {
           display: flex;
-          flex-wrap: wrap;
+          flex-direction: column;
           gap: 1rem;
-          justify-content: space-around;
+          margin: 1.5rem 0;
         }
         
-        .cluster {
+        .step {
+          display: flex;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+        
+        .step-number {
+          width: 30px;
+          height: 30px;
+          background-color: rgba(255, 165, 0, 0.2);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          color: #FFA500;
+          flex-shrink: 0;
+        }
+        
+        .step-description {
+          flex: 1;
+        }
+        
+        .step-title {
+          font-weight: bold;
+          display: block;
+          margin-bottom: 0.5rem;
+        }
+        
+        .step-description p {
+          margin: 0;
+          font-size: 1rem;
+        }
+        
+        .comparison-note {
           background-color: rgba(0, 0, 0, 0.3);
           border-radius: 8px;
           padding: 1rem;
-          min-width: 150px;
+          margin-top: 1rem;
+          border-left: 3px solid rgba(255, 165, 0, 0.5);
         }
         
-        .cluster-label {
-          text-align: center;
-          font-weight: bold;
-          margin-bottom: 0.5rem;
-          color: #FFA500;
+        .comparison-note p {
+          margin: 0;
+          font-size: 1rem;
         }
         
-        .cluster-words {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          align-items: center;
-        }
-        
-        .cluster-word {
-          background-color: rgba(255, 165, 0, 0.1);
-          border: 1px solid rgba(255, 165, 0, 0.3);
-          border-radius: 4px;
-          padding: 0.2rem 0.5rem;
-          font-size: 0.9rem;
-        }
-        
-        .glove-info {
+        .embedding-type {
           background-color: rgba(255, 165, 0, 0.1);
           border-radius: 8px;
+          padding: 1.5rem;
+          margin-bottom: 1.5rem;
+          border: 1px solid rgba(255, 165, 0, 0.3);
+        }
+        
+        .embedding-type.secondary {
+          background-color: rgba(33, 150, 243, 0.1);
+          border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+        
+        .embedding-type.secondary h4 {
+          color: #2196F3;
+        }
+        
+        .embedding-details {
+          margin-top: 1rem;
+        }
+        
+        .example-box {
+          background-color: rgba(0, 0, 0, 0.3);
+          border-radius: 8px;
           padding: 1rem;
-          margin: 1.5rem 0;
-          border-left: 3px solid #FFA500;
+          margin-top: 1rem;
+          border-left: 3px solid rgba(255, 165, 0, 0.5);
+        }
+        
+        .example-title {
+          font-weight: bold;
+          color: #FFA500;
+          margin-bottom: 0.5rem;
+        }
+        
+        .example-list {
+          margin-bottom: 0.5rem;
+        }
+        
+        .example-list li {
+          margin-bottom: 0.3rem;
+          font-size: 1rem;
         }
       `}</style>
     </div>

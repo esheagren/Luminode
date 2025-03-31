@@ -125,22 +125,25 @@ const Introduction = () => {
       <div className="intro-header">
         <h2>Welcome to Luminode</h2>
         <div className="animated-tagline">
-          <span className="highlight">Explore</span> the hidden connections between words
+          <span className="highlight">AI-Powered</span> Semantic Search & Discovery
         </div>
       </div>
       
       <div className="intro-content">
         <p className="lead-paragraph">
-          Luminode is an interactive visualization tool designed to help you explore the hidden semantic 
-          connections between words. By visualizing word embeddings—mathematical representations of meaning—Luminode 
-          reveals unexpected relationships and facilitates intuitive understanding of complex concepts.
+          Luminode is a cutting-edge application that leverages advanced AI technologies to represent and 
+          search information based on <span className="highlight">semantic similarity</span> rather than exact keyword matching. 
+          Using vector embeddings, similarity metrics, and nearest-neighbor search, Luminode finds 
+          connections that traditional search engines might miss.
         </p>
         
         <div className="vector-visualization">
-          <h3>Word Embeddings as Vectors</h3>
+          <h3>The Semantic Space</h3>
           <p>
-            In modern AI systems, words are represented as vectors—points in a high-dimensional space. 
-            Words with similar meanings are positioned closer together in this space.
+            At the core of Luminode is the concept of a <span className="highlight">semantic space</span> — 
+            a high-dimensional space where words and concepts with similar meanings cluster together. 
+            This is made possible through <span className="highlight">vector embeddings</span> from LLaMA, 
+            allowing Luminode to understand the meaning behind your queries.
           </p>
           <div className="canvas-container">
             <canvas 
@@ -152,91 +155,128 @@ const Introduction = () => {
             />
           </div>
           <div className="visualization-caption">
-            A simplified 2D representation of word vectors. Notice how related words cluster together: 
-            "king", "queen", "man", and "woman" form one group, while "computer", "technology", and "science" 
-            form another.
+            A simplified 2D representation of word vectors in semantic space. In reality, Luminode works with 
+            embeddings in hundreds of dimensions, capturing subtle relationships between concepts.
           </div>
         </div>
         
         <div className="info-cards">
           <div 
-            className={`info-card ${expandedSection === 'explore' ? 'expanded' : ''}`}
-            onClick={() => toggleSection('explore')}
+            className={`info-card ${expandedSection === 'embeddings' ? 'expanded' : ''}`}
+            onClick={() => toggleSection('embeddings')}
           >
             <div className="card-header">
-              <h3>Explore Language</h3>
-              <div className="expand-icon">{expandedSection === 'explore' ? '−' : '+'}</div>
+              <h3>Vector Embeddings</h3>
+              <div className="expand-icon">{expandedSection === 'embeddings' ? '−' : '+'}</div>
             </div>
             <div className="card-content">
               <p>
-                Whether you're a student, educator, researcher, or simply curious about language and meaning, 
-                Luminode offers a window into how modern AI systems understand and process language.
+                Luminode uses <span className="highlight">LLaMA</span> to transform text into rich, contextual 
+                vector embeddings that capture the semantic meaning of content.
               </p>
-              {expandedSection === 'explore' && (
+              {expandedSection === 'embeddings' && (
                 <p>
-                  Through interactive visualizations, you can discover how words relate to each other in ways that 
-                  might surprise you, challenge your assumptions, or inspire new connections.
+                  Unlike static word vectors, LLaMA's contextual embeddings consider surrounding text, 
+                  allowing the same word to have different representations based on its usage. These embeddings 
+                  position similar concepts closer together in a high-dimensional space.
                 </p>
               )}
             </div>
           </div>
           
           <div 
-            className={`info-card ${expandedSection === 'understand' ? 'expanded' : ''}`}
-            onClick={() => toggleSection('understand')}
+            className={`info-card ${expandedSection === 'similarity' ? 'expanded' : ''}`}
+            onClick={() => toggleSection('similarity')}
           >
             <div className="card-header">
-              <h3>Understand AI</h3>
-              <div className="expand-icon">{expandedSection === 'understand' ? '−' : '+'}</div>
+              <h3>Similarity Metrics</h3>
+              <div className="expand-icon">{expandedSection === 'similarity' ? '−' : '+'}</div>
             </div>
             <div className="card-content">
               <p>
-                Word embeddings are a core concept for understanding how large language models work. 
-                Luminode makes these abstract mathematical concepts tangible and explorable.
+                Luminode uses <span className="highlight">cosine similarity</span> to measure how closely related 
+                two pieces of content are in the semantic space.
               </p>
-              {expandedSection === 'understand' && (
+              {expandedSection === 'similarity' && (
                 <p>
-                  By interacting with word embeddings directly, you'll gain insights into the 
-                  fundamental building blocks that power modern AI language systems like ChatGPT, 
-                  Claude, and other large language models.
+                  Cosine similarity measures the angle between vectors, focusing on their orientation rather than 
+                  magnitude. This approach is ideal for finding conceptually similar content even when expressed 
+                  with different words, making search results more intuitive and relevant.
                 </p>
               )}
             </div>
           </div>
           
           <div 
-            className={`info-card ${expandedSection === 'discover' ? 'expanded' : ''}`}
-            onClick={() => toggleSection('discover')}
+            className={`info-card ${expandedSection === 'search' ? 'expanded' : ''}`}
+            onClick={() => toggleSection('search')}
           >
             <div className="card-header">
-              <h3>Discover Connections</h3>
-              <div className="expand-icon">{expandedSection === 'discover' ? '−' : '+'}</div>
+              <h3>Vector Search</h3>
+              <div className="expand-icon">{expandedSection === 'search' ? '−' : '+'}</div>
             </div>
             <div className="card-content">
               <p>
-                Find unexpected relationships between concepts, explore the semantic space 
-                between words, and visualize how language is organized in the "mind" of an AI.
+                Finding relevant content quickly is powered by <span className="highlight">HNSW</span> (Hierarchical Navigable Small 
+                World) graph algorithm for approximate nearest neighbor search.
               </p>
-              {expandedSection === 'discover' && (
+              {expandedSection === 'search' && (
                 <p>
-                  Luminode's visualization tools let you see patterns and connections that would 
-                  be impossible to detect by looking at raw data, offering new perspectives on 
-                  language and meaning.
+                  HNSW creates a multi-layered graph structure that enables Luminode to navigate the semantic space 
+                  efficiently, examining only a fraction of possible candidates while maintaining high accuracy. 
+                  This technology delivers millisecond-speed results even with large datasets.
                 </p>
               )}
             </div>
           </div>
         </div>
         
-        <div className="quote-container">
-          <blockquote>
-            "The limits of my language mean the limits of my world."
-            <cite>— Ludwig Wittgenstein</cite>
-          </blockquote>
-          <p className="quote-context">
-            Explore how AI systems expand and constrain their "world" through the mathematical 
-            structure of word embeddings.
-          </p>
+        <div className="info-cards second-row">
+          <div 
+            className={`info-card ${expandedSection === 'database' ? 'expanded' : ''}`}
+            onClick={() => toggleSection('database')}
+          >
+            <div className="card-header">
+              <h3>Vector Database</h3>
+              <div className="expand-icon">{expandedSection === 'database' ? '−' : '+'}</div>
+            </div>
+            <div className="card-content">
+              <p>
+                Luminode leverages <span className="highlight">Pinecone</span>, a specialized vector database optimized for 
+                high-performance similarity search.
+              </p>
+              {expandedSection === 'database' && (
+                <p>
+                  Pinecone handles the storage, indexing, and querying of embedding vectors at scale, allowing 
+                  Luminode to maintain fast response times regardless of dataset size. This cloud-based service 
+                  ensures reliable performance without the complexity of managing custom infrastructure.
+                </p>
+              )}
+            </div>
+          </div>
+          
+          <div 
+            className={`info-card ${expandedSection === 'visualization' ? 'expanded' : ''}`}
+            onClick={() => toggleSection('visualization')}
+          >
+            <div className="card-header">
+              <h3>Dimensionality Reduction</h3>
+              <div className="expand-icon">{expandedSection === 'visualization' ? '−' : '+'}</div>
+            </div>
+            <div className="card-content">
+              <p>
+                To visualize high-dimensional data, Luminode employs <span className="highlight">Principal Component Analysis (PCA)</span> 
+                to project vectors into explorable 2D or 3D spaces.
+              </p>
+              {expandedSection === 'visualization' && (
+                <p>
+                  PCA identifies the most important dimensions in the data, preserving as much variance as possible 
+                  in the reduced space. This allows users to see clusters, trends, and relationships that would be 
+                  impossible to visualize in the original high-dimensional embedding space.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -335,8 +375,12 @@ const Introduction = () => {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           gap: 1.5rem;
-          margin-bottom: 2rem;
+          margin-bottom: 1.5rem;
           margin-top: 2rem;
+        }
+        
+        .second-row {
+          margin-top: 0;
         }
         
         .info-card {
@@ -403,55 +447,6 @@ const Introduction = () => {
           line-height: 1.6;
           margin-bottom: 1rem;
           font-size: 1.1rem;
-        }
-        
-        .quote-container {
-          margin-top: 2rem;
-          text-align: center;
-          padding: 1.5rem;
-          background-color: rgba(0, 0, 0, 0.2);
-          border-radius: 8px;
-          position: relative;
-        }
-        
-        blockquote {
-          font-style: italic;
-          font-size: 1.3rem;
-          margin: 0 0 1rem 0;
-          position: relative;
-          padding: 0 2rem;
-        }
-        
-        blockquote::before,
-        blockquote::after {
-          content: '"';
-          font-size: 2rem;
-          color: rgba(255, 165, 0, 0.5);
-          position: absolute;
-        }
-        
-        blockquote::before {
-          left: 0;
-          top: -0.5rem;
-        }
-        
-        blockquote::after {
-          right: 0;
-          bottom: -1rem;
-        }
-        
-        cite {
-          display: block;
-          margin-top: 0.5rem;
-          font-size: 1rem;
-          color: rgba(255, 255, 255, 0.7);
-        }
-        
-        .quote-context {
-          font-size: 1rem;
-          color: rgba(255, 255, 255, 0.9);
-          max-width: 600px;
-          margin: 1rem auto 0;
         }
       `}</style>
     </div>
