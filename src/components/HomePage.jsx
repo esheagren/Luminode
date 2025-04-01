@@ -301,7 +301,7 @@ const HomePage = () => {
         .app-container {
           display: flex;
           flex-direction: column;
-          height: calc(100vh - 80px); /* Adjusted for NavBar height */
+          height: calc(100vh - 10px); /* Reduced from 80px to 40px to extend content area */
         }
         
         .header {
@@ -312,6 +312,7 @@ const HomePage = () => {
           display: flex;
           flex: 1;
           overflow: hidden;
+          margin-bottom: 0; /* Remove any bottom margin */
         }
 
         .logo-container {
@@ -421,7 +422,7 @@ const HomePage = () => {
         .tools-bar {
           padding: 0;
           background-color: #0f0f10;
-          margin-bottom: 10px;
+          margin-bottom: 5px; /* Reduced from 10px to 5px */
         }
         
         .graph-area {
@@ -429,6 +430,7 @@ const HomePage = () => {
           min-height: 500px;
           position: relative;
           overflow: hidden;
+          padding-bottom: 0; /* Ensure no padding at bottom */
         }
         
         .graph-area > div {

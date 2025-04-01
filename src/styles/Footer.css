@@ -1,125 +1,101 @@
 .footer {
+  background-color: #050f25;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 4px 0;
+  font-size: 0.8rem;
   width: 100%;
-  padding: 1.5rem 0;
-  background-color: rgba(20, 20, 40, 0.8);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 165, 0, 0.3);
-  margin-top: auto;
+  z-index: 10;
 }
 
 .footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 2rem;
+  justify-content: space-between;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  height: 30px;
 }
 
 .footer-links {
   display: flex;
-  gap: 2rem;
+  gap: 1.2rem;
 }
 
 .footer-links a {
-  color: #f5f5f5;
+  color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
   transition: color 0.3s ease;
-  font-size: 0.9rem;
 }
 
 .footer-links a:hover {
-  color: #FFA500;
+  color: #fff;
 }
 
-/* Node connection animation */
+/* Make the connection animation smaller and more subtle */
 .footer-animation {
   position: relative;
-  width: 100px;
-  height: 40px;
+  width: 80px;
+  height: 20px;
 }
 
 .node {
   position: absolute;
-  width: 8px;
-  height: 8px;
-  background-color: #FFA500;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  opacity: 0.8;
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 .node1 {
-  left: 10px;
-  top: 20px;
-  animation: pulse 2s infinite;
+  top: 0;
+  left: 0;
+  animation: pulse 4s infinite;
 }
 
 .node2 {
-  left: 50px;
-  top: 10px;
-  animation: pulse 2s infinite 0.6s;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 4s infinite 1s;
 }
 
 .node3 {
-  left: 90px;
-  top: 25px;
-  animation: pulse 2s infinite 1.2s;
+  top: 0;
+  right: 0;
+  animation: pulse 4s infinite 2s;
 }
 
 .connection {
   position: absolute;
-  background-color: rgba(255, 165, 0, 0.4);
-  height: 2px;
-  transform-origin: left center;
+  background-color: rgba(255, 255, 255, 0.2);
+  height: 1px;
 }
 
 .connection1-2 {
-  left: 14px;
-  top: 18px;
-  width: 40px;
-  transform: rotate(-15deg);
-  animation: fadeInOut 3s infinite;
+  width: 50%;
+  top: 5px;
+  left: 5px;
+  transform: rotate(25deg);
+  transform-origin: left center;
 }
 
 .connection2-3 {
-  left: 54px;
-  top: 14px;
-  width: 40px;
-  transform: rotate(20deg);
-  animation: fadeInOut 3s infinite 0.5s;
+  width: 50%;
+  top: 5px;
+  right: 5px;
+  transform: rotate(-25deg);
+  transform-origin: right center;
 }
 
 .connection1-3 {
-  left: 14px;
-  top: 22px;
-  width: 80px;
-  transform: rotate(3deg);
-  animation: fadeInOut 3s infinite 1s;
+  width: 100%;
+  top: 0;
+  left: 0;
 }
 
 @keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.5);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-}
-
-@keyframes fadeInOut {
-  0% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 0.8;
-  }
-  100% {
-    opacity: 0.2;
-  }
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
 } 
