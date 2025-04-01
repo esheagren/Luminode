@@ -14,14 +14,14 @@ import './ToolbarStyles.css';
 // Import icons from a reliable source like Feather or include SVG directly
 // Book icon for Learn button
 const BookIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
   </svg>
 );
 
 const MidpointIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10"></circle>
     <line x1="12" y1="8" x2="12" y2="16"></line>
     <line x1="8" y1="12" x2="16" y2="12"></line>
@@ -29,7 +29,7 @@ const MidpointIcon = () => (
 );
 
 const AnalogyIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="7" cy="8" r="2"></circle>
     <circle cx="7" cy="16" r="2"></circle>
     <circle cx="17" cy="8" r="2"></circle>
@@ -38,13 +38,13 @@ const AnalogyIcon = () => (
 );
 
 const SliceIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <line x1="5" y1="19" x2="19" y2="5"></line>
   </svg>
 );
 
 const RulerIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 8c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8z"></path>
     <path d="M18 16V8"></path>
     <path d="M14 16V8"></path>
@@ -54,7 +54,7 @@ const RulerIcon = () => (
 );
 
 const NeighborsIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="8"></circle>
     <circle cx="12" cy="12" r="3"></circle>
     <line x1="12" y1="2" x2="12" y2="4"></line>
@@ -801,13 +801,13 @@ const Tools = ({
         .icon-button {
           display: flex;
           align-items: center;
-          gap: 0.25rem;
+          gap: 0.4rem;
           background: transparent;
           color: #ccc;
           border: none;
-          padding: 0.3rem 0.5rem;
+          padding: 0.4rem 0.7rem;
           border-radius: 4px;
-          font-size: 0.8rem;
+          font-size: 0.85rem;
           cursor: pointer;
           transition: all 0.15s ease;
         }
@@ -819,6 +819,7 @@ const Tools = ({
         
         .learn-button {
           color: #FF9D42;
+          margin-right: 1rem;
         }
         
         .learn-button:hover {
@@ -870,6 +871,7 @@ const Tools = ({
         
         .spacer {
           flex-grow: 1;
+          min-width: 0.5rem;
         }
         
         .tool-content {
@@ -902,7 +904,7 @@ const Tools = ({
 
 // Add a Reset icon (trash can or refresh symbol)
 const ResetIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 6h18"></path>
     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
     <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
