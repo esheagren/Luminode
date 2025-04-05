@@ -49,6 +49,8 @@ const LearnPage = () => {
     // Get content from our utility
     const content = getEssayContent(selectedEssay);
     setEssayContent(content);
+    // Reset scroll position when essay changes
+    setScrollPosition(0);
   }, [selectedEssay]);
 
   // Handle scroll events in the essay content area
@@ -86,6 +88,7 @@ const LearnPage = () => {
             <EssayContent 
               content={essayContent} 
               title={selectedEssay} 
+              scrollPosition={scrollPosition}
             />
           </div>
 

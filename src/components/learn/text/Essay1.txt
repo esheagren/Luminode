@@ -4,6 +4,22 @@ Modern AI capitalizes on this association-rich view of language by using *vector
 
 ---
 
+**What is a Vector?**
+
+Before diving deeper, let's clarify what we mean by "vector." In its simplest form, a vector is just a list of numbers that represents a position in space. If you recall basic coordinate geometry, a point on a two-dimensional plane has an X and Y coordinate, like (3, 4). This is essentially a 2-dimensional vector.
+
+We can visualize these easily: the X-axis might represent one property and the Y-axis another. For example, if we were looking at articles of clothing, the X-axis could represent "formality" while the Y-axis represents "warmth." A winter coat might be at (2, 9)—not very formal, but extremely warm—while a business suit could be at (8, 5)—quite formal and moderately warm.
+
+But we're not limited to just two dimensions. We can add a third dimension, creating a 3D space (X, Y, Z). Consider adding "cost" as our Z-axis: our winter coat might now be at (2, 9, 7)—informal, warm, and somewhat expensive—while the business suit sits at (8, 5, 9)—formal, moderately warm, and very expensive.
+
+The power of vectors comes when we extend beyond the three dimensions we can easily visualize. Language models typically use hundreds or even thousands of dimensions to capture the subtle nuances of meaning. Each dimension represents some learned aspect or feature of the data, though these dimensions often don't have straightforward human interpretations.
+
+For example, a vector representing the word "king" might have values across 300 dimensions. Some dimensions might capture aspects of royalty, others masculinity, others leadership, and so on. These higher-dimensional vectors are essentially coordinates in a vast "semantic hyperspace" where similar concepts cluster together.
+
+When we talk about a "word embedding," we're referring to this vector representation of a word. The term "embedding" comes from the mathematical concept of embedding one space within another—in this case, embedding words from language into a continuous vector space where mathematical operations become possible.
+
+---
+
 **Why Vectors Reflect Meaning**
 
 A central premise of vector embeddings is that **distance corresponds to difference**. When we embed words as points in a high-dimensional space, words that often occupy similar contexts end up clustered near each other. For example, "food" and "meal" may appear in similar contexts—sentences about eating, restaurants, or cooking. An embedding algorithm will notice that these words co-occur with overlapping sets of neighbors ("eat," "dinner," "restaurant," "plate") and consequently place their coordinates close together.
