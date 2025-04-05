@@ -17,7 +17,7 @@ const VectorExplanationDiagram = () => {
       ctx.clearRect(0, 0, width, height);
       
       // Set background
-      ctx.fillStyle = '#f8f9fa';
+      ctx.fillStyle = 'rgba(26, 26, 46, 0.7)';
       ctx.fillRect(0, 0, width, height);
       
       // Draw coordinate system
@@ -25,7 +25,7 @@ const VectorExplanationDiagram = () => {
       const originY = height / 2;
       
       // Draw axes
-      ctx.strokeStyle = '#ccc';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
       ctx.lineWidth = 1;
       
       // X-axis
@@ -41,7 +41,7 @@ const VectorExplanationDiagram = () => {
       ctx.stroke();
       
       // Draw axis labels
-      ctx.fillStyle = '#666';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
       ctx.font = '12px Arial';
       ctx.textAlign = 'center';
       
@@ -52,7 +52,7 @@ const VectorExplanationDiagram = () => {
       ctx.fillText('y', originX + 15, 15);
       
       // Draw grid
-      ctx.strokeStyle = '#eee';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
       ctx.lineWidth = 0.5;
       
       // Vertical grid lines
@@ -72,17 +72,17 @@ const VectorExplanationDiagram = () => {
       }
       
       // Draw vectors
-      // Vector 1: (3, 1)
-      drawVector(originX, originY, 60, -20, '#4285F4', 'word1');
+      // Vector 1: "food"
+      drawVector(originX, originY, 60, -20, '#FFA500', 'food');
       
-      // Vector 2: (1, 3)
-      drawVector(originX, originY, 20, -60, '#EA4335', 'word2');
+      // Vector 2: "meal"
+      drawVector(originX, originY, 48, -40, '#FF6347', 'meal');
       
-      // Vector 3: (2, 2)
-      drawVector(originX, originY, 40, -40, '#34A853', 'word3');
+      // Vector 3: "dinner"
+      drawVector(originX, originY, 40, -50, '#6A5ACD', 'dinner');
       
       // Draw origin label
-      ctx.fillStyle = '#000';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.textAlign = 'right';
       ctx.fillText('(0,0)', originX - 5, originY + 15);
     };
@@ -123,6 +123,12 @@ const VectorExplanationDiagram = () => {
       ctx.font = 'bold 14px Arial';
       ctx.textAlign = 'center';
       ctx.fillText(label, endX + 15, endY - 10);
+      
+      // Add glow effect
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = color;
+      ctx.fillText(label, endX + 15, endY - 10);
+      ctx.shadowBlur = 0;
     };
     
     // Initial drawing
@@ -158,10 +164,10 @@ const VectorExplanationDiagram = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid #e0e0e0;
+          border: 1px solid rgba(255, 165, 0, 0.3);
           border-radius: 8px;
-          background-color: #fff;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          background-color: rgba(26, 26, 46, 0.7);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 165, 0, 0.1);
           overflow: hidden;
         }
         

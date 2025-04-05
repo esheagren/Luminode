@@ -63,22 +63,28 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
           display: flex;
           flex-direction: column;
           height: 100%;
+          background-color: rgba(26, 26, 46, 0.6);
+          border-radius: 8px;
         }
         
         .diagram-title {
           font-size: 1.2rem;
           font-weight: 500;
           padding: 1rem;
-          border-bottom: 1px solid #e0e0e0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          color: rgba(255, 255, 255, 0.9);
+          text-align: center;
         }
         
         .diagram-content {
-          flex: 1;
+          flex: 0 0 auto;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 1rem;
+          min-height: 240px;
           overflow: hidden;
+          margin-top: 0;
         }
       `}</style>
     </div>

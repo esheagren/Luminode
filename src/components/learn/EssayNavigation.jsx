@@ -27,13 +27,14 @@ const EssayNavigation = ({ essays, selectedEssay, onSelectEssay }) => {
         
         .essay-nav-header {
           padding: 1rem;
-          border-bottom: 1px solid #e0e0e0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .essay-nav-header h3 {
           margin: 0;
           font-size: 1.2rem;
           font-weight: 500;
+          color: rgba(255, 255, 255, 0.9);
         }
         
         .essay-nav-list {
@@ -44,18 +45,21 @@ const EssayNavigation = ({ essays, selectedEssay, onSelectEssay }) => {
         .essay-nav-item {
           padding: 0.75rem 1rem;
           cursor: pointer;
-          transition: background-color 0.2s ease;
-          border-bottom: 1px solid #f0f0f0;
+          transition: all 0.2s ease;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          color: rgba(255, 255, 255, 0.7);
         }
         
         .essay-nav-item:hover {
-          background-color: #f5f5f5;
+          background-color: rgba(255, 255, 255, 0.05);
+          color: rgba(255, 255, 255, 1);
         }
         
         .essay-nav-item.selected {
-          background-color: #e3f2fd;
+          background-color: rgba(255, 165, 0, 0.15);
+          color: #FFA500;
           font-weight: 500;
-          border-left: 3px solid #2196f3;
+          border-left: 3px solid #FFA500;
         }
       `}</style>
     </div>
