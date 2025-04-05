@@ -11,16 +11,7 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
   
   // Update diagram based on essay title and scroll position
   useEffect(() => {
-    if (essayTitle === 'Introduction') {
-      // Change diagrams based on scroll position for the Introduction essay
-      if (scrollPosition < 500) {
-        setActiveDiagram('vectorExplanation');
-      } else if (scrollPosition < 1000) {
-        setActiveDiagram('vectorComparison');
-      } else {
-        setActiveDiagram('transformerModel');
-      }
-    } else if (essayTitle === 'Vector Basics') {
+    if (essayTitle === 'The Why and How of Vector Embeddings') {
       // Different diagrams for Vector Basics
       if (scrollPosition < 400) {
         setActiveDiagram('multidimensionalSpace');
@@ -29,13 +20,13 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
       } else {
         setActiveDiagram('wordClusters');
       }
-    } else if (essayTitle === 'Transformer Models') {
+    } else if (essayTitle === 'Exploring and Visualizing Vector Embeddings') {
       if (scrollPosition < 500) {
         setActiveDiagram('transformerArchitecture');
       } else {
         setActiveDiagram('contextualEmbeddings');
       }
-    } else if (essayTitle === 'Similarity & Distance') {
+    } else if (essayTitle === 'Vector Databases and Large-Scale Retrieval') {
       if (scrollPosition < 400) {
         setActiveDiagram('cosineSimilarity');
       } else if (scrollPosition < 800) {
@@ -43,20 +34,6 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
       } else {
         setActiveDiagram('analogyTransformations');
       }
-    } else if (essayTitle === 'Vector Databases') {
-      if (scrollPosition < 400) {
-        setActiveDiagram('vectorDatabaseStructure');
-      } else {
-        setActiveDiagram('retrievalAugmentedGeneration');
-      }
-    } else if (essayTitle === 'Visualization Techniques') {
-      if (scrollPosition < 400) {
-        setActiveDiagram('pcaVisualization');
-      } else {
-        setActiveDiagram('tsneUmapComparison');
-      }
-    } else if (essayTitle === 'Conclusion') {
-      setActiveDiagram('embeddingsOverview');
     } else {
       // Default diagram if essay not recognized
       setActiveDiagram('default');
@@ -103,18 +80,15 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
       case 'vectorDatabaseStructure':
         return <DefaultDiagram title="Vector Database Structure" />;
       case 'retrievalAugmentedGeneration':
-        return <DefaultDiagram title="Retrieval-Augmented Generation" />;
+        return <DefaultDiagram title="Retrieval Augmented Generation" />;
       
-      // Visualization Techniques diagrams
+      // Visualization diagrams
       case 'pcaVisualization':
         return <DefaultDiagram title="PCA Visualization" />;
       case 'tsneUmapComparison':
         return <DefaultDiagram title="t-SNE & UMAP Comparison" />;
       
-      // Conclusion diagram
-      case 'embeddingsOverview':
-        return <DefaultDiagram title="Vector Embeddings Overview" />;
-      
+      // Default case
       default:
         return <DefaultDiagram title="Diagram Component" />;
     }
@@ -122,6 +96,7 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
   
   return (
     <div className="diagram-component">
+      <h3 className="diagram-title">Diagram Component</h3>
       <div className="diagram-content">
         {renderDiagram()}
       </div>

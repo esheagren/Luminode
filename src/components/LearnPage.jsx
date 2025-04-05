@@ -14,7 +14,7 @@ import { getEssayContent, getAvailableEssays } from './learn/essayUtils';
 const LearnPage = () => {
   const containerRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [selectedEssay, setSelectedEssay] = useState('Introduction');
+  const [selectedEssay, setSelectedEssay] = useState('The Why and How of Vector Embeddings');
   const [essayContent, setEssayContent] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
 
@@ -71,9 +71,7 @@ const LearnPage = () => {
           <Link to="/app" className="back-button">
             Back to Application
           </Link>
-        </div>
-
-        <div className="learn-content">
+          
           <div className="essay-navigation">
             <EssayNavigation 
               essays={essays} 
@@ -81,7 +79,9 @@ const LearnPage = () => {
               onSelectEssay={setSelectedEssay} 
             />
           </div>
+        </div>
 
+        <div className="learn-content">
           <div className="essay-content-container" onScroll={handleScroll}>
             <EssayContent 
               content={essayContent} 
