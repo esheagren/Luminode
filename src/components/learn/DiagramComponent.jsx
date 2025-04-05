@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import DefaultDiagram from './diagrams/DefaultDiagram';
 
 // Essay 1 diagrams
 import E1_DictionaryVsAssociation from './diagrams/essay1/E1_DictionaryVsAssociation';
@@ -21,6 +20,53 @@ import E3_VectorDatabases from './diagrams/essay3/E3_VectorDatabases';
 import E3_DocumentChunking from './diagrams/essay3/E3_DocumentChunking';
 import E3_RAG from './diagrams/essay3/E3_RAG';
 import E3_VectorEcosystem from './diagrams/essay3/E3_VectorEcosystem';
+
+// Inline DefaultDiagram component to avoid external dependencies
+const DefaultDiagram = ({ title = 'Vector Embeddings', caption = 'Select an essay to view diagrams' }) => {
+  return (
+    <div className="default-diagram">
+      <div className="diagram-content">
+        <div className="diagram-title">{title}</div>
+        <div className="diagram-caption">{caption}</div>
+      </div>
+      
+      <style jsx="true">{`
+        .default-diagram {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: rgba(26, 26, 46, 0.7);
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          padding: 20px;
+        }
+        
+        .diagram-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+        }
+        
+        .diagram-title {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: white;
+          margin-bottom: 10px;
+        }
+        
+        .diagram-caption {
+          font-size: 1rem;
+          color: rgba(255, 255, 255, 0.7);
+          max-width: 80%;
+        }
+      `}</style>
+    </div>
+  );
+};
 
 const DiagramComponent = ({ essayTitle, scrollPosition }) => {
   const [activeDiagram, setActiveDiagram] = useState('default');
@@ -127,7 +173,7 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
       
       // Default case
       default:
-        return <DefaultDiagram title="Diagram Component" />;
+        return <DefaultDiagram title="Diagram Component" caption={caption} />;
     }
   };
   
