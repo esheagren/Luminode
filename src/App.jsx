@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import HomePage from './components/HomePage.jsx'
+import LearnPage from './components/LearnPage.jsx'
 import AboutPage from './components/about/AboutPage.jsx'
 import LandingPage from './components/LandingPage.jsx'
 import './App.css'
@@ -14,6 +14,7 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/app" element={<HomePage />} />
+              <Route path="/learn" element={<LearnPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<div className="content-page"><h2>Contact</h2></div>} />
             </Routes>

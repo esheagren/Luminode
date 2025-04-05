@@ -1,0 +1,83 @@
+.learn-page-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  background-color: #f8f9fa;
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.learn-header {
+  padding: 1rem;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.back-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #e0e0e0;
+}
+
+.learn-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.essay-navigation {
+  width: 250px;
+  border-right: 1px solid #e0e0e0;
+  background-color: #fff;
+  overflow-y: auto;
+}
+
+.essay-content-container {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+.diagram-container {
+  width: 300px;
+  padding: 1rem;
+  border-left: 1px solid #e0e0e0;
+  background-color: #fff;
+  overflow-y: auto;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .learn-content {
+    flex-direction: column;
+  }
+
+  .essay-navigation {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .essay-content-container {
+    flex: 1;
+  }
+
+  .diagram-container {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #e0e0e0;
+  }
+} 

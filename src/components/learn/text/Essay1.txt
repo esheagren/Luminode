@@ -1,0 +1,43 @@
+## 2. How Vectors Can Store Meaning
+
+At first glance, the notion that words can be “stored” as numbers might sound bizarre—like trying to represent the word *“croissant”* using a single phone number. But modern AI doesn’t cram language into a single digit; it spreads it across many dimensions, creating a high-dimensional “semantic space.” In that space, each word (or phrase, or image, or anything else we care about) becomes a vector—a list of numbers—designed so that distances and directions in the space match up with our intuition about meaning.
+
+---
+
+### **2.1 The Core Idea of Distributional Semantics**
+
+A classic example of how these vectors capture meaning is the famous equation:  
+\[
+\text{king} \;-\; \text{man} \;+\; \text{woman} \;\approx\; \text{queen}.
+\]  
+It’s a neat party trick, but it arises from a simple premise. If “king” and “queen” share some notion of “royalty,” but differ by “gender,” then mathematically you can treat **royalty** and **gender** like axes in the vector space. Subtracting *“man”* (masculine) from *“king”* removes that male-oriented component; adding *“woman”* reintroduces the female component, landing near “queen.”  
+
+This idea follows the principle of *distributional semantics*, which says that words appearing in similar contexts tend to have similar meanings. AI models, when they scan large amounts of text, adjust each word’s vector so that words with overlapping contexts end up *close* to each other. As the model refines these positions, abstract dimensions—like *royalty*, *gender*, or *plurality*—emerge organically.
+
+---
+
+### **2.2 Dimensionality and Embedding Space**
+
+When we talk about these “vectors,” we might be dealing with 100, 300, or even 1,024 dimensions (the perfect number of angles from which to observe, say, “croissant”). Each dimension corresponds to some hidden “feature” that the model has learned is important for distinguishing word meanings. We can’t easily label each dimension—like “Dimension 17 = food vs. item-of-clothing”—because the machine discovers them implicitly.  
+
+To get a better feel for what’s happening, researchers often use visualization tools like **t-SNE** or **UMAP** to project these big vectors down to 2D or 3D. If you plot *dog*, *cat*, *wolf*, *lion*, *tiger*, you may see them grouping together, separate from a cluster of *car*, *truck*, *bicycle*. Even though we’re losing information by squashing, we can still see the broad neighborhoods formed by semantic similarity.
+
+---
+
+### **2.3 Contextual vs. Static Embeddings**
+
+Earlier generation models (like **Word2Vec** or **GloVe**) produce a single, unchanging vector per word. So *“bank”* always gets the same vector, even if you’re reading about a *river bank* or making a *bank deposit*. That’s called a **static embedding**.  
+
+Modern approaches (e.g., **BERT**, **GPT**, **LLaMA**) generate **contextual embeddings**. They factor in the surrounding words before finalizing the vector. So the model’s version of *“bank”* in *“I paddled the canoe to the bank”* might differ from *“I withdrew cash from the bank.”* This is crucial for handling polysemy (words with multiple meanings) and subtle usage differences. It’s like each occurrence of a word gets its own custom vector, fine-tuned for the context at hand.
+
+---
+
+### **2.4 Analogy, Gender, and Other Surprising Dimensions**
+
+The royalty/gender example is just one instance of how arithmetic in embedding space can reflect relationships. You might see patterns like:
+- *“france” – “paris” + “tokyo” ≈ “japan”*
+- *“walk” – “walking” + “swim” ≈ “swimming”*  
+
+Such results occur because the model “clusters” together concepts that share grammar or meaning, and the differences between these clusters can act like direction vectors. That said, these embeddings can also reveal (and even amplify) biases present in the training data: for instance, “doctor – man + woman” might end up near “nurse” in some older embeddings, reflecting cultural stereotypes. Researchers are working on ways to detect and mitigate these biases so we don’t inadvertently encode them into AI systems.
+
+All told, vector embeddings give us a powerful, flexible way to capture meaning—treating words as coordinates in a space where distances reflect common sense (and occasionally reveal not-so-common biases). Next, we’ll look at **how** we build these embeddings, from the actual training algorithms to the ways we measure the distance (or closeness) between these vectors. Strap in (with your metaphorical 1,024-dimensional seatbelt), because when you see how these embeddings are constructed, the “space of meaning” only gets more interesting.
