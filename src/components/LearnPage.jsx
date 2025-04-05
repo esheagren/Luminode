@@ -13,6 +13,7 @@ import { getEssayContent, getAvailableEssays } from './learn/essayUtils';
 
 const LearnPage = () => {
   const containerRef = useRef(null);
+  const essayContentRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [selectedEssay, setSelectedEssay] = useState('The Why and How of Vector Embeddings');
   const [essayContent, setEssayContent] = useState('');
@@ -44,13 +45,28 @@ const LearnPage = () => {
     });
   };
 
+  // Function to handle essay selection with proper state reset
+  const handleEssaySelect = (essay) => {
+    // First reset scroll and content to prevent DOM reconciliation issues
+    setScrollPosition(0);
+    setEssayContent('');
+    
+    // Set the selected essay after a brief delay to allow DOM to update
+    setTimeout(() => {
+      setSelectedEssay(essay);
+      
+      // Reset scroll position of the container if it exists
+      if (essayContentRef.current) {
+        essayContentRef.current.scrollTop = 0;
+      }
+    }, 50);
+  };
+
   // Load essay content when selected essay changes
   useEffect(() => {
     // Get content from our utility
     const content = getEssayContent(selectedEssay);
     setEssayContent(content);
-    // Reset scroll position when essay changes
-    setScrollPosition(0);
   }, [selectedEssay]);
 
   // Handle scroll events in the essay content area
@@ -78,13 +94,17 @@ const LearnPage = () => {
             <EssayNavigation 
               essays={essays} 
               selectedEssay={selectedEssay} 
-              onSelectEssay={setSelectedEssay} 
+              onSelectEssay={handleEssaySelect} 
             />
           </div>
         </div>
 
         <div className="learn-content">
-          <div className="essay-content-container" onScroll={handleScroll}>
+          <div 
+            className="essay-content-container" 
+            onScroll={handleScroll} 
+            ref={essayContentRef}
+          >
             <EssayContent 
               content={essayContent} 
               title={selectedEssay} 

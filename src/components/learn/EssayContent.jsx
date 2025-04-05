@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
@@ -18,78 +18,141 @@ const sectionColorMap = {
   'embedding algorithms': 'rgba(255, 142, 83, 0.1)', // Orange
   'practical applications': 'rgba(76, 205, 196, 0.1)', // Teal
   'recommendation systems': 'rgba(76, 205, 196, 0.1)',
+  
+  // Essay 2: Exploring and Visualizing Vector Embeddings
+  'dimensionality reduction': 'rgba(83, 123, 196, 0.1)',
+  'nearest neighbor': 'rgba(76, 125, 196, 0.15)',
+  'distance metrics': 'rgba(255, 142, 83, 0.1)',
+  'vector analogies': 'rgba(76, 205, 196, 0.1)',
+  
+  // Essay 3: Vector Databases and Large-Scale Retrieval
+  'vector databases': 'rgba(83, 123, 196, 0.1)',
+  'document chunking': 'rgba(76, 125, 196, 0.15)',
+  'retrieval-augmented': 'rgba(255, 142, 83, 0.1)',
+  'vector ecosystem': 'rgba(76, 205, 196, 0.1)',
 };
 
 const EssayContent = ({ content, title, scrollPosition }) => {
+  const [highlighting, setHighlighting] = useState(true);
+
   useEffect(() => {
+    // Reset highlighting state when content changes
+    setHighlighting(true);
+    
+    // Clear any existing highlights when changing essays
+    const existingHighlights = document.querySelectorAll('.section-highlight');
+    existingHighlights.forEach(el => {
+      try {
+        const parent = el.parentNode;
+        if (parent) {
+          while (el.firstChild) {
+            parent.insertBefore(el.firstChild, el);
+          }
+          parent.removeChild(el);
+        }
+      } catch (error) {
+        console.warn("Failed to clean up highlighting:", error);
+      }
+    });
+    
     // Apply section highlighting based on headings
     const highlightSections = () => {
-      const essayText = document.querySelector('.essay-text');
-      if (!essayText) return;
-      
-      // Reset any existing highlights
-      const existingHighlights = document.querySelectorAll('.section-highlight');
-      existingHighlights.forEach(el => {
-        const parent = el.parentNode;
-        while (el.firstChild) parent.insertBefore(el.firstChild, el);
-        parent.removeChild(el);
-      });
-      
-      // Get all section headings
-      const headings = essayText.querySelectorAll('h2, h3, strong');
-      
-      headings.forEach(heading => {
-        let headingText = heading.textContent.toLowerCase();
-        let sectionColor = null;
+      try {
+        const essayText = document.querySelector('.essay-text');
+        if (!essayText || !highlighting) return;
         
-        // Find matching color for this section
-        for (const [key, color] of Object.entries(sectionColorMap)) {
-          if (headingText.includes(key.toLowerCase())) {
-            sectionColor = color;
-            break;
+        // Reset any existing highlights
+        const existingHighlights = document.querySelectorAll('.section-highlight');
+        existingHighlights.forEach(el => {
+          try {
+            const parent = el.parentNode;
+            if (parent) {
+              while (el.firstChild) {
+                parent.insertBefore(el.firstChild, el);
+              }
+              parent.removeChild(el);
+            }
+          } catch (error) {
+            console.warn("Failed to clean up highlighting:", error);
           }
-        }
+        });
         
-        if (sectionColor) {
-          // Find all paragraphs until the next heading
-          let nextElement = heading.nextElementSibling;
-          const elementsToHighlight = [];
-          
-          // Include the heading itself
-          elementsToHighlight.push(heading);
-          
-          // Add all paragraphs until next heading
-          while (nextElement && 
-                 !['H2', 'H3'].includes(nextElement.tagName) && 
-                 !nextElement.querySelector('h2, h3')) {
-            elementsToHighlight.push(nextElement);
-            nextElement = nextElement.nextElementSibling;
-            if (!nextElement) break;
+        // Get all section headings
+        const headings = essayText.querySelectorAll('h2, h3, strong');
+        
+        headings.forEach(heading => {
+          try {
+            let headingText = heading.textContent.toLowerCase();
+            let sectionColor = null;
+            
+            // Find matching color for this section
+            for (const [key, color] of Object.entries(sectionColorMap)) {
+              if (headingText.includes(key.toLowerCase())) {
+                sectionColor = color;
+                break;
+              }
+            }
+            
+            if (sectionColor) {
+              // Find all paragraphs until the next heading
+              let nextElement = heading.nextElementSibling;
+              const elementsToHighlight = [];
+              
+              // Include the heading itself
+              elementsToHighlight.push(heading);
+              
+              // Add all paragraphs until next heading
+              while (nextElement && 
+                     !['H2', 'H3'].includes(nextElement.tagName) && 
+                     !nextElement.querySelector('h2, h3')) {
+                elementsToHighlight.push(nextElement);
+                nextElement = nextElement.nextElementSibling;
+                if (!nextElement) break;
+              }
+              
+              // Apply highlight to each element
+              elementsToHighlight.forEach(element => {
+                if (!element || !element.parentNode) return;
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'section-highlight';
+                wrapper.style.backgroundColor = sectionColor;
+                wrapper.style.borderRadius = '6px';
+                wrapper.style.padding = '10px';
+                wrapper.style.marginBottom = '15px';
+                
+                // Clone the element to the wrapper
+                const clone = element.cloneNode(true);
+                wrapper.appendChild(clone);
+                
+                // Replace the original with the wrapped version
+                try {
+                  element.parentNode.replaceChild(wrapper, element);
+                } catch (error) {
+                  console.warn("Failed to apply highlighting:", error);
+                }
+              });
+            }
+          } catch (error) {
+            console.warn("Error processing heading:", error);
           }
-          
-          // Apply highlight to each element
-          elementsToHighlight.forEach(element => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'section-highlight';
-            wrapper.style.backgroundColor = sectionColor;
-            wrapper.style.borderRadius = '6px';
-            wrapper.style.padding = '10px';
-            wrapper.style.marginBottom = '15px';
-            
-            // Clone the element to the wrapper
-            const clone = element.cloneNode(true);
-            wrapper.appendChild(clone);
-            
-            // Replace the original with the wrapped version
-            element.parentNode.replaceChild(wrapper, element);
-          });
-        }
-      });
+        });
+      } catch (error) {
+        console.error("Highlighting error:", error);
+        setHighlighting(false); // Disable highlighting if it causes errors
+      }
     };
     
     // Run after content is rendered
-    setTimeout(highlightSections, 100);
-  }, [content, scrollPosition]); // Re-run when content or scroll position changes
+    if (content && content.length > 0) {
+      setTimeout(highlightSections, 300);
+    }
+  }, [content, title]); // Re-run when content or title changes, not on every scroll
+  
+  // Track scroll position separately
+  useEffect(() => {
+    // Optional: perform any scroll-specific updates here
+  }, [scrollPosition]);
 
   return (
     <div className="essay-content">

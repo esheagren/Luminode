@@ -89,7 +89,7 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
   // Update diagram based on essay title and scroll position
   useEffect(() => {
     if (essayTitle === 'The Why and How of Vector Embeddings') {
-      if (scrollPosition < 300) {
+      if (scrollPosition === 0) {
         setActiveDiagram('dictionaryVsAssociation');
         setCaption('Dictionary definition vs. Associative view of language');
         setBackgroundColor(diagramColors.dictionaryVsAssociation);
