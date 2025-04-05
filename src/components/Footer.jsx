@@ -6,14 +6,14 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-links">
-          <a href="https://github.com/esheagren/Luminode" target="_blank" rel="noopener noreferrer">
-            GitHub
-          </a>
+          <Link to="/learn">Learn</Link>
+          <Link to="/about">About</Link>
           <a href="https://eriksheagren.notion.site" target="_blank" rel="noopener noreferrer">
             Contact
           </a>
-          <Link to="/about">About</Link>
-          <Link to="/learn">Learn</Link>
+          <a href="https://github.com/esheagren/Luminode" target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
         </div>
         
         <div className="footer-animation">
