@@ -9,7 +9,7 @@ const E1_DictionaryVsAssociation = () => {
           <div className="grid-cell header-cell">
             <div className="section-header">Definition</div>
           </div>
-          <div className="grid-cell content-cell">
+          <div className="grid-cell content-cell definition-cell">
             <div className="definition-box">
               <div className="word">travel <span className="part-speech">verb</span></div>
               <div className="definition">
@@ -24,7 +24,7 @@ const E1_DictionaryVsAssociation = () => {
           </div>
           <div className="grid-cell content-cell">
             <div className="pca-visualization">
-              <svg width="100%" height="280" viewBox="0 0 480 280" preserveAspectRatio="xMidYMid meet">
+              <svg width="100%" height="100%" viewBox="0 0 480 280" preserveAspectRatio="xMidYMid meet">
                 {/* Background Grid */}
                 <line x1="80" y1="40" x2="80" y2="240" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" />
                 <line x1="160" y1="40" x2="160" y2="240" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" />
@@ -39,26 +39,26 @@ const E1_DictionaryVsAssociation = () => {
                 
                 {/* Travel cluster */}
                 {/* Main travel node */}
-                <circle cx="240" cy="140" r="10" fill="#FF8E53" />
-                <text x="240" y="145" textAnchor="middle" fill="white" fontSize="22" fontWeight="bold">travel</text>
+                <circle cx="240" cy="140" r="14" fill="#FF8E53" />
+                <text x="240" y="146" textAnchor="middle" fill="white" fontSize="26" fontWeight="bold">travel</text>
                 
                 {/* Closely related concepts */}
-                <line x1="240" y1="140" x2="320" y2="100" stroke="rgba(255, 142, 83, 0.6)" strokeWidth="1.5" strokeDasharray="3,3" />
-                <circle cx="320" cy="100" r="8" fill="#FF8E53" />
-                <text x="320" y="100" dx="12" textAnchor="start" fill="white" fontSize="18">journey</text>
+                <line x1="240" y1="140" x2="320" y2="100" stroke="rgba(255, 142, 83, 0.6)" strokeWidth="2" strokeDasharray="4,4" />
+                <circle cx="320" cy="100" r="12" fill="#FF8E53" />
+                <text x="320" y="105" dx="16" textAnchor="start" fill="white" fontSize="22">journey</text>
                 
-                <line x1="240" y1="140" x2="290" y2="190" stroke="rgba(255, 142, 83, 0.6)" strokeWidth="1.5" strokeDasharray="3,3" />
-                <circle cx="290" cy="190" r="8" fill="#FF8E53" />
-                <text x="290" y="190" dx="12" textAnchor="start" fill="white" fontSize="18">adventure</text>
+                <line x1="240" y1="140" x2="290" y2="190" stroke="rgba(255, 142, 83, 0.6)" strokeWidth="2" strokeDasharray="4,4" />
+                <circle cx="290" cy="190" r="12" fill="#FF8E53" />
+                <text x="290" y="195" dx="16" textAnchor="start" fill="white" fontSize="22">adventure</text>
                 
                 {/* More distant but related concepts */}
-                <line x1="240" y1="140" x2="380" y2="140" stroke="rgba(255, 142, 83, 0.4)" strokeWidth="1" strokeDasharray="4,4" />
-                <circle cx="380" cy="140" r="7" fill="#FF8E53" />
-                <text x="380" y="140" dx="10" textAnchor="start" fill="white" fontSize="18">vacation</text>
+                <line x1="240" y1="140" x2="380" y2="140" stroke="rgba(255, 142, 83, 0.4)" strokeWidth="1.5" strokeDasharray="5,5" />
+                <circle cx="380" cy="140" r="10" fill="#FF8E53" />
+                <text x="380" y="145" dx="14" textAnchor="start" fill="white" fontSize="22">vacation</text>
                 
-                <line x1="240" y1="140" x2="120" y2="140" stroke="rgba(255, 142, 83, 0.4)" strokeWidth="1" strokeDasharray="4,4" />
-                <circle cx="120" cy="140" r="7" fill="#FF8E53" />
-                <text x="120" y="140" dx="-68" textAnchor="start" fill="white" fontSize="18">airports</text>
+                <line x1="240" y1="140" x2="120" y2="140" stroke="rgba(255, 142, 83, 0.4)" strokeWidth="1.5" strokeDasharray="5,5" />
+                <circle cx="120" cy="140" r="10" fill="#FF8E53" />
+                <text x="120" y="145" dx="-78" textAnchor="start" fill="white" fontSize="22">airports</text>
               </svg>
             </div>
           </div>
@@ -89,8 +89,8 @@ const E1_DictionaryVsAssociation = () => {
         .grid-container {
           display: grid;
           grid-template-columns: 90px 1fr;
-          grid-template-rows: 80px 1fr;
-          gap: 10px;
+          grid-template-rows: 120px 1fr;
+          gap: 15px;
           height: 100%;
           width: 100%;
         }
@@ -112,8 +112,13 @@ const E1_DictionaryVsAssociation = () => {
           overflow: hidden;
         }
         
+        .definition-cell {
+          display: flex;
+          align-items: center;
+        }
+        
         .section-header {
-          font-size: 0.85rem;
+          font-size: 0.95rem;
           font-weight: bold;
           color: white;
           writing-mode: vertical-lr;
@@ -126,7 +131,7 @@ const E1_DictionaryVsAssociation = () => {
         .definition-box {
           background-color: rgba(255, 255, 255, 0.08);
           border-radius: 8px;
-          padding: 10px 14px;
+          padding: 16px 20px;
           width: 100%;
           max-width: 100%;
           text-align: left;
@@ -136,22 +141,22 @@ const E1_DictionaryVsAssociation = () => {
         .word {
           font-weight: bold;
           color: white;
-          font-size: 1.1rem;
-          margin-bottom: 4px;
+          font-size: 1.5rem;
+          margin-bottom: 8px;
         }
         
         .part-speech {
           font-style: italic;
           font-weight: normal;
           color: rgba(255, 255, 255, 0.7);
-          font-size: 0.85rem;
+          font-size: 1rem;
           margin-left: 5px;
         }
         
         .definition {
           color: rgba(255, 255, 255, 0.9);
-          font-size: 0.85rem;
-          line-height: 1.2;
+          font-size: 1.1rem;
+          line-height: 1.4;
           letter-spacing: 0.1px;
         }
         
@@ -161,6 +166,7 @@ const E1_DictionaryVsAssociation = () => {
           display: flex;
           align-items: center;
           justify-content: center;
+          overflow: visible;
         }
       `}</style>
     </div>
