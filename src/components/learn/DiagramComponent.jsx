@@ -18,13 +18,43 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
       } else {
         setActiveDiagram('transformerModel');
       }
-    } else if (essayTitle === 'Essay1') {
-      // Different set of diagrams for Essay1
-      if (scrollPosition < 800) {
-        setActiveDiagram('essay1Diagram1');
+    } else if (essayTitle === 'Vector Basics') {
+      // Different diagrams for Vector Basics
+      if (scrollPosition < 400) {
+        setActiveDiagram('multidimensionalSpace');
+      } else if (scrollPosition < 800) {
+        setActiveDiagram('kingQueenAnalogy');
       } else {
-        setActiveDiagram('essay1Diagram2');
+        setActiveDiagram('wordClusters');
       }
+    } else if (essayTitle === 'Transformer Models') {
+      if (scrollPosition < 500) {
+        setActiveDiagram('transformerArchitecture');
+      } else {
+        setActiveDiagram('contextualEmbeddings');
+      }
+    } else if (essayTitle === 'Similarity & Distance') {
+      if (scrollPosition < 400) {
+        setActiveDiagram('cosineSimilarity');
+      } else if (scrollPosition < 800) {
+        setActiveDiagram('nearestNeighbors');
+      } else {
+        setActiveDiagram('analogyTransformations');
+      }
+    } else if (essayTitle === 'Vector Databases') {
+      if (scrollPosition < 400) {
+        setActiveDiagram('vectorDatabaseStructure');
+      } else {
+        setActiveDiagram('retrievalAugmentedGeneration');
+      }
+    } else if (essayTitle === 'Visualization Techniques') {
+      if (scrollPosition < 400) {
+        setActiveDiagram('pcaVisualization');
+      } else {
+        setActiveDiagram('tsneUmapComparison');
+      }
+    } else if (essayTitle === 'Conclusion') {
+      setActiveDiagram('embeddingsOverview');
     } else {
       // Default diagram if essay not recognized
       setActiveDiagram('default');
@@ -40,10 +70,45 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
         return <DefaultDiagram title="Vector Comparison" />;
       case 'transformerModel':
         return <DefaultDiagram title="Transformer Model" />;
-      case 'essay1Diagram1':
-        return <DefaultDiagram title="Essay 1 - Diagram 1" />;
-      case 'essay1Diagram2':
-        return <DefaultDiagram title="Essay 1 - Diagram 2" />;
+      
+      // Vector Basics diagrams
+      case 'multidimensionalSpace':
+        return <DefaultDiagram title="Multidimensional Space" />;
+      case 'kingQueenAnalogy':
+        return <DefaultDiagram title="King - Queen Analogy" />;
+      case 'wordClusters':
+        return <DefaultDiagram title="Word Clusters" />;
+      
+      // Transformer Models diagrams
+      case 'transformerArchitecture':
+        return <DefaultDiagram title="Transformer Architecture" />;
+      case 'contextualEmbeddings':
+        return <DefaultDiagram title="Contextual Embeddings" />;
+      
+      // Similarity & Distance diagrams
+      case 'cosineSimilarity':
+        return <DefaultDiagram title="Cosine Similarity" />;
+      case 'nearestNeighbors':
+        return <DefaultDiagram title="Nearest Neighbors" />;
+      case 'analogyTransformations':
+        return <DefaultDiagram title="Analogy Transformations" />;
+      
+      // Vector Databases diagrams
+      case 'vectorDatabaseStructure':
+        return <DefaultDiagram title="Vector Database Structure" />;
+      case 'retrievalAugmentedGeneration':
+        return <DefaultDiagram title="Retrieval-Augmented Generation" />;
+      
+      // Visualization Techniques diagrams
+      case 'pcaVisualization':
+        return <DefaultDiagram title="PCA Visualization" />;
+      case 'tsneUmapComparison':
+        return <DefaultDiagram title="t-SNE & UMAP Comparison" />;
+      
+      // Conclusion diagram
+      case 'embeddingsOverview':
+        return <DefaultDiagram title="Vector Embeddings Overview" />;
+      
       default:
         return <DefaultDiagram title="Diagram Component" />;
     }
@@ -51,9 +116,6 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
   
   return (
     <div className="diagram-component">
-      <div className="diagram-title">
-        Diagram Component
-      </div>
       <div className="diagram-content">
         {renderDiagram()}
       </div>
@@ -62,29 +124,18 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
         .diagram-component {
           display: flex;
           flex-direction: column;
+          width: 100%;
           height: 100%;
-          background-color: rgba(26, 26, 46, 0.6);
-          border-radius: 8px;
-        }
-        
-        .diagram-title {
-          font-size: 1.2rem;
-          font-weight: 500;
-          padding: 1rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          color: rgba(255, 255, 255, 0.9);
-          text-align: center;
+          background-color: transparent;
         }
         
         .diagram-content {
-          flex: 0 0 auto;
+          flex: 1;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 1rem;
-          min-height: 240px;
+          padding: 0.5rem;
           overflow: hidden;
-          margin-top: 0;
         }
       `}</style>
     </div>

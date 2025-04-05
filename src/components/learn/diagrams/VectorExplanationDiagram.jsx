@@ -153,8 +153,8 @@ const VectorExplanationDiagram = () => {
     <div className="vector-explanation-diagram">
       <canvas
         ref={canvasRef}
-        width={280}
-        height={210}
+        width={300}
+        height={300}
       />
       
       <style jsx="true">{`

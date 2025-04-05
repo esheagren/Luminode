@@ -1,11 +1,21 @@
 // Import essay files
 import introduction from './text/Introduction.txt?raw';
-import essay1 from './text/Essay1.txt?raw';
+import vectorBasics from './text/Essay1.txt?raw';
+import transformerModels from './text/Essay2.txt?raw';
+import similarityMetrics from './text/Essay3.txt?raw';
+import vectorDatabases from './text/Essay4.txt?raw';
+import dimensionReduction from './text/Essay5.txt?raw';
+import conclusion from './text/Essay6.txt?raw';
 
 // Map of essay titles to their content
 const essayContentMap = {
   'Introduction': introduction,
-  'Essay1': essay1,
+  'Vector Basics': vectorBasics,
+  'Transformer Models': transformerModels,
+  'Similarity & Distance': similarityMetrics,
+  'Vector Databases': vectorDatabases,
+  'Visualization Techniques': dimensionReduction,
+  'Conclusion': conclusion
   // Add more essays as they become available
 };
 
