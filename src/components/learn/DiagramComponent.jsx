@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Provider } from 'react-redux';
+import { store } from '../../app/store';
 
 // Import diagram components
 import VectorExplanationDiagram from './diagrams/VectorExplanationDiagram';
@@ -65,7 +67,11 @@ const DiagramComponent = ({ essayTitle, scrollPosition }) => {
   const renderDiagram = () => {
     switch (activeDiagram) {
       case 'vectorExplanation':
-        return <VectorExplanationDiagram />;
+        return (
+          <Provider store={store}>
+            <VectorExplanationDiagram />
+          </Provider>
+        );
       case 'vectorComparison':
         return <DefaultDiagram title="Vector Comparison" />;
       case 'transformerModel':

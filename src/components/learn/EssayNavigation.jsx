@@ -4,7 +4,7 @@ const EssayNavigation = ({ essays, selectedEssay, onSelectEssay }) => {
   return (
     <div className="essay-nav-container">
       <div className="essay-nav-header">
-        <h3>Overview</h3>
+        <h3>Learn</h3>
       </div>
       <div className="essay-nav-list">
         {essays.map((essay) => (

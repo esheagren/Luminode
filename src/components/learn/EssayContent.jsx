@@ -19,8 +19,8 @@ const EssayContent = ({ content, title }) => {
       
       <style jsx="true">{`
         .essay-content {
-          max-width: 800px;
-          margin: 0 auto;
+          width: 100%;
+          padding-right: 1rem;
         }
         
         .essay-title {
@@ -29,22 +29,26 @@ const EssayContent = ({ content, title }) => {
           padding-bottom: 0.5rem;
           border-bottom: 2px solid rgba(255, 255, 255, 0.1);
           color: rgba(255, 255, 255, 0.95);
+          text-align: left;
         }
         
         .essay-text {
           font-size: 1.1rem;
           line-height: 1.7;
           color: rgba(255, 255, 255, 0.85);
+          text-align: left;
         }
         
         .essay-text p {
           margin-bottom: 1.5rem;
+          text-align: left;
         }
         
         .essay-text h1, .essay-text h2, .essay-text h3 {
           margin-top: 2rem;
           margin-bottom: 1rem;
           color: rgba(255, 255, 255, 0.95);
+          text-align: left;
         }
         
         .essay-text a {

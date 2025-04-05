@@ -68,7 +68,6 @@ const LearnPage = () => {
 
       <div className="learn-content-wrapper">
         <div className="learn-header">
-          <h1>Learn</h1>
           <Link to="/app" className="back-button">
             Back to Application
           </Link>

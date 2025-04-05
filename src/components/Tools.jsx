@@ -732,7 +732,7 @@ const Tools = ({
           <div className="spacer"></div>
           
           <Link 
-            to="/about" 
+            to="/learn" 
             className="icon-button learn-button"
             onMouseEnter={(e) => createToolbarTooltip('Learn', e)}
             onMouseLeave={() => removeToolbarTooltip()}
