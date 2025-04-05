@@ -13,6 +13,7 @@ const Footer = () => {
             Contact
           </a>
           <Link to="/about">About</Link>
+          <Link to="/learn">Learn</Link>
         </div>
         
         <div className="footer-animation">

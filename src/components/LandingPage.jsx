@@ -38,9 +38,14 @@ const LandingPage = () => {
       <div className="landing-content">
         <h1 className="landing-title">Luminode</h1>
         <p className="landing-tagline">Explore the hidden relationships between words in a beautiful, interactive vector space</p>
-        <Link to="/app" className="enter-app-button">
-          Enter
-        </Link>
+        <div className="button-container">
+          <Link to="/app" className="app-button primary-button">
+            Explore
+          </Link>
+          <Link to="/learn" className="app-button secondary-button">
+            Learn
+          </Link>
+        </div>
       </div>
 
       <footer className="landing-footer">
@@ -52,6 +57,7 @@ const LandingPage = () => {
             Contact
           </a>
           <Link to="/about">About</Link>
+          <Link to="/learn">Learn</Link>
         </div>
         
         <div className="footer-animation">
@@ -120,7 +126,13 @@ const LandingPage = () => {
           text-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
         }
         
-        .enter-app-button {
+        .button-container {
+          display: flex;
+          gap: 1.5rem;
+          margin-top: 0.5rem;
+        }
+        
+        .app-button {
           display: inline-block;
           padding: 0.8rem 2.5rem;
           background: transparent;
@@ -136,7 +148,15 @@ const LandingPage = () => {
           box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         
-        .enter-app-button:hover {
+        .primary-button {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .secondary-button {
+          background-color: transparent;
+        }
+        
+        .app-button:hover {
           background: rgba(255, 255, 255, 0.15);
           border-color: rgba(255, 255, 255, 0.5);
           color: rgba(255, 255, 255, 1);
@@ -246,7 +266,12 @@ const LandingPage = () => {
             padding: 0 1rem;
           }
           
-          .enter-app-button {
+          .button-container {
+            flex-direction: column;
+            gap: 1rem;
+          }
+          
+          .app-button {
             padding: 0.6rem 2rem;
             font-size: 0.9rem;
           }

@@ -1,19 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import LoadingAnimation from '../visualization/LoadingAnimation';
-import Introduction from './Introduction';
-import CoreFunctionalities from './CoreFunctionalities';
-import EmbeddingExplanation from './EmbeddingExplanation';
-import Disclaimer from './Disclaimer';
-import MiniVisualizer from './MiniVisualizer';
-import InteractiveExamples from './InteractiveExamples';
 import Footer from '../Footer';
 import { Link } from 'react-router-dom';
 
 const AboutPage = () => {
   const containerRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [activeTab, setActiveTab] = useState('overview');
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -24,14 +16,8 @@ const AboutPage = () => {
     // Add resize listener
     window.addEventListener('resize', updateDimensions);
     
-    // Mark as loaded after a short delay to ensure components have time to initialize
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 300);
-    
     return () => {
       window.removeEventListener('resize', updateDimensions);
-      clearTimeout(timer);
     };
   }, []);
   
@@ -42,28 +28,6 @@ const AboutPage = () => {
       width: containerRef.current.clientWidth,
       height: containerRef.current.clientHeight
     });
-  };
-
-  const renderTabContent = () => {
-    switch(activeTab) {
-      case 'overview':
-        return (
-          <>
-            <Introduction />
-            {isLoaded && <MiniVisualizer />}
-          </>
-        );
-      case 'embeddings':
-        return <EmbeddingExplanation />;
-      case 'technologies':
-        return <CoreFunctionalities />;
-      case 'examples':
-        return isLoaded ? <InteractiveExamples /> : <div className="loading-placeholder">Loading examples...</div>;
-      case 'limitations':
-        return <Disclaimer />;
-      default:
-        return <Introduction />;
-    }
   };
 
   return (
@@ -78,53 +42,62 @@ const AboutPage = () => {
       <div className="content">
         <div className="header-container">
           <h1>About Luminode</h1>
-          <Link to="/app" className="back-button">
-            Back to App
-          </Link>
+          <div className="navigation-buttons">
+            <Link to="/app" className="nav-button">
+              Explore App
+            </Link>
+            <Link to="/learn" className="nav-button">
+              Learn More
+            </Link>
+          </div>
         </div>
         
         <div className="about-container">
-          <div className="tabs">
-            <button 
-              className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
-              onClick={() => setActiveTab('overview')}
-            >
-              Overview
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'embeddings' ? 'active' : ''}`}
-              onClick={() => setActiveTab('embeddings')}
-            >
-              Word Embeddings
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'technologies' ? 'active' : ''}`}
-              onClick={() => setActiveTab('technologies')}
-            >
-              Vector Technologies
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'examples' ? 'active' : ''}`}
-              onClick={() => setActiveTab('examples')}
-            >
-              Interactive Examples
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'limitations' ? 'active' : ''}`}
-              onClick={() => setActiveTab('limitations')}
-            >
-              Limitations
-            </button>
-          </div>
-          
-          <div className="tab-content">
-            {renderTabContent()}
+          <div className="about-content">
+            <h2>Vector Database Visualization Software</h2>
+            
+            <p>
+              Luminode is an educational application for exploring word embeddings, finding semantic relationships, 
+              and visualizing vector spaces. The application uses cloud-based Pinecone storage for word embeddings 
+              to ensure optimal performance.
+            </p>
+            
+            <div className="features-section">
+              <h3>Key Features</h3>
+              <ul>
+                <li>Find similar words using nearest neighbor search</li>
+                <li>Calculate semantic midpoints between words to discover concepts in-between</li>
+                <li>Solve analogy problems (e.g., "man is to woman as king is to _____")</li>
+                <li>Explore semantic space using novel slicing technique</li>
+                <li>Visualize word vectors in 2D or 3D space using memory-efficient PCA</li>
+              </ul>
+            </div>
+            
+            <div className="tech-section">
+              <h3>Technology</h3>
+              <p>
+                Luminode is built with React and Vite for the frontend, Express.js for the backend API, 
+                and uses Pinecone vector database for cloud-based vector storage and search. The application 
+                utilizes GloVe word embeddings (200-dimensional vectors) and employs memory-optimized PCA 
+                implementation for visualization with Three.js for 3D rendering.
+              </p>
+            </div>
+            
+            <div className="disclaimer-section">
+              <h3>Limitations</h3>
+              <p>
+                Word embeddings capture semantic relationships based on word co-occurrence patterns in training data,
+                but they have limitations. They may reflect societal biases present in the training data and can sometimes
+                produce unexpected or inconsistent results. Luminode is designed as an educational tool to help understand
+                the concepts of vector embeddings rather than as a definitive resource for language understanding.
+              </p>
+            </div>
           </div>
         </div>
         
         <div className="bottom-navigation">
-          <Link to="/app" className="back-button large">
-            Return to Application
+          <Link to="/" className="home-button">
+            Return to Home
           </Link>
         </div>
       </div>
@@ -163,7 +136,7 @@ const AboutPage = () => {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 1rem;
+          gap: 1.5rem;
           margin-bottom: 2rem;
           width: 100%;
           position: relative;
@@ -176,28 +149,80 @@ const AboutPage = () => {
           text-align: center;
         }
         
-        .back-button {
+        h2 {
+          font-size: 1.8rem;
+          color: rgba(255, 255, 255, 0.9);
+          margin: 0 0 1.5rem 0;
+          text-align: center;
+          font-weight: 500;
+        }
+        
+        h3 {
+          font-size: 1.4rem;
+          color: #FFA500;
+          margin: 1.5rem 0 1rem 0;
+          font-weight: 500;
+        }
+        
+        p {
+          font-size: 1.1rem;
+          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.85);
+          margin-bottom: 1.5rem;
+        }
+        
+        ul {
+          padding-left: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
+        
+        li {
+          font-size: 1.1rem;
+          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.85);
+          margin-bottom: 0.5rem;
+        }
+        
+        .navigation-buttons {
+          display: flex;
+          gap: 1rem;
+        }
+        
+        .nav-button {
           background-color: rgba(255, 165, 0, 0.2);
           color: #FFA500;
           border: 1px solid rgba(255, 165, 0, 0.5);
           border-radius: 4px;
-          padding: 0.5rem 1rem;
-          font-size: 0.9rem;
+          padding: 0.6rem 1.2rem;
+          font-size: 1rem;
           text-decoration: none;
           transition: all 0.3s ease;
           display: inline-block;
         }
         
-        .back-button:hover {
+        .nav-button:hover {
           background-color: rgba(255, 165, 0, 0.3);
           transform: translateY(-2px);
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         
-        .back-button.large {
-          font-size: 1.1rem;
+        .home-button {
+          background-color: rgba(255, 255, 255, 0.1);
+          color: rgba(255, 255, 255, 0.9);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
           padding: 0.75rem 1.5rem;
+          font-size: 1.1rem;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          display: inline-block;
           margin: 2rem 0;
+        }
+        
+        .home-button:hover {
+          background-color: rgba(255, 255, 255, 0.2);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         
         .bottom-navigation {
@@ -210,82 +235,58 @@ const AboutPage = () => {
         .about-container {
           background-color: rgba(26, 26, 46, 0.8);
           border-radius: 12px;
-          padding: 2rem;
-          max-width: 1000px;
+          padding: 2.5rem;
+          max-width: 900px;
           width: 100%;
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
           backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .tabs {
-          display: flex;
-          border-bottom: 1px solid rgba(255, 165, 0, 0.3);
+        .about-content {
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        
+        .features-section, .tech-section, .disclaimer-section {
           margin-bottom: 2rem;
-          overflow-x: auto;
-          scrollbar-width: thin;
-          scrollbar-color: rgba(255, 165, 0, 0.5) transparent;
-        }
-        
-        .tab-button {
-          background: transparent;
-          border: none;
-          color: white;
-          padding: 0.75rem 1.25rem;
-          font-size: 1.1rem;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          position: relative;
-          white-space: nowrap;
-        }
-        
-        .tab-button:hover {
-          color: #FFA500;
-        }
-        
-        .tab-button.active {
-          color: #FFA500;
-          font-weight: bold;
-        }
-        
-        .tab-button.active::after {
-          content: '';
-          position: absolute;
-          bottom: -1px;
-          left: 0;
-          width: 100%;
-          height: 3px;
-          background-color: #FFA500;
-          border-radius: 3px 3px 0 0;
-        }
-        
-        .tab-content {
-          min-height: 400px;
-        }
-        
-        .loading-placeholder {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 200px;
-          font-style: italic;
-          color: rgba(255, 255, 255, 0.7);
         }
         
         @media (max-width: 768px) {
-          .tabs {
-            flex-wrap: wrap;
+          .content {
+            padding: 1.5rem;
           }
           
-          .tab-button {
-            flex: 1 1 auto;
-            text-align: center;
-            padding: 0.5rem;
-            font-size: 0.9rem;
+          .about-container {
+            padding: 1.5rem;
           }
           
           h1 {
             font-size: 2.5rem;
+          }
+          
+          h2 {
+            font-size: 1.5rem;
+          }
+          
+          h3 {
+            font-size: 1.2rem;
+          }
+          
+          p, li {
+            font-size: 1rem;
+          }
+          
+          .navigation-buttons {
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+            align-items: center;
+          }
+          
+          .nav-button {
+            width: 80%;
+            text-align: center;
           }
         }
       `}</style>
