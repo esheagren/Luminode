@@ -13,7 +13,8 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
     highestVisiblePosition,
     getPositionFromId,
     shouldUnhighlightWhenScrollingUp,
-    paragraphThresholds
+    paragraphThresholds,
+    userHasScrolled
   } = useScroll();
   
   // Get paragraph position in the document
@@ -54,6 +55,11 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
     return paragraphThresholds[id] || { appearThreshold: 0, disappearThreshold: 0 };
   };
   
+  // Check if this is the first paragraph in the essay
+  const isFirstParagraph = () => {
+    return id === 'intro-p1';
+  };
+  
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -65,10 +71,8 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
         if (isIntersecting) {
           setVisibilityRatio(entry.intersectionRatio);
         } else {
-          // Only reset visibility ratio when scrolling up
-          if (scrollDirection === 'up') {
-            setVisibilityRatio(0);
-          }
+          // Always reset visibility ratio immediately when paragraph is no longer visible
+          setVisibilityRatio(0);
         }
         
         // Pass paragraph ID and its diagram ID to callback when visibility changes
@@ -101,6 +105,16 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   
   // Determine if we should show background color
   const shouldShowBackground = () => {
+    // Always highlight the first paragraph regardless of scroll state
+    if (isFirstParagraph()) {
+      return true;
+    }
+    
+    // If user hasn't scrolled yet, only highlight the first paragraph
+    if (!userHasScrolled) {
+      return false;
+    }
+    
     // If the paragraph is currently visible, always show its background
     if (isVisible) {
       return true;
@@ -111,15 +125,10 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
       return isParagraphAboveViewed();
     }
     
-    // When scrolling up, the logic is more complex:
+    // When scrolling up, immediately un-highlight paragraphs that aren't visible
     if (scrollDirection === 'up') {
-      // If this paragraph is at or above the highest visible paragraph, keep it highlighted
-      if (paragraphPosition <= highestVisiblePosition) {
-        return true;
-      }
-      
-      // Otherwise, check if we've scrolled past the point where it initially became visible
-      return !shouldUnhighlightWhenScrollingUp(id);
+      // Only keep paragraphs highlighted if they're currently visible or above the highest visible paragraph
+      return isVisible || paragraphPosition <= highestVisiblePosition;
     }
     
     // Default fallback - if in doubt, rely on visibility
@@ -129,6 +138,11 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   // Calculate opacity based on visibility ratio for a smoother transition
   const getOpacity = () => {
     if (!shouldShowBackground()) return 0;
+    
+    // Always give the first paragraph full opacity
+    if (isFirstParagraph()) {
+      return 1;
+    }
     
     // When paragraph has been seen but isn't currently visible,
     // use a slightly lower opacity
@@ -190,6 +204,16 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   // Get threshold data for debugging
   const thresholdData = getThresholdInfo();
   
+  // Determine transition style based on scroll direction
+  const getTransitionStyle = () => {
+    // For scrolling up, use no transition for instant un-highlighting
+    if (scrollDirection === 'up') {
+      return 'background-color 0s';
+    }
+    // For scrolling down or no scrolling, use the smooth transition
+    return 'background-color 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)';
+  };
+  
   return (
     <div 
       ref={paragraphRef} 
@@ -205,7 +229,7 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
         padding: '10px 10px 5px 10px', // Reduced bottom padding
         marginBottom: '0px',
         marginTop: '0px',
-        transition: 'background-color 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)', // Slower, smoother transition with material-style easing
+        transition: getTransitionStyle(), // Dynamic transition based on scroll direction
         borderRadius: isFirstInSection() ? '6px 6px 0 0' :     // First paragraph in section gets top rounded corners
                      isLastInSection() ? '0 0 6px 6px' :       // Last paragraph in section gets bottom rounded corners
                      '0'  // Middle paragraphs get no rounded corners for a continuous look

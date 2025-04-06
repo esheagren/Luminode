@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
@@ -20,6 +20,25 @@ const EssayContent = ({ content, title }) => {
   
   // Get structured data for this essay if available
   const essayData = essayDataMap[title];
+  
+  // Make sure the first paragraph is highlighted on mount
+  useEffect(() => {
+    if (essayData && essayData.content.length > 0) {
+      // Find first paragraph
+      const firstParagraph = essayData.content.find(item => item.type === 'paragraph');
+      if (firstParagraph) {
+        // Manually trigger visibility for the first paragraph to ensure it's highlighted
+        handleVisibilityChange({
+          id: firstParagraph.id,
+          diagramId: firstParagraph.diagramId,
+          diagramColor: firstParagraph.diagramColor,
+          isVisible: true,
+          sectionId: firstParagraph.id.split('-')[0],
+          ratio: 1.0
+        });
+      }
+    }
+  }, [essayData, handleVisibilityChange]);
   
   // If we have structured data for this essay, use it
   if (essayData) {

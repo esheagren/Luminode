@@ -6,7 +6,7 @@ const colors = {
   dictionary: 'rgba(153, 102, 255, 0.6)', // Purple - darker for better visibility
   vector: 'rgba(47, 105, 45, 0.65)',      // Forest green - darker, richer green
   meaning: 'rgba(83, 123, 196, 0.6)',     // Blue - darker for better visibility
-  contextual: 'rgba(76, 125, 196, 0.65)', // Light blue - darker for better visibility
+  contextual: 'rgba(153, 28, 151, 0.65)', // Light blue - darker for better visibility
   algorithms: 'rgba(255, 142, 83, 0.6)',  // Orange - darker for better visibility
   applications: 'rgba(76, 205, 196, 0.6)', // Teal - darker for better visibility
   summary: 'rgba(255, 165, 0, 0.6)'       // Gold - darker for better visibility
@@ -28,8 +28,15 @@ export const essay1 = {
   title: "Vectors: Meaning in AI Systems",
   content: [
     {
+        type: "paragraph",
+        id: "intro-p1",
+        text: "In modern AI systems, language and meaning are represented mathematically. This on its own is an astonishing fact that deserves study. And for those who wish to understand AI, understanding the mechanics of how meaning can arise at all from raw data is a critical concentual brick that must be laid if sturdy understanding is to be developed later. My hope is this essay and interative tool aids in that endeavor.",
+        diagramId: "E1_SemanticSpace",
+        diagramColor: colors.dictionary
+      },
+    {
       type: "paragraph",
-      id: "intro-p1",
+      id: "intro-p1.5",
       text: "When we first learn new words, dictionaries often guide us with neat definitions: \"cat\" is a small, carnivorous mammal, \"house\" is a dwelling where people live, and so on. Yet in actual human communication, words are rarely locked into these one-line definitions. Instead, they come alive through the contexts and connotations they share with other words. If you think about what \"travel\" means in an everyday sense, you might imagine suitcases, tickets, airports—or maybe scenic highways, train stations, and different currencies. All these associations form a dense web of meaning that the word \"travel\" can evoke.",
       diagramId: "E1_DictionaryVsAssociation",
       diagramColor: colors.dictionary

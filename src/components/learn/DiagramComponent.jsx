@@ -155,7 +155,7 @@ const diagramMap = {
 };
 
 const DiagramComponent = () => {
-  const { currentDiagram, currentDiagramColor } = useScroll();
+  const { currentDiagram, currentDiagramColor, scrollDirection } = useScroll();
   
   // Get the diagram details from our mapping
   const diagramInfo = currentDiagram ? diagramMap[currentDiagram] : null;
@@ -170,13 +170,23 @@ const DiagramComponent = () => {
     return <DiagramToRender caption={diagramInfo.caption} />;
   };
   
+  // Determine transition speed based on scroll direction
+  const getTransitionStyle = () => {
+    // For scrolling up, use much faster transition
+    if (scrollDirection === 'up') {
+      return 'background-color 0.1s ease';
+    }
+    // For scrolling down or no scrolling, use the normal transition
+    return 'background-color 0.3s ease-in-out';
+  };
+  
   return (
     <div className="diagram-component">
       <div 
         className="diagram-content" 
         style={{ 
           backgroundColor: currentDiagramColor || 'rgba(26, 26, 46, 0.4)',
-          transition: 'background-color 0.3s ease-in-out'
+          transition: getTransitionStyle()
         }}
       >
         {renderDiagram()}

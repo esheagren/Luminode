@@ -16,6 +16,8 @@ export function ScrollProvider({ children }) {
   const [currentDiagram, setCurrentDiagram] = useState(null);
   const [currentDiagramColor, setCurrentDiagramColor] = useState(null);
   const [scrollDirection, setScrollDirection] = useState('none');
+  // Add userHasScrolled flag to track if user has scrolled yet
+  const [userHasScrolled, setUserHasScrolled] = useState(false);
   const lastScrollY = useRef(0);
   const contentRef = useRef(null);
   
@@ -50,6 +52,11 @@ export function ScrollProvider({ children }) {
     const handleScroll = (e) => {
       if (!contentRef.current) return;
       
+      // Set userHasScrolled to true on first scroll
+      if (!userHasScrolled) {
+        setUserHasScrolled(true);
+      }
+      
       const currentScrollTop = e.target.scrollTop;
       if (currentScrollTop > lastScrollY.current) {
         setScrollDirection('down');
@@ -71,7 +78,7 @@ export function ScrollProvider({ children }) {
         contentRef.current.removeEventListener('scroll', handleScroll);
       }
     };
-  }, []);
+  }, [userHasScrolled]);
   
   // Update highest visible position whenever visible paragraphs change
   useEffect(() => {
@@ -90,8 +97,23 @@ export function ScrollProvider({ children }) {
   const handleVisibilityChange = useCallback(({ id, diagramId, diagramColor, sectionId, isVisible, ratio }) => {
     const position = getPositionFromId(id);
     
-    // Store the threshold at which this paragraph becomes visible or invisible
-    if (scrollDirection !== 'none') {
+    // When scrolling up, immediately process visibility changes
+    if (scrollDirection === 'up') {
+      // Update paragraph thresholds with a simplified approach
+      setParagraphThresholds(prev => {
+        return {
+          ...prev,
+          [id]: {
+            ...prev[id],
+            isCurrentlyVisible: isVisible,
+            position
+          }
+        };
+      });
+    } 
+    // For scrolling down, maintain the previous behavior with thresholds
+    else if (scrollDirection === 'down' || scrollDirection === 'none') {
+      // Store the threshold at which this paragraph becomes visible or invisible
       setParagraphThresholds(prev => {
         const threshold = lastScrollY.current;
         
@@ -109,7 +131,7 @@ export function ScrollProvider({ children }) {
         }
         
         // Update thresholds only when visibility state changes
-        const currentVisibility = prev[id].isCurrentlyVisible;
+        const currentVisibility = prev[id] ? prev[id].isCurrentlyVisible : false;
         
         // Visibility state is changing from invisible to visible
         if (isVisible && !currentVisibility) {
@@ -165,8 +187,7 @@ export function ScrollProvider({ children }) {
         // Include the position in the stored data
         updated = [...prev.filter(p => p.id !== id), { id, sectionId, diagramId, diagramColor, ratio, position }];
       } else {
-        // Remove this paragraph from visible ones if scrolling up
-        // Keep it in the list if scrolling down
+        // When scrolling up, immediately remove non-visible paragraphs
         if (scrollDirection === 'up') {
           updated = prev.filter(p => p.id !== id);
         } else {
@@ -203,33 +224,14 @@ export function ScrollProvider({ children }) {
   }, [scrollDirection, furthestSeenPosition]);
   
   // Helper function to check if we should unhighlight a paragraph when scrolling up
+  // Simplified for faster response when scrolling up
   const shouldUnhighlightWhenScrollingUp = useCallback((id) => {
-    if (!paragraphThresholds[id]) return false;
+    if (scrollDirection !== 'up') return false;
     
-    // When scrolling up, check if we've passed the threshold where this paragraph appeared
-    if (scrollDirection === 'up') {
-      const { appearThreshold, position } = paragraphThresholds[id];
-      
-      // If there's no appearance threshold yet, don't unhighlight
-      if (!appearThreshold) return false;
-      
-      // Create a buffer zone for smoother transitions
-      const transitionBuffer = 30; // pixels of scroll buffer for transition
-      
-      // Calculate how far past the threshold we've scrolled
-      const distancePastThreshold = appearThreshold - lastScrollY.current;
-      
-      // If we're in the buffer zone, don't unhighlight yet - creates smoother transition
-      if (distancePastThreshold <= transitionBuffer) {
-        return false;
-      }
-      
-      // Only unhighlight paragraphs below the highest visible one
-      return position > highestVisiblePosition;
-    }
-    
-    return false;
-  }, [paragraphThresholds, scrollDirection, highestVisiblePosition, lastScrollY]);
+    const position = paragraphThresholds[id]?.position || 0;
+    // When scrolling up, immediately unhighlight paragraphs below the current visible position
+    return position > highestVisiblePosition;
+  }, [paragraphThresholds, scrollDirection, highestVisiblePosition]);
   
   return (
     <ScrollContext.Provider value={{ 
@@ -243,7 +245,8 @@ export function ScrollProvider({ children }) {
       highestVisiblePosition,
       getPositionFromId,
       shouldUnhighlightWhenScrollingUp,
-      paragraphThresholds
+      paragraphThresholds,
+      userHasScrolled
     }}>
       {children}
     </ScrollContext.Provider>
