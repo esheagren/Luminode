@@ -213,16 +213,23 @@ export function ScrollProvider({ children }) {
       // If there's no appearance threshold yet, don't unhighlight
       if (!appearThreshold) return false;
       
-      // Check if we've scrolled past the point where this paragraph became visible
-      if (lastScrollY.current < appearThreshold) {
-        // Also check if this paragraph is below the currently highest visible paragraph
-        // Only unhighlight paragraphs below the highest visible one
-        return position > highestVisiblePosition;
+      // Create a buffer zone for smoother transitions
+      const transitionBuffer = 30; // pixels of scroll buffer for transition
+      
+      // Calculate how far past the threshold we've scrolled
+      const distancePastThreshold = appearThreshold - lastScrollY.current;
+      
+      // If we're in the buffer zone, don't unhighlight yet - creates smoother transition
+      if (distancePastThreshold <= transitionBuffer) {
+        return false;
       }
+      
+      // Only unhighlight paragraphs below the highest visible one
+      return position > highestVisiblePosition;
     }
     
     return false;
-  }, [paragraphThresholds, scrollDirection, highestVisiblePosition]);
+  }, [paragraphThresholds, scrollDirection, highestVisiblePosition, lastScrollY]);
   
   return (
     <ScrollContext.Provider value={{ 

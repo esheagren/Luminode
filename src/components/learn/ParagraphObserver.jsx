@@ -133,7 +133,7 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
     // When paragraph has been seen but isn't currently visible,
     // use a slightly lower opacity
     if (!isVisible) {
-      return 0.95; // Slightly less intense but still clearly visible
+      return 0.96; // Nearly full opacity for better readability when not in view
     }
     
     // When paragraphs are visible, use full opacity
@@ -141,8 +141,10 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
       return 1;
     }
     
-    // Normal case: fade based on visibility ratio with a minimum opacity
-    return Math.max(0.3, Math.min(visibilityRatio * 2, 1)); // Faster opacity increase with minimum threshold
+    // Normal case: fade based on visibility ratio with a higher minimum opacity
+    // Use a smoothing function for more gradual transitions
+    const smoothedRatio = Math.pow(visibilityRatio, 0.7); // Less aggressive curve
+    return Math.max(0.5, Math.min(smoothedRatio * 1.5, 1)); // Higher minimum opacity for better readability
   };
   
   // Parse the rgba color to get its components
@@ -203,7 +205,7 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
         padding: '10px 10px 5px 10px', // Reduced bottom padding
         marginBottom: '0px',
         marginTop: '0px',
-        transition: 'background-color 0.3s ease-out', // Faster, smoother transition with ease-out timing
+        transition: 'background-color 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)', // Slower, smoother transition with material-style easing
         borderRadius: isFirstInSection() ? '6px 6px 0 0' :     // First paragraph in section gets top rounded corners
                      isLastInSection() ? '0 0 6px 6px' :       // Last paragraph in section gets bottom rounded corners
                      '0'  // Middle paragraphs get no rounded corners for a continuous look
