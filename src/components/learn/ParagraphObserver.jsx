@@ -1,11 +1,15 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, children }) => {
   const paragraphRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
+        // Update local visibility state
+        setIsVisible(entry.isIntersecting);
+        
         // Pass paragraph ID and its diagram ID to callback when visibility changes
         onVisibilityChange({
           id, 
@@ -40,10 +44,10 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
       id={`para-${id}`} 
       className="essay-paragraph"
       style={{ 
-        backgroundColor: diagramColor,
+        backgroundColor: isVisible ? diagramColor : 'transparent',
         borderRadius: '6px',
         padding: '10px',
-        marginBottom: '15px',
+        marginBottom: '5px',
         transition: 'background-color 0.3s ease'
       }}
     >

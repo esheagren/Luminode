@@ -11,19 +11,27 @@ export function ScrollProvider({ children }) {
   const handleVisibilityChange = useCallback(({ id, diagramId, diagramColor, isVisible, ratio }) => {
     setVisibleParagraphs(prev => {
       // Update the visible paragraphs list
-      const updated = isVisible 
-        ? [...prev.filter(p => p.id !== id), { id, diagramId, diagramColor, ratio }]
-        : prev.filter(p => p.id !== id);
+      let updated;
+      if (isVisible) {
+        // Add this paragraph to visible ones if not already there
+        updated = [...prev.filter(p => p.id !== id), { id, diagramId, diagramColor, ratio }];
+      } else {
+        // Remove this paragraph from visible ones
+        updated = prev.filter(p => p.id !== id);
+      }
       
-      // Find the most prominent paragraph (highest visibility ratio)
-      const sorted = [...updated].sort((a, b) => b.ratio - a.ratio);
-      const mostVisible = sorted[0];
-      
-      // Update the current diagram if necessary
-      if (mostVisible && mostVisible.diagramId) {
-        setCurrentDiagram(mostVisible.diagramId);
-        setCurrentDiagramColor(mostVisible.diagramColor);
-      } else if (updated.length === 0) {
+      // Find the most prominent paragraph (highest visibility ratio and closest to top)
+      if (updated.length > 0) {
+        const sorted = [...updated].sort((a, b) => b.ratio - a.ratio);
+        const mostVisible = sorted[0];
+        
+        // Update the current diagram if necessary
+        if (mostVisible && mostVisible.diagramId) {
+          setCurrentDiagram(mostVisible.diagramId);
+          setCurrentDiagramColor(mostVisible.diagramColor);
+        }
+      } else {
+        // No paragraphs visible, clear the diagram
         setCurrentDiagram(null);
         setCurrentDiagramColor(null);
       }

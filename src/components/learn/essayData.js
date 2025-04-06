@@ -13,15 +13,8 @@ const colors = {
 };
 
 export const essay1 = {
-  title: "The Why and How of Vector Embeddings",
+  title: "Vectors: Meaning in AI Systems",
   content: [
-    {
-      type: "heading",
-      level: 1,
-      id: "title",
-      text: "The Why and How of Vector Embeddings"
-    },
-    // Introduction
     {
       type: "paragraph",
       id: "intro-p1",
@@ -335,7 +328,7 @@ export const essay1 = {
 
 // Export available essays
 export const availableEssays = [
-  "The Why and How of Vector Embeddings",
+  "Vectors: Meaning in AI Systems",
   "Exploring and Visualizing Vector Embeddings",
   "Vector Databases and Large-Scale Retrieval"
 ]; 

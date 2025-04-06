@@ -10,6 +10,7 @@ import { essay1 } from './essayData';
 
 // Map essay titles to their data
 const essayDataMap = {
+  'Vectors: Meaning in AI Systems': essay1,
   'The Why and How of Vector Embeddings': essay1,
   // Add other essays as they're structured
 };

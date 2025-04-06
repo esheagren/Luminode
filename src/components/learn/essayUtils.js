@@ -6,7 +6,8 @@ import { availableEssays } from './essayData';
 
 // Map of essay titles to their content
 const essayContentMap = {
-  'The Why and How of Vector Embeddings': vectorBasics,
+  'Vectors: Meaning in AI Systems': vectorBasics,
+  'The Why and How of Vector Embeddings': vectorBasics, // Keep for backward compatibility
   'Exploring and Visualizing Vector Embeddings': transformerModels,
   'Vector Databases and Large-Scale Retrieval': similarityMetrics
   // Add more essays as they become available
