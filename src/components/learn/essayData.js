@@ -3,13 +3,13 @@
 
 // Colors for different diagram sections - increase opacity for better readability
 const colors = {
-  dictionary: 'rgba(153, 102, 255, 0.3)', // Purple - even darker for better visibility
-  vector: 'rgba(124, 179, 66, 0.35)',     // Light green - even darker for better visibility
-  meaning: 'rgba(83, 123, 196, 0.3)',     // Blue - even darker for better visibility
-  contextual: 'rgba(76, 125, 196, 0.35)', // Light blue - even darker for better visibility
-  algorithms: 'rgba(255, 142, 83, 0.3)',  // Orange - even darker for better visibility
-  applications: 'rgba(76, 205, 196, 0.3)', // Teal - even darker for better visibility
-  summary: 'rgba(255, 165, 0, 0.3)'       // Gold - even darker for better visibility
+  dictionary: 'rgba(153, 102, 255, 0.6)', // Purple - darker for better visibility
+  vector: 'rgba(47, 105, 45, 0.65)',      // Forest green - darker, richer green
+  meaning: 'rgba(83, 123, 196, 0.6)',     // Blue - darker for better visibility
+  contextual: 'rgba(76, 125, 196, 0.65)', // Light blue - darker for better visibility
+  algorithms: 'rgba(255, 142, 83, 0.6)',  // Orange - darker for better visibility
+  applications: 'rgba(76, 205, 196, 0.6)', // Teal - darker for better visibility
+  summary: 'rgba(255, 165, 0, 0.6)'       // Gold - darker for better visibility
 };
 
 // Section order for essay 1 - defines the paragraph ordering for highlighting
