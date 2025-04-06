@@ -107,6 +107,7 @@
   border-bottom-left-radius: 8px;
   border-left: 1px solid rgba(255, 255, 255, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: opacity 0.5s ease-in-out; /* Smooth opacity transition for the container */
 }
 
 /* Mobile responsiveness */

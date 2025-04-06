@@ -155,7 +155,7 @@ const diagramMap = {
 };
 
 const DiagramComponent = () => {
-  const { currentDiagram, currentDiagramColor, scrollDirection } = useScroll();
+  const { currentDiagram, currentDiagramColor, scrollDirection, userHasScrolled } = useScroll();
   
   // Get the diagram details from our mapping
   const diagramInfo = currentDiagram ? diagramMap[currentDiagram] : null;
@@ -180,8 +180,20 @@ const DiagramComponent = () => {
     return 'background-color 0.3s ease-in-out';
   };
   
+  // Calculate opacity based on whether user has scrolled
+  const getOpacity = () => {
+    if (!userHasScrolled) return 0;
+    return 1;
+  };
+  
   return (
-    <div className="diagram-component">
+    <div 
+      className="diagram-component"
+      style={{
+        opacity: getOpacity(),
+        transition: 'opacity 0.5s ease-in-out'
+      }}
+    >
       <div 
         className="diagram-content" 
         style={{ 

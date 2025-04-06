@@ -7,11 +7,22 @@ import LoadingAnimation from './visualization/LoadingAnimation';
 import EssayNavigation from './learn/EssayNavigation';
 import EssayContent from './learn/EssayContent';
 import DiagramComponent from './learn/DiagramComponent';
-import { ScrollProvider } from './learn/ScrollContext';
+import { ScrollProvider, useScroll } from './learn/ScrollContext';
 
 // Import essay utilities
 import { getEssayContent, getAvailableEssays } from './learn/essayUtils';
 import { availableEssays } from './learn/essayData';
+
+// Wrapper component that has access to the scroll context
+const DiagramContainer = () => {
+  const { userHasScrolled } = useScroll();
+  
+  return (
+    <div className="diagram-container" style={{ opacity: userHasScrolled ? 1 : 0 }}>
+      <DiagramComponent />
+    </div>
+  );
+};
 
 const LearnPage = () => {
   const containerRef = useRef(null);
@@ -130,9 +141,7 @@ const LearnPage = () => {
               />
             </div>
 
-            <div className="diagram-container">
-              <DiagramComponent />
-            </div>
+            <DiagramContainer />
           </div>
         </ScrollProvider>
       </div>
