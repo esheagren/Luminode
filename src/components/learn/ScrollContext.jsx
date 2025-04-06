@@ -11,6 +11,8 @@ export function ScrollProvider({ children }) {
   const [furthestSeenPosition, setFurthestSeenPosition] = useState(0);
   // Track the highest currently visible paragraph position when scrolling up
   const [highestVisiblePosition, setHighestVisiblePosition] = useState(0);
+  // Track paragraph visibility thresholds to ensure symmetrical highlighting/unhighlighting
+  const [paragraphThresholds, setParagraphThresholds] = useState({});
   const [currentDiagram, setCurrentDiagram] = useState(null);
   const [currentDiagramColor, setCurrentDiagramColor] = useState(null);
   const [scrollDirection, setScrollDirection] = useState('none');
@@ -88,6 +90,57 @@ export function ScrollProvider({ children }) {
   const handleVisibilityChange = useCallback(({ id, diagramId, diagramColor, sectionId, isVisible, ratio }) => {
     const position = getPositionFromId(id);
     
+    // Store the threshold at which this paragraph becomes visible or invisible
+    if (scrollDirection !== 'none') {
+      setParagraphThresholds(prev => {
+        const threshold = lastScrollY.current;
+        
+        // If this is a new paragraph, initialize its state
+        if (!prev[id]) {
+          return {
+            ...prev,
+            [id]: {
+              appearThreshold: isVisible ? threshold : undefined,
+              disappearThreshold: !isVisible ? threshold : undefined,
+              isCurrentlyVisible: isVisible,
+              position
+            }
+          };
+        }
+        
+        // Update thresholds only when visibility state changes
+        const currentVisibility = prev[id].isCurrentlyVisible;
+        
+        // Visibility state is changing from invisible to visible
+        if (isVisible && !currentVisibility) {
+          return {
+            ...prev,
+            [id]: {
+              ...prev[id],
+              appearThreshold: threshold,
+              isCurrentlyVisible: true,
+              position
+            }
+          };
+        } 
+        // Visibility state is changing from visible to invisible
+        else if (!isVisible && currentVisibility) {
+          return {
+            ...prev,
+            [id]: {
+              ...prev[id],
+              disappearThreshold: threshold,
+              isCurrentlyVisible: false,
+              position
+            }
+          };
+        }
+        
+        // No change in visibility state
+        return prev;
+      });
+    }
+    
     // Update list of paragraphs that have been seen
     if (isVisible && ratio > 0.2) { // Consider paragraph "seen" when it's significantly visible
       setSeenParagraphs(prev => {
@@ -149,6 +202,28 @@ export function ScrollProvider({ children }) {
     });
   }, [scrollDirection, furthestSeenPosition]);
   
+  // Helper function to check if we should unhighlight a paragraph when scrolling up
+  const shouldUnhighlightWhenScrollingUp = useCallback((id) => {
+    if (!paragraphThresholds[id]) return false;
+    
+    // When scrolling up, check if we've passed the threshold where this paragraph appeared
+    if (scrollDirection === 'up') {
+      const { appearThreshold, position } = paragraphThresholds[id];
+      
+      // If there's no appearance threshold yet, don't unhighlight
+      if (!appearThreshold) return false;
+      
+      // Check if we've scrolled past the point where this paragraph became visible
+      if (lastScrollY.current < appearThreshold) {
+        // Also check if this paragraph is below the currently highest visible paragraph
+        // Only unhighlight paragraphs below the highest visible one
+        return position > highestVisiblePosition;
+      }
+    }
+    
+    return false;
+  }, [paragraphThresholds, scrollDirection, highestVisiblePosition]);
+  
   return (
     <ScrollContext.Provider value={{ 
       visibleParagraphs,
@@ -159,7 +234,9 @@ export function ScrollProvider({ children }) {
       handleVisibilityChange,
       furthestSeenPosition,
       highestVisiblePosition,
-      getPositionFromId
+      getPositionFromId,
+      shouldUnhighlightWhenScrollingUp,
+      paragraphThresholds
     }}>
       {children}
     </ScrollContext.Provider>

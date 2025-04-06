@@ -11,7 +11,9 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
     seenParagraphs, 
     furthestSeenPosition,
     highestVisiblePosition,
-    getPositionFromId
+    getPositionFromId,
+    shouldUnhighlightWhenScrollingUp,
+    paragraphThresholds
   } = useScroll();
   
   // Get paragraph position in the document
@@ -45,6 +47,11 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   // Check if this paragraph is above current visible paragraphs when scrolling up
   const isParagraphAboveCurrentlyVisible = () => {
     return paragraphPosition <= highestVisiblePosition;
+  };
+  
+  // Get the threshold information for this paragraph
+  const getThresholdInfo = () => {
+    return paragraphThresholds[id] || { appearThreshold: 0, disappearThreshold: 0 };
   };
   
   useEffect(() => {
@@ -99,14 +106,20 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
       return true;
     }
     
-    // When scrolling down or no scroll yet, show background for all paragraphs above the furthest seen position
+    // When scrolling down, highlight paragraphs that have been viewed
     if (scrollDirection === 'down' || scrollDirection === 'none') {
       return isParagraphAboveViewed();
     }
     
-    // When scrolling up, show background for paragraphs above/including the highest currently visible paragraph
+    // When scrolling up, the logic is more complex:
     if (scrollDirection === 'up') {
-      return isParagraphAboveCurrentlyVisible();
+      // If this paragraph is at or above the highest visible paragraph, keep it highlighted
+      if (paragraphPosition <= highestVisiblePosition) {
+        return true;
+      }
+      
+      // Otherwise, check if we've scrolled past the point where it initially became visible
+      return !shouldUnhighlightWhenScrollingUp(id);
     }
     
     // Default fallback - if in doubt, rely on visibility
@@ -172,6 +185,9 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
     return id.includes('-p9') || id.includes('-p8') || id.includes('-p7') || id.includes('-p6');
   };
   
+  // Get threshold data for debugging
+  const thresholdData = getThresholdInfo();
+  
   return (
     <div 
       ref={paragraphRef} 
@@ -181,12 +197,13 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
       data-has-been-seen={hasBeenSeen() ? "true" : "false"}
       data-is-visible={isVisible ? "true" : "false"}
       data-position={paragraphPosition}
+      data-appear-threshold={thresholdData.appearThreshold}
       style={{ 
         backgroundColor: getBackgroundColor(),
         padding: '10px 10px 5px 10px', // Reduced bottom padding
         marginBottom: '0px',
         marginTop: '0px',
-        transition: 'background-color 0.5s ease-in-out',
+        transition: 'background-color 0.3s ease-out', // Faster, smoother transition with ease-out timing
         borderRadius: isFirstInSection() ? '6px 6px 0 0' :     // First paragraph in section gets top rounded corners
                      isLastInSection() ? '0 0 6px 6px' :       // Last paragraph in section gets bottom rounded corners
                      '0'  // Middle paragraphs get no rounded corners for a continuous look
