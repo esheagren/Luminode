@@ -1,55 +1,70 @@
 import React from 'react';
 
-const E1_VectorsMeaning = ({ caption = 'Polysemy: How context-aware embeddings handle word ambiguity' }) => {
+const E1_VectorsMeaning = ({ caption = 'Contextual embeddings resolve word ambiguity' }) => {
   return (
     <div className="vector-meaning-diagram">
       <div className="diagram-box">
         <svg width="100%" height="100%" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
           {/* Title */}
-          <text x="30" y="25" fontSize="12" fontWeight="bold" fill="rgba(255, 255, 255, 0.9)">Polysemy: Same Word, Different Meanings</text>
+          <text x="100" y="20" fontSize="12" fontWeight="bold" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">
+            Static vs. Contextual Embeddings
+          </text>
           
-          {/* Water stream cluster */}
-          <circle cx="65" cy="75" r="25" fill="rgba(76, 205, 196, 0.2)" stroke="#4ECDC4" strokeWidth="1.5" />
-          <text x="65" y="50" fontSize="11" fontWeight="bold" fill="#4ECDC4" textAnchor="middle">Water Context</text>
+          {/* Dividing line between static and contextual */}
+          <line x1="10" y1="100" x2="190" y2="100" stroke="rgba(255, 255, 255, 0.2)" strokeWidth="1" strokeDasharray="3,2" />
           
-          <circle cx="65" cy="75" r="8" fill="#4ECDC4" />
-          <text x="65" y="78" fontSize="10" fontWeight="bold" fill="white" textAnchor="middle">stream</text>
+          {/* Static embedding header */}
+          <text x="40" y="40" fontSize="11" fontWeight="bold" fill="rgba(255, 255, 255, 0.8)">Static Embedding</text>
           
-          {/* Video stream cluster */}
-          <circle cx="135" cy="75" r="25" fill="rgba(255, 142, 83, 0.2)" stroke="#FF8E53" strokeWidth="1.5" />
-          <text x="135" y="50" fontSize="11" fontWeight="bold" fill="#FF8E53" textAnchor="middle">Video Context</text>
+          {/* Static embedding bank example */}
+          <circle cx="40" cy="70" r="20" fill="rgba(255, 107, 107, 0.2)" stroke="#FF6B6B" strokeWidth="1.5" />
+          <circle cx="40" cy="70" r="6" fill="#FF6B6B" />
+          <text x="40" y="73" fontSize="8" fontWeight="bold" fill="white" textAnchor="middle">bank</text>
           
-          <circle cx="135" cy="75" r="8" fill="#FF8E53" />
-          <text x="135" y="78" fontSize="10" fontWeight="bold" fill="white" textAnchor="middle">stream</text>
+          {/* Bank meanings in static model */}
+          <text x="40" y="50" fontSize="9" fill="#FF6B6B" textAnchor="middle">Single vector</text>
+          <text x="85" y="65" fontSize="8" fill="rgba(255, 255, 255, 0.8)">Financial</text>
+          <text x="85" y="75" fontSize="8" fill="rgba(255, 255, 255, 0.8)">River edge</text>
+          <text x="85" y="85" fontSize="8" fill="rgba(255, 255, 255, 0.8)">To rely on</text>
           
-          {/* Static embedding */}
-          <circle cx="100" cy="140" r="8" fill="#FF6B6B" />
-          <text x="100" y="143" fontSize="10" fontWeight="bold" fill="white" textAnchor="middle">stream</text>
+          <line x1="50" y1="65" x2="75" y2="65" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="0.8" />
+          <line x1="50" y1="75" x2="75" y2="75" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="0.8" />
+          <line x1="50" y1="85" x2="75" y2="85" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="0.8" />
           
-          {/* Connect to static embedding */}
-          <line x1="65" y1="75" x2="100" y2="140" stroke="#4ECDC4" strokeWidth="1.5" strokeDasharray="3,3" />
-          <line x1="135" y1="75" x2="100" y2="140" stroke="#FF8E53" strokeWidth="1.5" strokeDasharray="3,3" />
+          {/* Static embedding confusion icon */}
+          <text x="135" y="75" fontSize="24" fill="rgba(255, 107, 107, 0.8)" textAnchor="middle">⚠️</text>
+          <text x="135" y="90" fontSize="8" fill="rgba(255, 255, 255, 0.7)" textAnchor="middle">Meaning confusion</text>
           
-          {/* Explanation arrows */}
-          <path d="M70,110 L90,125" stroke="#4ECDC4" strokeWidth="1" fill="none" markerEnd="url(#arrowhead1)" />
-          <path d="M130,110 L110,125" stroke="#FF8E53" strokeWidth="1" fill="none" markerEnd="url(#arrowhead2)" />
+          {/* Contextual embedding header */}
+          <text x="40" y="120" fontSize="11" fontWeight="bold" fill="rgba(255, 255, 255, 0.8)">Contextual Embedding</text>
           
-          {/* Arrowhead definitions */}
-          <defs>
-            <marker id="arrowhead1" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto">
-              <polygon points="0 0, 5 2.5, 0 5" fill="#4ECDC4" />
-            </marker>
-            <marker id="arrowhead2" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto">
-              <polygon points="0 0, 5 2.5, 0 5" fill="#FF8E53" />
-            </marker>
-          </defs>
+          {/* Financial context */}
+          <circle cx="40" cy="150" r="15" fill="rgba(76, 114, 176, 0.2)" stroke="#4C72B0" strokeWidth="1.5" />
+          <circle cx="40" cy="150" r="6" fill="#4C72B0" />
+          <text x="40" y="153" fontSize="8" fontWeight="bold" fill="white" textAnchor="middle">bank</text>
+          <text x="40" y="173" fontSize="8" fill="#4C72B0" textAnchor="middle">Financial context</text>
           
-          {/* Labels */}
-          <text x="100" y="160" fontSize="10" fill="#FF6B6B" textAnchor="middle">Static embedding</text>
-          <text x="100" y="175" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">(combines both meanings)</text>
+          {/* River context */}
+          <circle cx="100" cy="150" r="15" fill="rgba(76, 205, 196, 0.2)" stroke="#4ECDC4" strokeWidth="1.5" />
+          <circle cx="100" cy="150" r="6" fill="#4ECDC4" />
+          <text x="100" y="153" fontSize="8" fontWeight="bold" fill="white" textAnchor="middle">bank</text>
+          <text x="100" y="173" fontSize="8" fill="#4ECDC4" textAnchor="middle">River context</text>
+          
+          {/* Rely on context */}
+          <circle cx="160" cy="150" r="15" fill="rgba(255, 142, 83, 0.2)" stroke="#FF8E53" strokeWidth="1.5" />
+          <circle cx="160" cy="150" r="6" fill="#FF8E53" />
+          <text x="160" y="153" fontSize="8" fontWeight="bold" fill="white" textAnchor="middle">bank</text>
+          <text x="160" y="173" fontSize="8" fill="#FF8E53" textAnchor="middle">Rely on context</text>
+          
+          {/* Context sentences */}
+          <text x="40" y="185" fontSize="8" fill="rgba(255, 255, 255, 0.6)" textAnchor="middle">"deposit"</text>
+          <text x="100" y="185" fontSize="8" fill="rgba(255, 255, 255, 0.6)" textAnchor="middle">"river"</text>
+          <text x="160" y="185" fontSize="8" fill="rgba(255, 255, 255, 0.6)" textAnchor="middle">"count on"</text>
           
           {/* Footer */}
-          <text x="100" y="195" fontSize="9" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">Context-aware models disambiguate the meanings</text>
+          <text x="100" y="195" fontSize="9" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
+            Surrounding words determine the specific meaning
+          </text>
         </svg>
         <div className="diagram-caption"><em>{caption}</em></div>
       </div>

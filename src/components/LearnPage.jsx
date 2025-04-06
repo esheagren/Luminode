@@ -7,9 +7,11 @@ import LoadingAnimation from './visualization/LoadingAnimation';
 import EssayNavigation from './learn/EssayNavigation';
 import EssayContent from './learn/EssayContent';
 import DiagramComponent from './learn/DiagramComponent';
+import { ScrollProvider } from './learn/ScrollContext';
 
 // Import essay utilities
 import { getEssayContent, getAvailableEssays } from './learn/essayUtils';
+import { availableEssays } from './learn/essayData';
 
 const LearnPage = () => {
   const containerRef = useRef(null);
@@ -19,8 +21,8 @@ const LearnPage = () => {
   const [essayContent, setEssayContent] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
 
-  // List of available essays
-  const essays = getAvailableEssays();
+  // List of available essays - prioritize the structured data format
+  const essays = availableEssays || getAvailableEssays();
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -62,11 +64,16 @@ const LearnPage = () => {
     }, 50);
   };
 
-  // Load essay content when selected essay changes
+  // Load essay content when selected essay changes - only needed for non-structured essays
   useEffect(() => {
-    // Get content from our utility
-    const content = getEssayContent(selectedEssay);
-    setEssayContent(content);
+    // If we're using structured data, we don't need to load content from text files
+    const needsLegacyContent = !availableEssays.includes(selectedEssay);
+    
+    if (needsLegacyContent) {
+      // Get content from our utility for legacy essays
+      const content = getEssayContent(selectedEssay);
+      setEssayContent(content);
+    }
   }, [selectedEssay]);
 
   // Handle scroll events in the essay content area
@@ -99,26 +106,24 @@ const LearnPage = () => {
           </div>
         </div>
 
-        <div className="learn-content">
-          <div 
-            className="essay-content-container" 
-            onScroll={handleScroll} 
-            ref={essayContentRef}
-          >
-            <EssayContent 
-              content={essayContent} 
-              title={selectedEssay} 
-              scrollPosition={scrollPosition}
-            />
-          </div>
+        <ScrollProvider>
+          <div className="learn-content">
+            <div 
+              className="essay-content-container" 
+              onScroll={handleScroll} 
+              ref={essayContentRef}
+            >
+              <EssayContent 
+                content={essayContent} 
+                title={selectedEssay} 
+              />
+            </div>
 
-          <div className="diagram-container">
-            <DiagramComponent 
-              essayTitle={selectedEssay} 
-              scrollPosition={scrollPosition} 
-            />
+            <div className="diagram-container">
+              <DiagramComponent />
+            </div>
           </div>
-        </div>
+        </ScrollProvider>
       </div>
     </div>
   );

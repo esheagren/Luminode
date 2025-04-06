@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimensions', scrollOffset = 0 }) => {
-  const [dimensionState, setDimensionState] = useState(0); // 0: 2D, 1: 3D, 2: Higher dimensions
+  const [dimensionState, setDimensionState] = useState(0); // 0: 2D, 1: 3D, 2: GloVe, 3: LLaMA
   
   // Update dimension state based on scroll offset within this section
   useEffect(() => {
@@ -10,10 +10,12 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
     
     if (localScroll < 100) {
       setDimensionState(0); // 2D view
-    } else if (localScroll < 300) {
+    } else if (localScroll < 250) {
       setDimensionState(1); // 3D view
+    } else if (localScroll < 350) {
+      setDimensionState(2); // GloVe (300 dimensions)
     } else {
-      setDimensionState(2); // Many dimensions view
+      setDimensionState(3); // LLaMA (up to 2048 dimensions)
     }
   }, [scrollOffset]);
   
@@ -23,7 +25,7 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
       // 2D Vector representation
       return (
         <g>
-          <text x="100" y="25" fontSize="12" fontWeight="bold" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">
+          <text x="100" y="25" fontSize="13" fontWeight="bold" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">
             2D Vector: (X, Y)
           </text>
           
@@ -44,9 +46,24 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
             (3, 4)
           </text>
           
+          {/* Scale markers */}
+          <line x1="70" y1="148" x2="70" y2="152" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="1" />
+          <line x1="100" y1="148" x2="100" y2="152" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="1" />
+          <line x1="130" y1="148" x2="130" y2="152" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="1" />
+          <text x="70" y="160" fontSize="8" fill="rgba(255, 255, 255, 0.5)" textAnchor="middle">1</text>
+          <text x="100" y="160" fontSize="8" fill="rgba(255, 255, 255, 0.5)" textAnchor="middle">2</text>
+          <text x="130" y="160" fontSize="8" fill="rgba(255, 255, 255, 0.5)" textAnchor="middle">3</text>
+          
+          <line x1="38" y1="120" x2="42" y2="120" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="1" />
+          <line x1="38" y1="90" x2="42" y2="90" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="1" />
+          <line x1="38" y1="60" x2="42" y2="60" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="1" />
+          <text x="33" y="120" fontSize="8" fill="rgba(255, 255, 255, 0.5)" textAnchor="middle">1</text>
+          <text x="33" y="90" fontSize="8" fill="rgba(255, 255, 255, 0.5)" textAnchor="middle">2</text>
+          <text x="33" y="60" fontSize="8" fill="rgba(255, 255, 255, 0.5)" textAnchor="middle">3</text>
+          
           {/* Dimension indicator */}
-          <text x="100" y="175" fontSize="9" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
-            Dimensions: 2
+          <text x="100" y="185" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
+            Simple 2D vectors can represent basic relationships
           </text>
         </g>
       );
@@ -54,7 +71,7 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
       // 3D Vector representation
       return (
         <g>
-          <text x="100" y="25" fontSize="12" fontWeight="bold" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">
+          <text x="100" y="25" fontSize="13" fontWeight="bold" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">
             3D Vector: (X, Y, Z)
           </text>
           
@@ -75,6 +92,7 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
           {/* Projected lines for clarity */}
           <line x1="100" y1="100" x2="100" y2="150" stroke="#7CBE42" strokeWidth="0.5" strokeDasharray="2,2" />
           <line x1="100" y1="100" x2="40" y2="100" stroke="#7CBE42" strokeWidth="0.5" strokeDasharray="2,2" />
+          <line x1="100" y1="100" x2="62" y2="139" stroke="#7CBE42" strokeWidth="0.5" strokeDasharray="2,2" />
           
           {/* Coordinates */}
           <text x="110" y="95" fontSize="10" fill="#7CBE42">
@@ -82,32 +100,132 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
           </text>
           
           {/* Dimension indicator */}
-          <text x="100" y="175" fontSize="9" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
-            Dimensions: 3
+          <text x="100" y="185" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
+            Adding a third dimension allows more complex representations
+          </text>
+        </g>
+      );
+    } else if (dimensionState === 2) {
+      // GloVe 300 dimensions popup
+      return (
+        <g>
+          <text x="100" y="25" fontSize="13" fontWeight="bold" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">
+            Word Embeddings
+          </text>
+          
+          {/* GloVe popup */}
+          <rect 
+            x="30" 
+            y="60" 
+            width="140" 
+            height="80" 
+            rx="6" 
+            fill="rgba(71, 145, 201, 0.15)" 
+            stroke="rgba(71, 145, 201, 0.5)" 
+            strokeWidth="1"
+          />
+          
+          <text x="100" y="80" fontSize="12" fontWeight="bold" fill="#4791C9" textAnchor="middle">
+            GloVe Embeddings
+          </text>
+          
+          <text x="100" y="105" fontSize="10" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">
+            300 dimensions
+          </text>
+          
+          <text x="100" y="125" fontSize="9" fill="rgba(255, 255, 255, 0.7)" textAnchor="middle">
+            One of the first popular word embedding models
+          </text>
+          
+          {/* Dimension scale */}
+          <rect 
+            x="40" 
+            y="150" 
+            width="120" 
+            height="10" 
+            rx="2" 
+            fill="rgba(255, 255, 255, 0.05)" 
+            stroke="rgba(255, 255, 255, 0.2)" 
+            strokeWidth="1"
+          />
+          <rect 
+            x="40" 
+            y="150" 
+            width="17" 
+            height="10" 
+            rx="2" 
+            fill="rgba(71, 145, 201, 0.5)" 
+            strokeWidth="0"
+          />
+          
+          <text x="100" y="175" fontSize="9" fill="rgba(255, 255, 255, 0.5)" textAnchor="middle">
+            2D → 3D → ... → 300D → ... → 1024D → 2048D → 4096D
+          </text>
+          
+          <text x="100" y="195" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
+            Higher dimensions capture subtle semantic relationships
           </text>
         </g>
       );
     } else {
-      // Higher dimensions representation
+      // LLaMA dimensions popup
       return (
         <g>
-          <text x="100" y="25" fontSize="12" fontWeight="bold" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">
-            High-Dimensional Vector
+          <text x="100" y="25" fontSize="13" fontWeight="bold" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">
+            Modern Language Models
           </text>
           
-          {/* Matrix/vector representation */}
-          <rect x="60" y="60" width="80" height="90" rx="3" fill="rgba(124, 190, 66, 0.1)" stroke="#7CBE42" strokeWidth="1" />
+          {/* LLaMA popup */}
+          <rect 
+            x="30" 
+            y="60" 
+            width="140" 
+            height="80" 
+            rx="6" 
+            fill="rgba(255, 165, 0, 0.15)" 
+            stroke="rgba(255, 165, 0, 0.5)" 
+            strokeWidth="1"
+          />
           
-          {/* Vector values with ellipsis to suggest many dimensions */}
-          <text x="100" y="75" fontSize="10" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">v = [0.32, 0.91, 0.14,</text>
-          <text x="100" y="90" fontSize="10" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">-0.27, 0.68, 0.55,</text>
-          <text x="100" y="105" fontSize="10" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">0.42, -0.12, 0.39,</text>
-          <text x="100" y="120" fontSize="10" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">...</text>
-          <text x="100" y="135" fontSize="10" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">0.78, -0.25]</text>
+          <text x="100" y="80" fontSize="12" fontWeight="bold" fill="rgba(255, 165, 0, 0.9)" textAnchor="middle">
+            LLaMA Models
+          </text>
           
-          {/* Dimension indicator */}
-          <text x="100" y="175" fontSize="9" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
-            Dimensions: 300+
+          <text x="100" y="105" fontSize="10" fill="rgba(255, 255, 255, 0.9)" textAnchor="middle">
+            1024 - 2048 dimensions
+          </text>
+          
+          <text x="100" y="125" fontSize="9" fill="rgba(255, 255, 255, 0.7)" textAnchor="middle">
+            Modern models with advanced contextual understanding
+          </text>
+          
+          {/* Dimension scale */}
+          <rect 
+            x="40" 
+            y="150" 
+            width="120" 
+            height="10" 
+            rx="2" 
+            fill="rgba(255, 255, 255, 0.05)" 
+            stroke="rgba(255, 255, 255, 0.2)" 
+            strokeWidth="1"
+          />
+          <rect 
+            x="40" 
+            y="150" 
+            width="90" 
+            height="10" 
+            rx="2" 
+            fill="rgba(255, 165, 0, 0.5)" 
+            strokeWidth="0"
+          />
+          
+          <text x="100" y="175" fontSize="9" fill="rgba(255, 255, 255, 0.5)" textAnchor="middle">
+            2D → 3D → ... → 300D → ... → 1024D → 2048D → 4096D
+          </text>
+          
+          <text x="100" y="195" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
+            Massive dimensionality enables human-like language abilities
           </text>
         </g>
       );
@@ -143,6 +261,7 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
           display: flex;
           flex-direction: column;
           padding: 10px;
+          transition: all 0.5s ease;
         }
         
         .diagram-caption {

@@ -32,6 +32,27 @@ By encoding meaning in numbers, we also gain a powerful benefit: mathematics. Di
 
 ---
 
+**Contextual Embeddings and Polysemy**
+
+One of the most significant challenges in language understanding is **polysemy** – the capacity for a single word to carry multiple meanings. Consider the word "bank": it can refer to a financial institution, the side of a river, or even the action of tilting an aircraft. Earlier embedding models represented each word with a single fixed vector, essentially averaging all possible meanings together. This creates a significant limitation: the word "bank" would be positioned somewhere between the financial and geographical senses, accurately representing neither.
+
+A related problem occurs with homonyms – entirely different words that happen to be spelled or pronounced the same way. Think of "bass" (a type of fish) versus "bass" (a low musical tone). In static embeddings, these distinct concepts get merged into a single point in semantic space, blurring their real meanings.
+
+To address this limitation, modern embedding approaches have introduced **contextual embeddings**. Instead of assigning a fixed vector to each word, these systems generate dynamic embeddings that change based on the surrounding context. When you use "stream" in "I'll stream the movie tonight," the embedding tilts toward digital media concepts. Use the same word in "We sat by the mountain stream," and the embedding shifts to align with nature and water-related terms.
+
+This context-sensitivity represents a fundamental advance in natural language processing. By allowing words to have different vector representations depending on usage, models can:
+
+- Distinguish between multiple senses of the same word
+- Capture nuanced shifts in meaning based on context
+- Understand idioms and metaphorical expressions
+- Adapt to domain-specific terminology
+
+The ability to disambiguate word senses is critical for downstream tasks like machine translation, where translating "bank" correctly depends entirely on understanding which sense is intended. Similarly, for search engines, distinguishing between a user looking for banking services versus river ecology information dramatically improves result relevance.
+
+What makes contextual embeddings so powerful is their ability to represent the fluid, shifting nature of language without losing the mathematical properties that make vector spaces useful. The word "light" might appear in contexts ranging from physics discussions about photons to descriptions of weight ("a light backpack") to metaphors about enlightenment. Each usage creates a different vector, but these vectors occupy meaningful positions relative to other concepts in the semantic space.
+
+---
+
 **Quick Survey of Embedding Algorithms**
 
 So how do these embeddings actually get built? Over the last decade, several milestone algorithms have paved the way.

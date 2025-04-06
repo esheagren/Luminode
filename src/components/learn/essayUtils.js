@@ -2,6 +2,7 @@
 import vectorBasics from './text/Essay1.txt?raw';
 import transformerModels from './text/Essay2.txt?raw';
 import similarityMetrics from './text/Essay3.txt?raw';
+import { availableEssays } from './essayData';
 
 // Map of essay titles to their content
 const essayContentMap = {
@@ -32,5 +33,10 @@ export function getEssayContent(title) {
  * @returns {string[]} Array of essay titles
  */
 export function getAvailableEssays() {
+  // If we have structured data available, use those essay titles
+  if (availableEssays && availableEssays.length > 0) {
+    return availableEssays;
+  }
+  // Otherwise fall back to the essayContentMap
   return Object.keys(essayContentMap);
 } 
