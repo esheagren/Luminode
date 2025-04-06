@@ -1,15 +1,15 @@
 // Essay data structure with paragraph-to-diagram mappings
 // This allows fine-grained control over which diagram is shown for each part of the essay
 
-// Colors for different diagram sections
+// Colors for different diagram sections - increase opacity for better readability
 const colors = {
-  dictionary: 'rgba(153, 102, 255, 0.1)', // Purple
-  vector: 'rgba(124, 179, 66, 0.15)',     // Light green
-  meaning: 'rgba(83, 123, 196, 0.1)',     // Blue
-  contextual: 'rgba(76, 125, 196, 0.15)', // Light blue
-  algorithms: 'rgba(255, 142, 83, 0.1)',  // Orange
-  applications: 'rgba(76, 205, 196, 0.1)', // Teal
-  summary: 'rgba(255, 165, 0, 0.1)'       // Gold
+  dictionary: 'rgba(153, 102, 255, 0.25)', // Purple - even darker
+  vector: 'rgba(124, 179, 66, 0.3)',       // Light green - even darker
+  meaning: 'rgba(83, 123, 196, 0.25)',     // Blue - even darker
+  contextual: 'rgba(76, 125, 196, 0.3)',   // Light blue - even darker
+  algorithms: 'rgba(255, 142, 83, 0.25)',  // Orange - even darker
+  applications: 'rgba(76, 205, 196, 0.25)', // Teal - even darker
+  summary: 'rgba(255, 165, 0, 0.25)'       // Gold - even darker
 };
 
 export const essay1 = {

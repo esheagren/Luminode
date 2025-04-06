@@ -17,12 +17,20 @@ const LearnPage = () => {
   const containerRef = useRef(null);
   const essayContentRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [selectedEssay, setSelectedEssay] = useState('The Why and How of Vector Embeddings');
+  const [selectedEssay, setSelectedEssay] = useState('');
   const [essayContent, setEssayContent] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
 
   // List of available essays - prioritize the structured data format
   const essays = availableEssays || getAvailableEssays();
+  
+  // Initialize with the first essay on component mount
+  useEffect(() => {
+    if (essays && essays.length > 0 && !selectedEssay) {
+      // Select the first essay by default (Vectors: Meaning in AI Systems)
+      setSelectedEssay(essays[0]);
+    }
+  }, [essays, selectedEssay]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -66,6 +74,9 @@ const LearnPage = () => {
 
   // Load essay content when selected essay changes - only needed for non-structured essays
   useEffect(() => {
+    // Skip if no essay is selected yet
+    if (!selectedEssay) return;
+    
     // If we're using structured data, we don't need to load content from text files
     const needsLegacyContent = !availableEssays.includes(selectedEssay);
     

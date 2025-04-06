@@ -83,7 +83,8 @@ const EssayContent = ({ content, title }) => {
           }
           
           .essay-text p {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0;
+            margin-top: 0;
             text-align: left;
           }
           
@@ -115,6 +116,11 @@ const EssayContent = ({ content, title }) => {
           /* Override KaTeX styling for dark theme */
           .katex {
             color: rgba(255, 255, 255, 0.95);
+          }
+
+          .essay-paragraph {
+            margin-bottom: 0 !important;
+            margin-top: 0 !important;
           }
         `}</style>
       </div>
@@ -157,7 +163,8 @@ const EssayContent = ({ content, title }) => {
         }
         
         .essay-text p {
-          margin-bottom: 1.5rem;
+          margin-bottom: 0;
+          margin-top: 0;
           text-align: left;
         }
         
@@ -189,6 +196,11 @@ const EssayContent = ({ content, title }) => {
         /* Override KaTeX styling for dark theme */
         .katex {
           color: rgba(255, 255, 255, 0.95);
+        }
+
+        .essay-paragraph {
+          margin-bottom: 0 !important;
+          margin-top: 0 !important;
         }
       `}</style>
     </div>
