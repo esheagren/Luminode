@@ -3,13 +3,25 @@
 
 // Colors for different diagram sections - increase opacity for better readability
 const colors = {
-  dictionary: 'rgba(153, 102, 255, 0.25)', // Purple - even darker
-  vector: 'rgba(124, 179, 66, 0.3)',       // Light green - even darker
-  meaning: 'rgba(83, 123, 196, 0.25)',     // Blue - even darker
-  contextual: 'rgba(76, 125, 196, 0.3)',   // Light blue - even darker
-  algorithms: 'rgba(255, 142, 83, 0.25)',  // Orange - even darker
-  applications: 'rgba(76, 205, 196, 0.25)', // Teal - even darker
-  summary: 'rgba(255, 165, 0, 0.25)'       // Gold - even darker
+  dictionary: 'rgba(153, 102, 255, 0.3)', // Purple - even darker for better visibility
+  vector: 'rgba(124, 179, 66, 0.35)',     // Light green - even darker for better visibility
+  meaning: 'rgba(83, 123, 196, 0.3)',     // Blue - even darker for better visibility
+  contextual: 'rgba(76, 125, 196, 0.35)', // Light blue - even darker for better visibility
+  algorithms: 'rgba(255, 142, 83, 0.3)',  // Orange - even darker for better visibility
+  applications: 'rgba(76, 205, 196, 0.3)', // Teal - even darker for better visibility
+  summary: 'rgba(255, 165, 0, 0.3)'       // Gold - even darker for better visibility
+};
+
+// Section order for essay 1 - defines the paragraph ordering for highlighting
+// These constants must match the ones in ScrollContext.jsx
+export const SECTION_ORDER = {
+  'intro': 0,       // Introduction section - paragraphs 1, 2
+  'vector': 100,    // What is a Vector - paragraphs 1-6
+  'meaning': 200,   // Why Vectors Reflect Meaning - paragraphs 1-4
+  'contextual': 300, // Contextual Embeddings - paragraphs 1-6
+  'algorithms': 400, // Embedding Algorithms - paragraphs 1-9
+  'applications': 500, // Applications - paragraphs 1-8
+  'summary': 600     // Summary - paragraphs 1-3
 };
 
 export const essay1 = {

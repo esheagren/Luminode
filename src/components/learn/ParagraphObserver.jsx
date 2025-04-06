@@ -5,7 +5,17 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   const paragraphRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
   const [visibilityRatio, setVisibilityRatio] = useState(0);
-  const { scrollDirection, visibleParagraphs, seenParagraphs } = useScroll();
+  const { 
+    scrollDirection, 
+    visibleParagraphs, 
+    seenParagraphs, 
+    furthestSeenPosition,
+    highestVisiblePosition,
+    getPositionFromId
+  } = useScroll();
+  
+  // Get paragraph position in the document
+  const paragraphPosition = getPositionFromId(id);
   
   // Extract section name from paragraph id (e.g., "vector" from "vector-p1")
   const getSectionId = (id) => {
@@ -25,6 +35,16 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   // Check if this paragraph has been seen before
   const hasBeenSeen = () => {
     return seenParagraphs.includes(id);
+  };
+  
+  // Check if this paragraph is above any paragraph that has been seen when scrolling down
+  const isParagraphAboveViewed = () => {
+    return paragraphPosition <= furthestSeenPosition;
+  };
+  
+  // Check if this paragraph is above current visible paragraphs when scrolling up
+  const isParagraphAboveCurrentlyVisible = () => {
+    return paragraphPosition <= highestVisiblePosition;
   };
   
   useEffect(() => {
@@ -74,18 +94,22 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   
   // Determine if we should show background color
   const shouldShowBackground = () => {
-    // When scrolling down, keep showing the color if paragraph has been seen
-    if (scrollDirection === 'down') {
-      // Show if this paragraph has been seen (sticky highlight)
-      return hasBeenSeen() || isVisible;
+    // If the paragraph is currently visible, always show its background
+    if (isVisible) {
+      return true;
     }
     
-    // When scrolling up, only show highlight if paragraph is actually visible
+    // When scrolling down or no scroll yet, show background for all paragraphs above the furthest seen position
+    if (scrollDirection === 'down' || scrollDirection === 'none') {
+      return isParagraphAboveViewed();
+    }
+    
+    // When scrolling up, show background for paragraphs above/including the highest currently visible paragraph
     if (scrollDirection === 'up') {
-      return isParagraphVisible();
+      return isParagraphAboveCurrentlyVisible();
     }
     
-    // Default case - just use visibility
+    // Default fallback - if in doubt, rely on visibility
     return isVisible;
   };
   
@@ -93,19 +117,18 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   const getOpacity = () => {
     if (!shouldShowBackground()) return 0;
     
-    // When scrolling down and paragraph has been seen but isn't currently visible,
-    // use a slightly lower opacity for the "sticky" effect
-    if (scrollDirection === 'down' && hasBeenSeen() && !isVisible) {
-      return 0.9; // Slightly less intense but still clearly visible
+    // When paragraph has been seen but isn't currently visible,
+    // use a slightly lower opacity
+    if (!isVisible) {
+      return 0.95; // Slightly less intense but still clearly visible
     }
     
-    // When scrolling up and paragraph is visible, use full opacity
-    if (scrollDirection === 'up' && isVisible) {
+    // When paragraphs are visible, use full opacity
+    if (isVisible) {
       return 1;
     }
     
     // Normal case: fade based on visibility ratio with a minimum opacity
-    // Use at least 0.3 opacity even at minimal visibility for better readability
     return Math.max(0.3, Math.min(visibilityRatio * 2, 1)); // Faster opacity increase with minimum threshold
   };
   
@@ -157,6 +180,7 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
       data-section={sectionId}
       data-has-been-seen={hasBeenSeen() ? "true" : "false"}
       data-is-visible={isVisible ? "true" : "false"}
+      data-position={paragraphPosition}
       style={{ 
         backgroundColor: getBackgroundColor(),
         padding: '10px 10px 5px 10px', // Reduced bottom padding

@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useCallback, useRef, useEffect } from 'react';
+import { SECTION_ORDER } from './essayData';
 
 const ScrollContext = createContext();
 
@@ -6,11 +7,41 @@ export function ScrollProvider({ children }) {
   const [visibleParagraphs, setVisibleParagraphs] = useState([]);
   // Track paragraphs that have been seen at any point
   const [seenParagraphs, setSeenParagraphs] = useState([]);
+  // Track the highest position (furthest down) paragraph that has been seen
+  const [furthestSeenPosition, setFurthestSeenPosition] = useState(0);
+  // Track the highest currently visible paragraph position when scrolling up
+  const [highestVisiblePosition, setHighestVisiblePosition] = useState(0);
   const [currentDiagram, setCurrentDiagram] = useState(null);
   const [currentDiagramColor, setCurrentDiagramColor] = useState(null);
   const [scrollDirection, setScrollDirection] = useState('none');
   const lastScrollY = useRef(0);
   const contentRef = useRef(null);
+  
+  // Function to extract position number from paragraph ID
+  const getPositionFromId = (id) => {
+    if (!id) return 0;
+    
+    // Handle intro paragraphs as having positions 1, 2, etc.
+    if (id.startsWith('intro-p')) {
+      const match = id.match(/intro-p(\d+)/);
+      return match ? parseInt(match[1], 10) : 0;
+    }
+    
+    // Handle regular section paragraphs
+    const match = id.match(/-p(\d+)$/);
+    if (match) {
+      // Extract the base section name
+      const sectionName = id.replace(/-p\d+$/, '');
+      
+      // Get position based on section ordering in the essay
+      const baseWeight = SECTION_ORDER[sectionName] || 0;
+      const paragraphNum = parseInt(match[1], 10);
+      
+      return baseWeight + paragraphNum;
+    }
+    
+    return 0;
+  };
   
   // Track scroll direction for the content container
   useEffect(() => {
@@ -40,8 +71,23 @@ export function ScrollProvider({ children }) {
     };
   }, []);
   
+  // Update highest visible position whenever visible paragraphs change
+  useEffect(() => {
+    // Find the highest position among currently visible paragraphs
+    if (visibleParagraphs.length > 0) {
+      const visibleWithRatio = visibleParagraphs.filter(p => p.ratio > 0);
+      
+      if (visibleWithRatio.length > 0) {
+        const highest = Math.max(...visibleWithRatio.map(p => p.position));
+        setHighestVisiblePosition(highest);
+      }
+    }
+  }, [visibleParagraphs]);
+  
   // Track paragraph visibility changes
   const handleVisibilityChange = useCallback(({ id, diagramId, diagramColor, sectionId, isVisible, ratio }) => {
+    const position = getPositionFromId(id);
+    
     // Update list of paragraphs that have been seen
     if (isVisible && ratio > 0.2) { // Consider paragraph "seen" when it's significantly visible
       setSeenParagraphs(prev => {
@@ -50,6 +96,11 @@ export function ScrollProvider({ children }) {
         }
         return prev;
       });
+      
+      // Update furthest seen position when scrolling down
+      if (position > furthestSeenPosition && scrollDirection !== 'up') {
+        setFurthestSeenPosition(position);
+      }
     }
     
     // Update visible paragraphs
@@ -58,7 +109,8 @@ export function ScrollProvider({ children }) {
       let updated;
       if (isVisible) {
         // Add this paragraph to visible ones if not already there
-        updated = [...prev.filter(p => p.id !== id), { id, sectionId, diagramId, diagramColor, ratio }];
+        // Include the position in the stored data
+        updated = [...prev.filter(p => p.id !== id), { id, sectionId, diagramId, diagramColor, ratio, position }];
       } else {
         // Remove this paragraph from visible ones if scrolling up
         // Keep it in the list if scrolling down
@@ -95,7 +147,7 @@ export function ScrollProvider({ children }) {
       
       return updated;
     });
-  }, [scrollDirection]);
+  }, [scrollDirection, furthestSeenPosition]);
   
   return (
     <ScrollContext.Provider value={{ 
@@ -104,7 +156,10 @@ export function ScrollProvider({ children }) {
       currentDiagram,
       currentDiagramColor,
       scrollDirection,
-      handleVisibilityChange
+      handleVisibilityChange,
+      furthestSeenPosition,
+      highestVisiblePosition,
+      getPositionFromId
     }}>
       {children}
     </ScrollContext.Provider>
