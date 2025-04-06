@@ -16,29 +16,34 @@ const essayDataMap = {
 };
 
 const EssayContent = ({ content, title }) => {
-  const { handleVisibilityChange } = useScroll();
+  const { handleVisibilityChange, userHasScrolled } = useScroll();
   
   // Get structured data for this essay if available
   const essayData = essayDataMap[title];
   
-  // Make sure the first paragraph is highlighted on mount
+  // Make sure the first paragraph is highlighted on mount and when scroll state changes
   useEffect(() => {
     if (essayData && essayData.content.length > 0) {
       // Find first paragraph
       const firstParagraph = essayData.content.find(item => item.type === 'paragraph');
       if (firstParagraph) {
-        // Manually trigger visibility for the first paragraph to ensure it's highlighted
-        handleVisibilityChange({
-          id: firstParagraph.id,
-          diagramId: firstParagraph.diagramId,
-          diagramColor: firstParagraph.diagramColor,
-          isVisible: true,
-          sectionId: firstParagraph.id.split('-')[0],
-          ratio: 1.0
-        });
+        // If user hasn't scrolled, only show the intro-p1 diagram
+        if (!userHasScrolled && firstParagraph.id === 'intro-p1') {
+          // Manually trigger visibility for the first paragraph to ensure it's highlighted
+          handleVisibilityChange({
+            id: firstParagraph.id,
+            diagramId: firstParagraph.diagramId,
+            diagramColor: firstParagraph.diagramColor,
+            isVisible: true,
+            sectionId: firstParagraph.id.split('-')[0],
+            ratio: 1.0
+          });
+        }
+        // If user has started scrolling and the first paragraph is not manually highlighted anymore,
+        // allow normal scroll-based highlighting to take over
       }
     }
-  }, [essayData, handleVisibilityChange]);
+  }, [essayData, handleVisibilityChange, userHasScrolled]);
   
   // If we have structured data for this essay, use it
   if (essayData) {

@@ -31,7 +31,7 @@ export const essay1 = {
         type: "paragraph",
         id: "intro-p1",
         text: "In modern AI systems, language and meaning are represented mathematically. This on its own is an astonishing fact that deserves study. And for those who wish to understand AI, understanding the mechanics of how meaning can arise at all from raw data is a critical concentual brick that must be laid if sturdy understanding is to be developed later. My hope is this essay and interative tool aids in that endeavor.",
-        diagramId: "E1_SemanticSpace",
+        diagramId: "E1_DictionaryVsAssociation",
         diagramColor: colors.dictionary
       },
     {
