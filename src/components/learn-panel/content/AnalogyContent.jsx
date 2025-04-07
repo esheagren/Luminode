@@ -5,7 +5,7 @@ const AnalogyContent = () => {
     <div>
       <p>
         One of the most fascinating properties of vector embeddings is their ability to 
-        encode analogical relationships. The classic example is "king - man + woman = queen," 
+        encode <strong>analogical relationships</strong>. The classic example is "<strong>king - man + woman = queen</strong>," 
         demonstrating that the vector space captures gender relationships.
       </p>
       <p>
@@ -15,13 +15,13 @@ const AnalogyContent = () => {
         help find "queen."
       </p>
       <p>
-        Mathematically, this works by computing vector arithmetic:
-        v(word2) - v(word1) + v(word3) = v(result)
+        Mathematically, this works by computing <strong>vector arithmetic</strong>:
+        v(word2) - v(word1) + v(word3) = v(result).
         The result is then searched against the embedding database to find the closest match.
       </p>
       <p>
         This capability isn't just a party trick—it reveals how neural networks learn to 
-        encode meaningful semantic relationships as geometric relationships in the embedding 
+        encode meaningful <strong>semantic relationships as geometric relationships</strong> in the embedding 
         space. These relationships can include gender, tense, plurality, geography, and 
         countless other linguistic and conceptual patterns.
       </p>

@@ -17,13 +17,13 @@ const VectorEmbeddingContent = () => {
       <p>
         These embeddings are created by training neural networks on large text 
         corpora, where the network learns to predict words based on their context. 
-        The resulting vectors capture remarkable linguistic patterns, including 
+        The resulting vectors capture remarkable linguistic patterns, including{" "}
         <strong>analogies</strong> like "king is to queen as man is to woman."
       </p>
       <p>
         Modern language models like BERT and GPT use more sophisticated embedding 
         techniques, but the basic principle remains: representing language as vectors 
-        enables computers to understand semantic relationships by performing 
+        enables computers to understand semantic relationships by performing{" "}
         <strong>mathematical operations</strong> in this embedded space.
       </p>
     </div>

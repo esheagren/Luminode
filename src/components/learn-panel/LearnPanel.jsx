@@ -9,7 +9,7 @@ const LearnPanel = ({ activeTool, onClose }) => {
   // Determine which content to show based on the active tool
   const renderContent = () => {
     switch (activeTool) {
-      case '3D':
+      case '2D/3D':
         return <PcaContent />;
       case 'Measure':
         return <DistanceContent />;
@@ -53,14 +53,14 @@ const LearnPanel = ({ activeTool, onClose }) => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 1.5rem;
+          margin-bottom: 1rem;
           border-bottom: 1px solid rgba(255, 157, 66, 0.3);
           padding-bottom: 0.75rem;
         }
         
         .learn-panel h2 {
           margin: 0;
-          font-size: 1.5rem;
+          font-size: 1.3rem;
           font-weight: 600;
           color: #FF9D42;
           letter-spacing: 0.5px;
@@ -89,7 +89,8 @@ const LearnPanel = ({ activeTool, onClose }) => {
           scrollbar-width: none; /* Firefox */
           font-size: 1rem;
           line-height: 1.7;
-          padding-right: 0.5rem; /* Add padding to compensate for the hidden scrollbar */
+          padding-right: 0.75rem;
+          padding-bottom: 1rem;
           color: rgba(248, 250, 252, 0.92);
           letter-spacing: 0.2px;
         }
