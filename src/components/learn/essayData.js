@@ -89,7 +89,7 @@ export const essay1 = {
       type: "paragraph",
       id: "vector-p1",
       text: "Before diving deeper, let's clarify what we mean by \"vector.\" In its simplest form, a vector is just a list of numbers that represents a position in space. If you recall basic coordinate geometry, a point on a two-dimensional plane has an X and Y coordinate, like (3, 4). This is essentially a 2-dimensional vector.",
-      diagramId: "E1_VectorBasic",
+      diagramId: "E1_VectorDimensions",
       diagramColor: colors.vector
     },
     {
@@ -120,19 +120,20 @@ export const essay1 = {
       diagramId: "E1_VectorDimensions",
       diagramColor: colors.vector
     },
-    {
-      type: "paragraph",
-      id: "vector-p6",
-      text: "When we talk about a \"word embedding,\" we're referring to this vector representation of a word. The term \"embedding\" comes from the mathematical concept of embedding one space within another—in this case, embedding words from language into a continuous vector space where mathematical operations become possible.",
-      diagramId: "E1_VectorDimensions",
-      diagramColor: colors.vector
-    },
+    
     // Why Vectors Reflect Meaning section
     {
       type: "heading",
       level: 2,
       id: "meaning-heading",
       text: "Why Vectors Reflect Meaning"
+    },
+    {
+      type: "paragraph",
+      id: "meaning-p1",
+      text: "When we talk about a \"word embedding,\" we're referring to this vector representation of a word. The term \"embedding\" comes from the mathematical concept of embedding one space within another—in this case, embedding words from language into a continuous vector space where mathematical operations become possible.",
+      diagramId: "E1_VectorDimensions",
+      diagramColor: colors.vector
     },
     {
       type: "paragraph",

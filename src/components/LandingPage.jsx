@@ -42,9 +42,6 @@ const LandingPage = () => {
           <Link to="/app" className="app-button primary-button">
             Explore
           </Link>
-          <Link to="/learn" className="app-button secondary-button">
-            Learn
-          </Link>
         </div>
       </div>
 
@@ -128,7 +125,7 @@ const LandingPage = () => {
         
         .button-container {
           display: flex;
-          gap: 1.5rem;
+          justify-content: center;
           margin-top: 0.5rem;
         }
         

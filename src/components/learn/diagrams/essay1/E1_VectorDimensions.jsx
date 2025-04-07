@@ -62,7 +62,7 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
           <text x="33" y="60" fontSize="8" fill="rgba(255, 255, 255, 0.5)" textAnchor="middle">3</text>
           
           {/* Dimension indicator */}
-          <text x="100" y="185" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
+          <text x="100" y="180" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
             Simple 2D vectors can represent basic relationships
           </text>
         </g>
@@ -100,7 +100,7 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
           </text>
           
           {/* Dimension indicator */}
-          <text x="100" y="185" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
+          <text x="100" y="180" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
             Adding a third dimension allows more complex representations
           </text>
         </g>
@@ -162,7 +162,7 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
             2D → 3D → ... → 300D → ... → 1024D → 2048D → 4096D
           </text>
           
-          <text x="100" y="195" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
+          <text x="100" y="190" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
             Higher dimensions capture subtle semantic relationships
           </text>
         </g>
@@ -224,7 +224,7 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
             2D → 3D → ... → 300D → ... → 1024D → 2048D → 4096D
           </text>
           
-          <text x="100" y="195" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
+          <text x="100" y="190" fontSize="10" fill="rgba(255, 255, 255, 0.8)" textAnchor="middle">
             Massive dimensionality enables human-like language abilities
           </text>
         </g>
@@ -235,7 +235,7 @@ const E1_VectorDimensions = ({ caption = 'Understanding vectors across dimension
   return (
     <div className="vector-dimensions-diagram">
       <div className="diagram-box">
-        <svg width="100%" height="100%" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <svg width="100%" height="100%" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg">
           {renderDimensionView()}
         </svg>
         <div className="diagram-caption"><em>{caption}</em></div>
