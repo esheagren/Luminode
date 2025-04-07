@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import MidpointSelection from './MidpointSelection';
 import AnalogySelection from './AnalogySelection';
 import SliceSelection from './SliceSelection';
@@ -95,7 +94,10 @@ const Tools = ({
   setIsSearchingAnalogy,
   setWords,
   sliceMode,
-  setSliceMode
+  setSliceMode,
+  learnMode,
+  setLearnMode,
+  setActiveTool
 }) => {
   const [activeTab, setActiveTab] = useState(null);
   const [showContent, setShowContent] = useState(false);
@@ -165,20 +167,6 @@ const Tools = ({
         console.log('Activating slice mode on tab switch');
         toggleSliceMode();
       }
-    }
-  };
-  
-  // Toggle midpoint selection mode
-  const toggleMidpointSelectionMode = () => {
-    if (selectionMode) {
-      setSelectionMode(false);
-      setSelectedPoints([]);
-    } else {
-      // Ensure other modes are off
-      setAnalogyMode(false);
-      setSliceMode(false);
-      // Turn on midpoint selection mode
-      setSelectionMode(true);
     }
   };
   
@@ -618,6 +606,33 @@ const Tools = ({
     }, 50);
   };
 
+  // Toggle learn mode
+  const toggleLearnMode = () => {
+    setLearnMode(!learnMode);
+    
+    // When enabling learn mode, set the active tool based on the current state
+    if (!learnMode) {
+      if (viewMode === '3D') {
+        setActiveTool('3D');
+      } else if (rulerActive) {
+        setActiveTool('Measure');
+      } else if (analogyMode) {
+        setActiveTool('Analogy');
+      } else if (sliceMode) {
+        setActiveTool('Slice');
+      } else {
+        setActiveTool('Vector Embeddings');
+      }
+    }
+  };
+
+  // Track active tool when buttons are clicked
+  const trackToolActivity = (toolName) => {
+    if (learnMode) {
+      setActiveTool(toolName);
+    }
+  };
+
   const renderToolContent = () => {
     if (!showContent) return null;
     
@@ -669,7 +684,10 @@ const Tools = ({
         <div className="tool-buttons">
           <ViewButton 
             viewMode={viewMode} 
-            setViewMode={setViewMode} 
+            setViewMode={(mode) => {
+              setViewMode(mode);
+              trackToolActivity('3D');
+            }} 
             isCompact={true}
             onMouseEnter={(e) => createToolbarTooltip('3D', e)}
             onMouseLeave={() => removeToolbarTooltip()}
@@ -677,7 +695,10 @@ const Tools = ({
 
           <button
             className={`icon-button ${rulerActive ? 'active' : ''}`}
-            onClick={() => setRulerActive(!rulerActive)}
+            onClick={() => {
+              setRulerActive(!rulerActive);
+              trackToolActivity('Measure');
+            }}
             onMouseEnter={(e) => createToolbarTooltip('Measure', e)}
             onMouseLeave={() => removeToolbarTooltip()}
           >
@@ -687,7 +708,10 @@ const Tools = ({
           
           <button
             className={`icon-button ${neighborsActive ? 'active' : ''}`}
-            onClick={handleNeighborsToggle}
+            onClick={() => {
+              handleNeighborsToggle();
+              trackToolActivity('Neighbors');
+            }}
             disabled={loading || words.length === 0}
             onMouseEnter={(e) => createToolbarTooltip('Neighbors', e)}
             onMouseLeave={() => removeToolbarTooltip()}
@@ -698,7 +722,10 @@ const Tools = ({
           
           <button
             className={`icon-button ${activeTab === 'analogy' ? 'active' : ''} ${analogyMode ? 'analogy-active' : ''}`}
-            onClick={() => handleTabClick('analogy')}
+            onClick={() => {
+              handleTabClick('analogy');
+              trackToolActivity('Analogy');
+            }}
             disabled={loading || selectionMode || sliceMode}
             onMouseEnter={(e) => createToolbarTooltip('Analogy', e)}
             onMouseLeave={() => removeToolbarTooltip()}
@@ -709,7 +736,10 @@ const Tools = ({
 
           <button
             className={`icon-button ${activeTab === 'slice' ? 'active' : ''} ${sliceMode ? 'slice-active' : ''}`}
-            onClick={() => handleTabClick('slice')}
+            onClick={() => {
+              handleTabClick('slice');
+              trackToolActivity('Slice');
+            }}
             disabled={loading || selectionMode || analogyMode}
             onMouseEnter={(e) => createToolbarTooltip('Slice', e)}
             onMouseLeave={() => removeToolbarTooltip()}
@@ -731,15 +761,15 @@ const Tools = ({
           
           <div className="spacer"></div>
           
-          <Link 
-            to="/learn" 
-            className="icon-button learn-button"
+          <button 
+            className={`icon-button learn-button ${learnMode ? 'active' : ''}`}
+            onClick={toggleLearnMode}
             onMouseEnter={(e) => createToolbarTooltip('Learn', e)}
             onMouseLeave={() => removeToolbarTooltip()}
           >
             <BookIcon />
             <span>Learn</span>
-          </Link>
+          </button>
         </div>
       </div>
       
@@ -896,6 +926,12 @@ const Tools = ({
         .reset-button:hover {
           background: rgba(255, 112, 67, 0.1);
           color: #ff7043;
+        }
+        
+        .learn-button.active {
+          background: rgba(255, 157, 66, 0.2);
+          color: #FF9D42;
+          box-shadow: inset 0 -2px 0 #FF9D42;
         }
       `}</style>
     </div>

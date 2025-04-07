@@ -10,6 +10,7 @@ import SuggestedWords from './SuggestedWords';
 import { getApiUrl } from '../utils/environment';
 import { Link } from 'react-router-dom';
 import { hasPrecomputedEmbedding, createWordResult } from '../data/wordEmbeddings';
+import LearnPanel from './learn-panel/LearnPanel';
 
 const HomePage = () => {
   const [words, setWords] = useState([]);
@@ -24,6 +25,8 @@ const HomePage = () => {
   const [analogyStep, setAnalogyStep] = useState(0);
   const [isSearchingAnalogy, setIsSearchingAnalogy] = useState(false);
   const [sliceMode, setSliceMode] = useState(false);
+  const [learnMode, setLearnMode] = useState(false);
+  const [activeTool, setActiveTool] = useState('Vector Embeddings');
   const dispatch = useDispatch();
   
   // Debug: Log the state functions
@@ -275,24 +278,38 @@ const HomePage = () => {
               setWords={setWords}
               sliceMode={sliceMode}
               setSliceMode={setSliceSelectionMode}
+              learnMode={learnMode}
+              setLearnMode={setLearnMode}
+              setActiveTool={setActiveTool}
             />
           </div>
           
-          <div className="graph-area">
-            <VectorGraph 
-              words={words}
-              midpointWords={relatedClusters}
-              numMidpoints={numNeighbors}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              rulerActive={rulerActive}
-              selectionMode={selectionMode || sliceMode} // Treat slice mode similar to selection mode
-              onPointSelected={handlePointSelected}
-              selectedPoints={selectedPoints}
-              analogyMode={analogyMode}
-              analogyStep={analogyStep}
-              isSearchingAnalogy={isSearchingAnalogy}
-            />
+          <div className={`graph-and-learn-container ${learnMode ? 'with-learn-panel' : ''}`}>
+            <div className={`graph-area ${learnMode ? 'with-learn-panel' : ''}`}>
+              <VectorGraph 
+                words={words}
+                midpointWords={relatedClusters}
+                numMidpoints={numNeighbors}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                rulerActive={rulerActive}
+                selectionMode={selectionMode || sliceMode} // Treat slice mode similar to selection mode
+                onPointSelected={handlePointSelected}
+                selectedPoints={selectedPoints}
+                analogyMode={analogyMode}
+                analogyStep={analogyStep}
+                isSearchingAnalogy={isSearchingAnalogy}
+              />
+            </div>
+            
+            {learnMode && (
+              <div className="learn-panel-container">
+                <LearnPanel 
+                  activeTool={activeTool} 
+                  onClose={() => setLearnMode(false)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -425,12 +442,21 @@ const HomePage = () => {
           margin-bottom: 5px; /* Reduced from 10px to 5px */
         }
         
+        .graph-and-learn-container {
+          display: flex;
+          flex: 1;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
         .graph-area {
           flex: 1;
           min-height: 500px;
           position: relative;
           overflow: hidden;
           padding-bottom: 0; /* Ensure no padding at bottom */
+          transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
         
         .graph-area > div {
@@ -439,6 +465,18 @@ const HomePage = () => {
           left: 0;
           width: 100%;
           height: 100%;
+        }
+        
+        .graph-area.with-learn-panel {
+          flex: 2; /* Change from 3 to 2 to give the learn panel more space */
+        }
+        
+        .learn-panel-container {
+          flex: 1; /* Keep this as is - now it will take up 1/3 of the space instead of 1/4 */
+          height: 100%;
+          padding-left: 10px;
+          overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
       `}</style>
     </div>
