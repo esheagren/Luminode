@@ -6,13 +6,14 @@ import 'katex/dist/katex.min.css';
 
 import { useScroll } from './ScrollContext';
 import ParagraphObserver from './ParagraphObserver';
-import { essay1 } from './essayData';
+import { essay1, essay2, essay3 } from './essayData';
 
 // Map essay titles to their data
 const essayDataMap = {
   'Vectors: Meaning in AI Systems': essay1,
-  'The Why and How of Vector Embeddings': essay1,
-  // Add other essays as they're structured
+  'The Why and How of Vector Embeddings': essay1, // Keep for backward compatibility
+  'Exploring and Visualizing Vector Embeddings': essay2,
+  'Vector Databases and Large-Scale Retrieval': essay3
 };
 
 const EssayContent = ({ content, title }) => {
@@ -27,8 +28,8 @@ const EssayContent = ({ content, title }) => {
       // Find first paragraph
       const firstParagraph = essayData.content.find(item => item.type === 'paragraph');
       if (firstParagraph) {
-        // If user hasn't scrolled, only show the intro-p1 diagram
-        if (!userHasScrolled && firstParagraph.id === 'intro-p1') {
+        // If user hasn't scrolled, only show the intro paragraph diagram
+        if (!userHasScrolled && firstParagraph.id.includes('intro')) {
           // Manually trigger visibility for the first paragraph to ensure it's highlighted
           handleVisibilityChange({
             id: firstParagraph.id,

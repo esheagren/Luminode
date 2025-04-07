@@ -9,7 +9,20 @@ const colors = {
   contextual: 'rgba(153, 28, 151, 0.65)', // Light blue - darker for better visibility
   algorithms: 'rgba(255, 142, 83, 0.6)',  // Orange - darker for better visibility
   applications: 'rgba(76, 205, 196, 0.6)', // Teal - darker for better visibility
-  summary: 'rgba(255, 165, 0, 0.6)'       // Gold - darker for better visibility
+  summary: 'rgba(255, 165, 0, 0.6)',       // Gold - darker for better visibility
+  
+  // Essay 2 colors
+  dimensionality: 'rgba(160, 91, 210, 0.6)',    // Purple
+  neighbors: 'rgba(56, 132, 222, 0.6)',         // Blue
+  metrics: 'rgba(92, 179, 99, 0.6)',            // Green
+  analogies: 'rgba(240, 110, 90, 0.6)',         // Coral
+  crossSections: 'rgba(66, 186, 192, 0.6)',     // Teal
+  
+  // Essay 3 colors
+  vectorDBs: 'rgba(145, 70, 255, 0.6)',        // Purple
+  chunking: 'rgba(60, 145, 230, 0.6)',         // Blue
+  rag: 'rgba(255, 110, 65, 0.6)',              // Orange
+  ecosystem: 'rgba(75, 200, 170, 0.6)'         // Teal-Green
 };
 
 // Section order for essay 1 - defines the paragraph ordering for highlighting
@@ -21,7 +34,24 @@ export const SECTION_ORDER = {
   'contextual': 300, // Contextual Embeddings - paragraphs 1-6
   'algorithms': 400, // Embedding Algorithms - paragraphs 1-9
   'applications': 500, // Applications - paragraphs 1-8
-  'summary': 600     // Summary - paragraphs 1-3
+  'summary': 600,     // Summary - paragraphs 1-3
+  
+  // Section ordering for Essay 2
+  'e2-intro': 0,        // Introduction section
+  'dim-reduction': 100, // Dimensionality Reduction section
+  'neighbors': 200,     // Nearest Neighbor Search section
+  'metrics': 300,       // Distance and Similarity Metrics section
+  'analogies': 400,     // Analogization section
+  'cross-sections': 500, // Slice and Cross-Sections section
+  'e2-summary': 600,     // Conclusion section
+  
+  // Section ordering for Essay 3
+  'e3-intro': 0,           // Introduction section
+  'vector-dbs': 100,       // Vector Databases section
+  'chunking': 200,         // Chunking section
+  'rag': 300,              // RAG section
+  'considerations': 400,   // Practical Considerations section
+  'e3-summary': 500        // Summary section
 };
 
 export const essay1 = {
@@ -59,7 +89,7 @@ export const essay1 = {
       type: "paragraph",
       id: "vector-p1",
       text: "Before diving deeper, let's clarify what we mean by \"vector.\" In its simplest form, a vector is just a list of numbers that represents a position in space. If you recall basic coordinate geometry, a point on a two-dimensional plane has an X and Y coordinate, like (3, 4). This is essentially a 2-dimensional vector.",
-      diagramId: "E1_VectorDimensions",
+      diagramId: "E1_VectorBasic",
       diagramColor: colors.vector
     },
     {
@@ -345,9 +375,316 @@ export const essay1 = {
   ]
 };
 
+// Essay 2: Exploring and Visualizing Vector Embeddings
+export const essay2 = {
+  title: "Exploring and Visualizing Vector Embeddings",
+  content: [
+    // Introduction
+    {
+      type: "paragraph",
+      id: "e2-intro-p1",
+      text: "Vector embeddings translate words, documents, or other entities into points in a high-dimensional space. Suppose you have 50,000 English words, each embedded by a LLaMa-based model into a coordinate of several hundred dimensions. While these vectors capture rich semantic relationships, they are not automatically understandable in their raw numeric form. To truly grasp the geometry of your embeddings, you need systematic methods for visualization and exploration. Below, we focus on five major techniques: dimensionality reduction, nearest neighbor search, distance and similarity metrics, vector analogies, and midpoint-based cross-sections.",
+      diagramId: "E2_DimensionalityReduction",
+      diagramColor: colors.dimensionality
+    },
+    
+    // Dimensionality Reduction section
+    {
+      type: "heading",
+      level: 2,
+      id: "dim-reduction-heading",
+      text: "Dimensionality Reduction for Visualization"
+    },
+    {
+      type: "paragraph",
+      id: "dim-reduction-p1",
+      text: "One major challenge with embeddings is their high dimensionality, which far exceeds the human capacity to visualize data in two or three dimensions. Techniques such as Principal Component Analysis (PCA), t-SNE, and UMAP help project these high-dimensional vectors onto a more manageable 2D or 3D plane.",
+      diagramId: "E2_DimensionalityReduction",
+      diagramColor: colors.dimensionality
+    },
+    {
+      type: "paragraph",
+      id: "dim-reduction-p2",
+      text: "PCA is a linear method: it computes the covariance matrix of your dataset and performs an eigenvalue (or SVD) decomposition to identify the principal components along which the data varies the most. You then select the top two or three components as the axes of your projection. This yields a quick, interpretable overview. However, because PCA is linear, it can flatten non-linear structures or tight local clusters in ways that might obscure meaningful relationships.",
+      diagramId: "E2_DimensionalityReduction",
+      diagramColor: colors.dimensionality
+    },
+    {
+      type: "paragraph",
+      id: "dim-reduction-p3",
+      text: "Non-linear methods like t-SNE (t-distributed Stochastic Neighbor Embedding) and UMAP (Uniform Manifold Approximation and Projection) aim to preserve local neighborhoods more faithfully. They compare high-dimensional distances between points, convert these distances into probabilities, and then find a low-dimensional layout that mirrors those probabilities. The result is often a vivid map of natural clusters—for instance, synonyms might form small, tightly knit islands. While these algorithms can reveal subtle groupings more effectively than PCA, they may distort global distances or require careful tuning of parameters (like perplexity in t-SNE or n_neighbors in UMAP). Still, if you want to see how words group by topic or nuance in a visually clear way, they are invaluable.",
+      diagramId: "E2_DimensionalityReduction",
+      diagramColor: colors.dimensionality
+    },
+    
+    // Nearest Neighbor Search section
+    {
+      type: "heading",
+      level: 2,
+      id: "neighbors-heading",
+      text: "Nearest Neighbor Search"
+    },
+    {
+      type: "paragraph",
+      id: "neighbors-p1",
+      text: "Once your embeddings are in place, a fundamental operation is finding the nearest neighbors of any given vector—essentially searching for items that share similar coordinates. In a small dataset, you can measure the distance between your query vector and every vector in the collection, then rank the results. However, this becomes computationally expensive if you have millions of embeddings. Approximate Nearest Neighbor (ANN) approaches like Annoy, FAISS, or HNSW accelerate searches by building spatial indexes that prune the search space.",
+      diagramId: "E2_NearestNeighbor",
+      diagramColor: colors.neighbors
+    },
+    {
+      type: "paragraph",
+      id: "neighbors-p2",
+      text: "In practice, you might embed a query word—like \"budget travel\"—and ask for the top k nearest words. If you see results like \"cheap flights\" and \"hostels,\" that is a good sign your model has learned coherent associations. If you see irrelevant terms, you may need to refine your training or check if your chosen distance metric aligns with your data.",
+      diagramId: "E2_NearestNeighbor",
+      diagramColor: colors.neighbors
+    },
+    
+    // Distance and Similarity Metrics section
+    {
+      type: "heading",
+      level: 2,
+      id: "metrics-heading",
+      text: "Distance and Similarity Metrics"
+    },
+    {
+      type: "paragraph",
+      id: "metrics-p1",
+      text: "Defining \"closeness\" precisely is central to embedding-based methods. Two of the most common metrics are **cosine similarity** and **Euclidean distance**. Cosine similarity treats each vector as an arrow from the origin in high-dimensional space, measuring how closely two arrows align. Formally,\n\n$$\\mathrm{CosSim}(\\mathbf{a}, \\mathbf{b}) = \\frac{\\mathbf{a}\\cdot \\mathbf{b}}{\\|\\mathbf{a}\\|\\|\\mathbf{b}\\|}$$\n\nIf $\\mathbf{a}$ and $\\mathbf{b}$ point in the same direction, their cosine similarity is close to 1; if they are orthogonal, it is 0; and if they point in opposite directions, the similarity becomes negative. Because embeddings for language often emphasize direction over magnitude, cosine similarity frequently works well.",
+      diagramId: "E2_DistanceMetrics",
+      diagramColor: colors.metrics
+    },
+    {
+      type: "paragraph",
+      id: "metrics-p2",
+      text: "Euclidean distance is a more general geometric measure:\n\n$$d_{\\mathrm{euclid}}(\\mathbf{a}, \\mathbf{b}) = \\|\\mathbf{a} - \\mathbf{b}\\|_2 = \\sqrt{\\sum_{i}(a_i - b_i)^2}$$\n\nThis distance function treats embeddings as coordinates and measures the straight-line separation. Some systems normalize vectors to unit length, making cosine similarity and Euclidean distance effectively interchangeable up to scaling. Which metric performs better can depend on how your embeddings were trained and whether vector length encodes important information.",
+      diagramId: "E2_DistanceMetrics",
+      diagramColor: colors.metrics
+    },
+    
+    // Analogization section
+    {
+      type: "heading",
+      level: 2,
+      id: "analogies-heading",
+      text: "Analogization"
+    },
+    {
+      type: "paragraph",
+      id: "analogies-p1",
+      text: "A striking property of many embedding spaces is that some relationships emerge as linear transformations. The classic example is:\n\n$$\\text{king} - \\text{man} + \\text{woman} \\approx \\text{queen}$$\n\nAlthough this equation looks almost whimsical, it highlights that certain \"gender\" and \"royalty\" dimensions can be isolated and recombined through simple arithmetic. In practice, you compute the vector for \"king,\" subtract the vector for \"man,\" then add the vector for \"woman.\" The result often lands near \"queen.\" This kind of analogization demonstrates that embeddings frequently encode conceptual offsets—like pluralization, opposites, or even country-capital pairs—in linear directions. Contextual embeddings (such as those from Transformers) complicate this arithmetic by making each token embedding dependent on surrounding text, but the principle remains that differences in vectors can map to meaningful differences in concepts.",
+      diagramId: "E2_VectorAnalogies",
+      diagramColor: colors.analogies
+    },
+    
+    // Slice and Cross-Sections section
+    {
+      type: "heading",
+      level: 2,
+      id: "cross-sections-heading",
+      text: "Slice and Cross-Sections"
+    },
+    {
+      type: "paragraph",
+      id: "cross-sections-p1",
+      text: "Beyond direct arithmetic analogies, you can gain insight by examining midpoints or cross-sections. Given two vectors $\\mathbf{A}$ and $\\mathbf{B}$, you can compute their midpoint,\n\n$$\\mathbf{M} = \\frac{\\mathbf{A} + \\mathbf{B}}{2}$$\n\nand then look for the nearest neighbors to $\\mathbf{M}$. If $\\mathbf{A}$ represents \"budget travel\" and $\\mathbf{B}$ represents \"luxury travel,\" their midpoint might correspond to mid-tier travel options. Similarly, combining embeddings for different music genres could point you to a \"fusion\" zone. This midpoint-based technique sometimes reveals hidden overlaps in semantic space, showing how your embedding model transitions from one concept to another.",
+      diagramId: "E2_CrossSections",
+      diagramColor: colors.crossSections
+    },
+    
+    // Conclusion
+    {
+      type: "heading",
+      level: 2,
+      id: "e2-summary-heading",
+      text: "Conclusion"
+    },
+    {
+      type: "paragraph",
+      id: "e2-summary-p1",
+      text: "Techniques for visualizing and exploring embeddings are essential for interpreting the vast web of numeric relationships learned by modern models. Dimensionality reduction methods like PCA, t-SNE, or UMAP let you see at a glance how words cluster and diverge, nearest neighbor searches allow you to confirm local associations, and mathematically defined metrics like cosine similarity and Euclidean distance anchor these explorations in robust geometry. Vector arithmetic—whether it is subtracting and adding vectors for analogies or finding midpoints—can expose subtler aspects of your training data, hinting at how a model internally represents abstractions like gender, royalty, musical genres, or product categories.",
+      diagramId: "E2_CrossSections",
+      diagramColor: colors.crossSections
+    },
+    {
+      type: "paragraph",
+      id: "e2-summary-p2",
+      text: "By diligently applying these techniques, you can debug your embedding space, tune hyperparameters, or simply marvel at the patterns that emerge when language is expressed as coordinates. In the next essay, we will shift from analyzing embeddings locally to the large-scale infrastructure needed to store, query, and harness them in real-world AI applications, covering vector databases, chunking, and retrieval-augmented generation.",
+      diagramId: "E2_CrossSections",
+      diagramColor: colors.crossSections
+    }
+  ]
+};
+
 // Export available essays
 export const availableEssays = [
   "Vectors: Meaning in AI Systems",
   "Exploring and Visualizing Vector Embeddings",
   "Vector Databases and Large-Scale Retrieval"
-]; 
+];
+
+// Essay 3: Vector Databases and Large-Scale Retrieval
+export const essay3 = {
+  title: "Vector Databases and Large-Scale Retrieval",
+  content: [
+    // Introduction
+    {
+      type: "paragraph",
+      id: "e3-intro-p1",
+      text: "Vector embeddings become particularly powerful when they are not merely artifacts of an offline model but are *deployed* for real-time retrieval tasks. Whether you are building a semantic search engine, a recommendation system, or a Retrieval-Augmented Generation (RAG) pipeline for large language models, you need infrastructure capable of storing millions—or even billions—of high-dimensional vectors and answering similarity queries in milliseconds. This is precisely the role of **vector databases**. They provide specialized indexing structures and query mechanisms optimized for the geometry of embeddings. Alongside these databases, techniques such as *chunking* help handle large documents, while RAG workflows ensure that language models stay grounded in accurate, up-to-date information.",
+      diagramId: "E3_VectorDatabases",
+      diagramColor: colors.vectorDBs
+    },
+    
+    // Vector Databases section
+    {
+      type: "heading",
+      level: 2,
+      id: "vector-dbs-heading",
+      text: "The Rise of Vector Databases"
+    },
+    {
+      type: "paragraph",
+      id: "vector-dbs-p1",
+      text: "Traditional relational databases excel at searching for exact matches or applying structured filters (e.g., \"give me all records where `price < 100`\"). They do not, however, handle queries like \"find the items whose vectors lie close to this new vector\" particularly well. Similarity search over large datasets is different from the usual SQL-based operations; it demands specialized data structures that can prune the search space quickly.",
+      diagramId: "E3_VectorDatabases",
+      diagramColor: colors.vectorDBs
+    },
+    {
+      type: "paragraph",
+      id: "vector-dbs-p2",
+      text: "A **vector database** is designed around this very need: you embed items—whether text snippets, images, or user profiles—into high-dimensional vectors, store them, and later retrieve the closest vectors to a given query vector. The key is to keep retrieval times low, even if the dataset spans millions of items.",
+      diagramId: "E3_VectorDatabases",
+      diagramColor: colors.vectorDBs
+    },
+    {
+      type: "paragraph",
+      id: "vector-dbs-p3",
+      text: "Common underlying techniques include approximate nearest neighbor (ANN) search, where the database builds indexes (such as HNSW graphs or inverted file systems) to reduce the search complexity. Rather than comparing a query vector to *every* item, the index routes the search to a subset of likely candidates. This can bring query times down to a fraction of a second, even for large collections. The trade-off is that you might miss a few exact neighbors, though well-tuned ANN algorithms often yield results that are nearly perfect, with a much faster response.",
+      diagramId: "E3_VectorDatabases",
+      diagramColor: colors.vectorDBs
+    },
+    {
+      type: "paragraph",
+      id: "vector-dbs-p4",
+      text: "Today, there are multiple implementations. Open-source projects like **Milvus**, **Weaviate**, and **FAISS** let you self-host vector databases, while cloud-based platforms such as **Pinecone** or **Chroma** manage the heavy lifting for you. In either case, you can issue a query embedding, specify how many neighbors you want, and receive a ranked list of the most similar items—often accompanied by their cosine similarities or distance scores.",
+      diagramId: "E3_VectorDatabases",
+      diagramColor: colors.vectorDBs
+    },
+    
+    // Chunking section
+    {
+      type: "heading",
+      level: 2,
+      id: "chunking-heading",
+      text: "Chunking and Document Management"
+    },
+    {
+      type: "paragraph",
+      id: "chunking-p1",
+      text: "Large documents, such as technical manuals or entire books, pose a challenge for embedding-based systems. If you embed them as single vectors, you lose granularity; the entire text collapses to a single representation. Conversely, you could embed each sentence separately, but then you might end up with a massive number of vectors, each capturing only a tiny snippet of context.",
+      diagramId: "E3_DocumentChunking",
+      diagramColor: colors.chunking
+    },
+    {
+      type: "paragraph",
+      id: "chunking-p2",
+      text: "A common strategy is **chunking**: you split the text into segments (or \"chunks\") of a manageable size, each chunk receiving its own embedding. This balances granularity and relevance. For instance, if you chunk a large PDF into 500-word blocks, each block can stand alone as a cohesive section but remains small enough that a semantic query can pinpoint relevant paragraphs accurately.",
+      diagramId: "E3_DocumentChunking",
+      diagramColor: colors.chunking
+    },
+    {
+      type: "paragraph",
+      id: "chunking-p3",
+      text: "In a vector database, each chunk is stored with metadata such as its parent document, the chunk's position, or a timestamp. When a user's query arrives—say, \"How do I calibrate the camera in this robotics manual?\"—the system transforms that query into a vector and finds the chunks that lie closest in embedding space. By retrieving just the top few chunks, you dramatically reduce the text you need to process further. This is crucial not only for direct retrieval but also for feeding the relevant text into large language models for more advanced tasks.",
+      diagramId: "E3_DocumentChunking",
+      diagramColor: colors.chunking
+    },
+    
+    // RAG section
+    {
+      type: "heading",
+      level: 2,
+      id: "rag-heading",
+      text: "Retrieval-Augmented Generation (RAG)"
+    },
+    {
+      type: "paragraph",
+      id: "rag-p1",
+      text: "Large language models (LLMs) like GPT or LLaMa are trained on vast amounts of text. Yet they can still produce \"hallucinations,\" especially about niche or recent topics not well covered in their training data. **Retrieval-Augmented Generation (RAG)** tackles this limitation by bridging an LLM with an external knowledge store—often a vector database.",
+      diagramId: "E3_RAG",
+      diagramColor: colors.rag
+    },
+    {
+      type: "paragraph",
+      id: "rag-p2",
+      text: "The process typically works as follows:\n\n1. **User Query**: A user asks a question, such as \"What are the top three ways to reduce motion blur in low-light photography?\"\n2. **Query Embedding**: A smaller model or an embedding layer transforms this text into a query vector.\n3. **Vector Database Search**: The system searches its database for the closest matching chunks—perhaps from a photography manual, blog posts about camera settings, or relevant Q&A threads.\n4. **Contextual Retrieval**: The top chunks are retrieved and fed back to the language model as context.\n5. **LLM Response**: Equipped with relevant external data, the LLM composes a more accurate, context-aware answer. This final output is then returned to the user.",
+      diagramId: "E3_RAG",
+      diagramColor: colors.rag
+    },
+    {
+      type: "paragraph",
+      id: "rag-p3",
+      text: "By bundling the retrieved chunks alongside the user's query, RAG frameworks enable the model to ground its responses in factual information. Rather than relying solely on the LLM's potentially incomplete internal knowledge, the model is nudged to consult external sources. This can mitigate hallucination and also allows for dynamic updating: if your vector database is refreshed regularly, the system can access the latest facts without retraining the LLM.",
+      diagramId: "E3_RAG",
+      diagramColor: colors.rag
+    },
+    
+    // Practical Considerations section
+    {
+      type: "heading",
+      level: 2,
+      id: "considerations-heading",
+      text: "Practical Considerations for RAG and Vector Databases"
+    },
+    {
+      type: "paragraph",
+      id: "considerations-p1",
+      text: "**Index Efficiency**: Storing millions of vectors is not trivial. You need to decide on an indexing method that fits your latency requirements and hardware constraints. Some indexes (like HNSW graphs) can use considerable memory but are extremely fast at search time. Others (like IVF-PQ structures) compress the vectors to reduce storage, trading off some accuracy.",
+      diagramId: "E3_VectorEcosystem",
+      diagramColor: colors.ecosystem
+    },
+    {
+      type: "paragraph",
+      id: "considerations-p2",
+      text: "**Filtering and Hybrid Queries**: Beyond pure similarity search, real-world systems often need to filter by date, category, or other metadata. Some vector databases support \"hybrid search,\" letting you combine a similarity score with structured filters (e.g., retrieve only \"how-to guides\" from 2023 that are near the query in embedding space).",
+      diagramId: "E3_VectorEcosystem",
+      diagramColor: colors.ecosystem
+    },
+    {
+      type: "paragraph",
+      id: "considerations-p3",
+      text: "**Chunk Sizing**: When chunking documents, the size of each chunk significantly affects precision and recall. Too large, and a chunk might contain multiple topics, diluting the embedding. Too small, and the system might need to retrieve many disjoint snippets, which can complicate reassembly of context. Balanced chunking is often a matter of experimentation, domain knowledge, and user testing.",
+      diagramId: "E3_VectorEcosystem",
+      diagramColor: colors.ecosystem
+    },
+    {
+      type: "paragraph",
+      id: "considerations-p4",
+      text: "**Updating Embeddings**: Over time, new documents or product listings may appear, or existing items may need updating. This requires not only embedding generation for the new or changed content but also an index rebuild or insertion. Modern vector databases streamline these operations so that incremental updates can happen without a full re-index.",
+      diagramId: "E3_VectorEcosystem",
+      diagramColor: colors.ecosystem
+    },
+    
+    // Summary section
+    {
+      type: "heading",
+      level: 2,
+      id: "e3-summary-heading",
+      text: "Summary"
+    },
+    {
+      type: "paragraph",
+      id: "e3-summary-p1",
+      text: "Vector embeddings do not live in isolation. To unlock their full potential—fast semantic queries, accurate question-answering, and robust recommendations—you need a backend capable of storing and serving them efficiently. Vector databases fill this role, optimizing for high-dimensional proximity operations at scale. By pairing these databases with chunking strategies, you can store vast amounts of text (or other data) at a fine enough resolution to retrieve precisely what users need. Finally, Retrieval-Augmented Generation pipelines close the loop: they marry the context in a vector database with the generative skills of large language models, producing answers that are both fluent and grounded in real information.",
+      diagramId: "E3_VectorEcosystem",
+      diagramColor: colors.ecosystem
+    },
+    {
+      type: "paragraph",
+      id: "e3-summary-p2",
+      text: "As AI systems become more capable, the interplay between embeddings, vector databases, and LLMs will grow even more central. Already, these building blocks power cutting-edge search engines, chatbots that cite specific sources, and recommender platforms that feel uncannily perceptive about user tastes. Whether you are dealing with text, images, or multimodal data, the strategy remains the same: translate content into embeddings, store and query them intelligently, and let retrieval-augmented models bridge the gap between raw data and actionable intelligence.",
+      diagramId: "E3_VectorEcosystem",
+      diagramColor: colors.ecosystem
+    }
+  ]
+}; 
