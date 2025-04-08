@@ -39,7 +39,7 @@ const LandingPage = () => {
         <h1 className="landing-title">Luminode</h1>
         <p className="landing-tagline">Explore the hidden relationships between words in a beautiful, interactive vector space</p>
         <div className="button-container">
-          <Link to="/app" className="app-button primary-button">
+          <Link to="/app" state={{ fromLanding: true }} className="app-button primary-button">
             Explore
           </Link>
         </div>

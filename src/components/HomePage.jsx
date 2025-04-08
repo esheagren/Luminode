@@ -8,9 +8,10 @@ import Tools from './Tools';
 import ViewButton from './ViewButton';
 import SuggestedWords from './SuggestedWords';
 import { getApiUrl } from '../utils/environment';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { hasPrecomputedEmbedding, createWordResult } from '../data/wordEmbeddings';
 import LearnPanel from './learn-panel/LearnPanel';
+import IntroModal from './IntroModal';
 
 const HomePage = () => {
   const [words, setWords] = useState([]);
@@ -27,7 +28,25 @@ const HomePage = () => {
   const [sliceMode, setSliceMode] = useState(false);
   const [learnMode, setLearnMode] = useState(false);
   const [activeTool, setActiveTool] = useState('Vector Embeddings');
+  const [showIntroModal, setShowIntroModal] = useState(false);
   const dispatch = useDispatch();
+  const location = useLocation();
+  
+  // Check if this is the first visit and show intro modal
+  useEffect(() => {
+    const hasSeenIntro = localStorage.getItem('luminode_has_seen_intro');
+    // Show intro modal if user hasn't seen it before or is coming from landing page
+    if (!hasSeenIntro || location.state?.fromLanding) {
+      setShowIntroModal(true);
+      // Mark that the user has seen the intro
+      localStorage.setItem('luminode_has_seen_intro', 'true');
+    }
+  }, [location]);
+  
+  // Handle closing the intro modal
+  const handleCloseIntroModal = () => {
+    setShowIntroModal(false);
+  };
   
   // Debug: Log the state functions
   console.log('HomePage component:', {
@@ -313,6 +332,12 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+      
+      {/* Intro Modal */}
+      <IntroModal 
+        isOpen={showIntroModal} 
+        onClose={handleCloseIntroModal} 
+      />
       
       <style jsx="true">{`
         .app-container {
