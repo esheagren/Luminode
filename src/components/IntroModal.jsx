@@ -21,7 +21,7 @@ const IntroModal = ({ isOpen, onClose }) => {
           </p>
           
           <p>
-            Vector embeddings are <strong>high-dimensional matrices</strong>. Imagine a familiar X-Y plane, then an X-Y-Z plane, and then imagine you continue increasing the number of dimensionthis to hundreds or even thousands of dimensions, each capturing a subtle semantic nuance, like if the word is a plural, is gendered, or even is associated with witchcraft. In high-dimensional systems, surprising layers of abstraction are often represented and can be seen visually.
+            Vector embeddings are <strong>high-dimensional matrices</strong>. Imagine a familiar X-Y plane, then an X-Y-Z plane, and then imagine you continue increasing the number of dimensions to hundreds or even thousands of dimensions, each capturing a subtle semantic nuance, like if the word is a plural, is gendered, or even is associated with witchcraft. In high-dimensional systems, surprising layers of abstraction are often represented and can be seen visually.
           </p>
           
           <div className="intro-graphic">
