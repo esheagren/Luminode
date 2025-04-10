@@ -277,7 +277,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
         color: color,
         isPrimary: isPrimaryWord,
         truncatedVector: point.truncatedVector,
-        radius: isPrimaryWord ? 0.4 : 0.2
+        radius: isPrimaryWord ? 0.3 : 0.15
       });
       
       // Add to appropriate arrays
@@ -291,7 +291,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       
       // Add text label for all words, not just primary ones
       const textSprite = createTextSprite(point.word, isPrimaryWord);
-      textSprite.position.set(normalizedX, normalizedY + (isPrimaryWord ? 0.7 : 0.5), normalizedZ);
+      textSprite.position.set(normalizedX, normalizedY + (isPrimaryWord ? 0.6 : 0.4), normalizedZ);
       sceneRef.current.add(textSprite);
       objectsRef.current.push(textSprite);
     });
@@ -303,10 +303,14 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       geometry.setAttribute('color', new THREE.Float32BufferAttribute(pointsColors, 3));
       
       const material = new THREE.PointsMaterial({
-        size: 0.2,
+        size: 0.12,
         vertexColors: true,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.8,
+        sizeAttenuation: true,
+        // Use round points instead of squares
+        map: createCircleTexture('#ffffff', 64),
+        alphaTest: 0.5
       });
       
       const points = new THREE.Points(geometry, material);
@@ -322,8 +326,14 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       geometry.setAttribute('color', new THREE.Float32BufferAttribute(primaryPointsColors, 3));
       
       const material = new THREE.PointsMaterial({
-        size: 0.4,
-        vertexColors: true
+        size: 0.25,
+        vertexColors: true,
+        transparent: true,
+        opacity: 1.0,
+        sizeAttenuation: true,
+        // Use round points instead of squares
+        map: createCircleTexture('#ffffff', 64),
+        alphaTest: 0.5
       });
       
       const points = new THREE.Points(geometry, material);
@@ -334,6 +344,38 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     
     // Store point info for raycasting
     pointsRef.current = pointInfos;
+  };
+  
+  // Helper function to create circular point texture
+  const createCircleTexture = (color, size) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    
+    // Draw a circle
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const radius = size / 2 - 2;
+    
+    context.beginPath();
+    context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+    context.closePath();
+    
+    // Fill with gradient for softer edges
+    const gradient = context.createRadialGradient(
+      centerX, centerY, 0,
+      centerX, centerY, radius
+    );
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    
+    context.fillStyle = gradient;
+    context.fill();
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
   };
   
   // Add ruler lines between primary points

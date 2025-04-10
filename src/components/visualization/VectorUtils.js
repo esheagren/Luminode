@@ -52,16 +52,21 @@ export const createTextSprite = (text, isPrimary = false) => {
   canvas.width = 256;
   canvas.height = 64;
   
-  // Background with different opacity based on word type
-  const bgOpacity = isPrimary ? 0.7 : 0.5;
-  context.fillStyle = `rgba(15, 23, 42, ${bgOpacity})`;
-  context.fillRect(0, 0, canvas.width, canvas.height);
+  // Clear background - transparent by default
+  context.clearRect(0, 0, canvas.width, canvas.height);
   
   // Text with different style based on word type
-  context.font = isPrimary ? 'bold 32px Arial' : '28px Arial';
+  context.font = isPrimary ? 'bold 28px Arial' : '24px Arial';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
-  context.fillStyle = isPrimary ? '#ffffff' : 'rgba(255, 255, 255, 0.8)';
+  
+  // Add subtle text shadow for readability
+  context.shadowColor = 'rgba(0, 0, 0, 0.7)';
+  context.shadowBlur = 4;
+  context.shadowOffsetX = 1;
+  context.shadowOffsetY = 1;
+  
+  context.fillStyle = isPrimary ? '#ffffff' : 'rgba(255, 255, 255, 0.9)';
   context.fillText(text, canvas.width / 2, canvas.height / 2);
   
   // Create texture and sprite
@@ -71,7 +76,7 @@ export const createTextSprite = (text, isPrimary = false) => {
     transparent: true
   });
   const sprite = new THREE.Sprite(material);
-  sprite.scale.set(isPrimary ? 2 : 1.5, isPrimary ? 0.5 : 0.4, 1);
+  sprite.scale.set(isPrimary ? 1.8 : 1.3, isPrimary ? 0.45 : 0.35, 1);
   
   return sprite;
 };
