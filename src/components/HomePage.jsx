@@ -397,6 +397,19 @@ const HomePage = () => {
         onClose={handleCloseIntroModal} 
       />
       
+      {/* Footer Links */}
+      <footer className="home-footer">
+        <div className="footer-links">
+          <Link to="/learn">Theory</Link>
+          <a href="https://eriksheagren.notion.site" target="_blank" rel="noopener noreferrer">
+            Contact
+          </a>
+          <a href="https://github.com/esheagren/Luminode" target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
+        </div>
+      </footer>
+      
       <style jsx="true">{`
         .app-container {
           display: flex;
@@ -615,6 +628,35 @@ const HomePage = () => {
           padding-left: 10px;
           overflow: hidden;
           transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
+        .home-footer {
+          width: 100%;
+          padding: 0.8rem 1.5rem;
+          display: flex;
+          justify-content: flex-start;
+          background-color: #0f0f10;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          z-index: 10;
+        }
+        
+        .footer-links {
+          display: flex;
+          gap: 2rem;
+        }
+        
+        .footer-links a {
+          color: rgba(217, 175, 93, 0.75); /* Muted gold color */
+          text-decoration: none;
+          font-size: 0.9rem;
+          font-weight: 400;
+          letter-spacing: 0.5px;
+          transition: color 0.2s ease;
+          font-family: 'Inter', sans-serif;
+        }
+        
+        .footer-links a:hover {
+          color: rgba(217, 175, 93, 0.9); /* Slightly brighter on hover */
         }
       `}</style>
     </div>
