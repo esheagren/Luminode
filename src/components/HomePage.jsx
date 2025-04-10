@@ -14,6 +14,15 @@ import LearnPanel from './learn-panel/LearnPanel';
 import IntroModal from './IntroModal';
 import luminodeLogo from '../assets/luminodeLogoSmall.png';
 
+// Add reset icon component
+const ResetIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 6h18"></path>
+    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+  </svg>
+);
+
 const HomePage = () => {
   const [words, setWords] = useState([]);
   const [relatedClusters, setRelatedClusters] = useState([]);
@@ -219,6 +228,40 @@ const HomePage = () => {
     setSelectionMode(true);
   };
 
+  // Handle Reset functionality
+  const handleReset = () => {
+    console.log('Resetting all words and visualization');
+    
+    // Clear all words
+    setWords([]);
+    
+    // Clear visualizations/clusters
+    setRelatedClusters([]);
+    
+    // Reset selection modes
+    if (selectionMode) {
+      setSelectionMode(false);
+      setSelectedPoints([]);
+    }
+    
+    // Reset analogy mode
+    if (analogyMode) {
+      setAnalogyMode(false);
+      setAnalogyStep(0);
+      setSelectedPoints([]);
+      setIsSearchingAnalogy(false);
+    }
+
+    // Reset slice mode
+    if (sliceMode) {
+      setSliceMode(false);
+      setSelectedPoints([]);
+    }
+    
+    // Clear any errors
+    setError(null);
+  };
+
   return (
     <div className="app-container">
       <div className="main-layout">
@@ -230,16 +273,25 @@ const HomePage = () => {
             </Link>
           </div>
           
-          <WordInput 
-            words={words}
-            setWords={setWords}
-            setResponse={setError}
-            setLoading={() => {/* No-op to prevent loading state issues */}}
-            setError={setError}
-            loading={false}
-            setRelatedClusters={setRelatedClusters}
-            showWordTags={false}
-          />
+          <div className="input-wrapper">
+            <WordInput 
+              words={words}
+              setWords={setWords}
+              setResponse={setError}
+              setLoading={() => {/* No-op to prevent loading state issues */}}
+              setError={setError}
+              loading={false}
+              setRelatedClusters={setRelatedClusters}
+              showWordTags={false}
+            />
+            <button 
+              className="reset-button" 
+              onClick={handleReset}
+              title="Reset words"
+            >
+              <ResetIcon />
+            </button>
+          </div>
           
           <div className="words-container">
             {words.length > 0 && (
@@ -397,6 +449,40 @@ const HomePage = () => {
           font-weight: 600;
           color: rgba(248, 250, 252, 0.7);
           letter-spacing: 0.5px;
+        }
+        
+        .input-wrapper {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          width: 100%;
+          margin-top: 10px;
+          margin-bottom: 10px;
+        }
+        
+        .reset-button {
+          position: static;
+          margin-left: 10px;
+          background: none;
+          border: none;
+          color: #ff5757;
+          cursor: pointer;
+          padding: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          border-radius: 50%;
+          transform: none;
+          height: 38px;
+          width: 38px;
+          margin-top: -25px; /* Fine-tune: move up a bit more */
+        }
+        
+        .reset-button:hover {
+          background-color: rgba(255, 87, 87, 0.1);
+          transform: scale(1.1);
         }
         
         .sidebar {

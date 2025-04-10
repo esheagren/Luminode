@@ -554,58 +554,6 @@ const Tools = ({
     }
   };
 
-  // Handle Reset functionality
-  const handleReset = () => {
-    console.log('Resetting all words and visualization');
-    
-    // Clear all words
-    setWords([]);
-    
-    // Clear visualizations/clusters
-    debugSetMidpointClusters([]);
-    
-    // Reset selection modes
-    if (selectionMode) {
-      setSelectionMode(false);
-      setSelectedPoints([]);
-    }
-    
-    // Reset analogy mode
-    if (analogyMode) {
-      setAnalogyMode(false);
-      setAnalogyStep(0);
-      setSelectedPoints([]);
-      setIsSearchingAnalogy(false);
-    }
-
-    // Reset slice mode
-    if (sliceMode) {
-      setSliceMode(false);
-      setSelectedPoints([]);
-    }
-    
-    // Reset neighbors mode
-    if (neighborsActive) {
-      setNeighborsActive(false);
-    }
-    
-    // Clear any errors
-    setError(null);
-    
-    // Force a complete refresh of the visualization
-    // First set loading to true to trigger cleanup
-    setLoading(true);
-    
-    // Then set loading to false after a small delay to allow state updates to process
-    setTimeout(() => {
-      // Setting this to false triggers redraw with empty state
-      setLoading(false);
-      
-      // Log confirmation of reset
-      console.log('Reset complete - graph should be cleared');
-    }, 50);
-  };
-
   // Toggle learn mode
   const toggleLearnMode = () => {
     setLearnMode(!learnMode);
@@ -746,17 +694,6 @@ const Tools = ({
           >
             <SliceIcon />
             <span>{sliceMode ? `Slice (${selectedPoints.length}/2)` : "Slice"}</span>
-          </button>
-          
-          <button
-            className="icon-button reset-button"
-            onClick={handleReset}
-            disabled={loading || words.length === 0}
-            onMouseEnter={(e) => createToolbarTooltip('Reset', e)}
-            onMouseLeave={() => removeToolbarTooltip()}
-          >
-            <ResetIcon />
-            <span>Reset</span>
           </button>
           
           <div className="spacer"></div>
