@@ -367,7 +367,6 @@ const HomePage = () => {
 
         .logo-container {
           display: flex;
-          justify-content: center;
           align-items: center;
           margin-bottom: 1rem;
           padding: 0.5rem;
@@ -378,23 +377,22 @@ const HomePage = () => {
           align-items: center;
           text-decoration: none;
           color: #f8fafc;
-          transition: opacity 0.2s ease;
-        }
-
-        .logo-link:hover {
-          opacity: 0.9;
+          pointer-events: auto;
+          cursor: pointer;
         }
 
         .logo-container img {
           height: 40px;
-          width: auto;
+          width: 40px;
+          border-radius: 50%;
           margin-right: 10px;
+          object-fit: cover;
         }
 
         .logo-text {
           font-size: 1.4rem;
-          font-weight: 700;
-          color: #f8fafc;
+          font-weight: 600;
+          color: rgba(248, 250, 252, 0.7);
           letter-spacing: 0.5px;
         }
         
