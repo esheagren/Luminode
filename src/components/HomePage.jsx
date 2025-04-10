@@ -339,7 +339,6 @@ const HomePage = () => {
               setLoading={setError}
               setError={setError}
               loading={error}
-              wordsValid={words.some(word => word.exists)}
               viewMode={viewMode}
               setViewMode={setViewMode}
               rulerActive={rulerActive}
@@ -354,7 +353,6 @@ const HomePage = () => {
               setAnalogyStep={setAnalogyStep}
               isSearchingAnalogy={isSearchingAnalogy}
               setIsSearchingAnalogy={setSearchingAnalogy}
-              setWords={setWords}
               sliceMode={sliceMode}
               setSliceMode={setSliceSelectionMode}
               learnMode={learnMode}

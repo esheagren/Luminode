@@ -92,7 +92,6 @@ const Tools = ({
   setAnalogyStep,
   isSearchingAnalogy,
   setIsSearchingAnalogy,
-  setWords,
   sliceMode,
   setSliceMode,
   learnMode,
