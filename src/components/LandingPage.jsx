@@ -48,7 +48,6 @@ const LandingPage = () => {
       <footer className="landing-footer">
         <div className="footer-links">
           <Link to="/learn">Learn</Link>
-          <Link to="/about">About</Link>
           <a href="https://eriksheagren.notion.site" target="_blank" rel="noopener noreferrer">
             Contact
           </a>
