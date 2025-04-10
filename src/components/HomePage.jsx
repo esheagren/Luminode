@@ -405,13 +405,33 @@ const HomePage = () => {
           flex-direction: column;
           gap: 0.75rem;
           height: 100%; /* Ensure full height */
+          border: none;
         }
         
         .words-container {
-          max-height: 120px;
+          max-height: 600px; /* Significantly increased to allow for many more words */
           overflow-y: auto;
           margin-bottom: 0.5rem;
           flex-shrink: 0; /* Prevent container from shrinking */
+          overflow-x: hidden;
+        }
+        
+        /* Custom scrollbar styling */
+        .words-container::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .words-container::-webkit-scrollbar-track {
+          background: transparent; 
+        }
+        
+        .words-container::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 3px;
+        }
+        
+        .words-container::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.3);
         }
         
         .selected-words {

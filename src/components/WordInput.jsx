@@ -164,11 +164,15 @@ const WordInput = ({
         .word-input-container {
           position: relative;
           width: 100%;
+          outline: none;
         }
         
         form {
           position: relative;
           margin-bottom: 1rem;
+          border: none;
+          outline: none;
+          box-shadow: none;
         }
         
         input {
@@ -180,12 +184,20 @@ const WordInput = ({
           color: #E2E8F0;
           font-size: 1rem;
           transition: all 0.2s ease;
+          outline: none;
+          box-shadow: none;
         }
         
         input:focus {
           outline: none;
           border-color: #FFC837;
           box-shadow: 0 0 0 3px rgba(255, 200, 55, 0.2);
+        }
+        
+        /* Ensure no outline or boxes appear in any state */
+        input:not(:focus) {
+          outline: none;
+          box-shadow: none;
         }
         
         input::placeholder {
