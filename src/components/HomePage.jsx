@@ -367,14 +367,17 @@ const HomePage = () => {
 
         .logo-container {
           display: flex;
+          justify-content: center;
           align-items: center;
-          margin-bottom: 1rem;
-          padding: 0.5rem;
+          margin-bottom: 0.5rem; /* Reduced from 1rem to bring elements closer */
+          padding-top: 0.25rem; /* Reduced top padding to bring it up */
+          padding-bottom: 0.25rem;
         }
 
         .logo-link {
           display: flex;
           align-items: center;
+          justify-content: center; /* Center the logo and text */
           text-decoration: none;
           color: #f8fafc;
           pointer-events: auto;
@@ -398,12 +401,12 @@ const HomePage = () => {
         
         .sidebar {
           width: 300px;
-          padding: 1rem;
+          padding: 0.75rem 1rem; /* Reduced top padding to bring elements up */
           overflow-y: auto;
           background-color: #0f0f10;
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
+          gap: 0.5rem; /* Reduced from 0.75rem to bring elements closer */
           height: 100%; /* Ensure full height */
           border: none;
         }
