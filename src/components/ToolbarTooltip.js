@@ -177,10 +177,18 @@ const getTooltipContent = (toolType) => {
         <div class="tooltip-usage">
           <div class="tooltip-usage-title">How to use:</div>
           <ul class="tooltip-usage-steps">
+            <li>You need at least 3 words to perform analogies</li>
             <li>Click to activate analogy mode</li>
             <li>Select three words in sequence (A, B, then C)</li>
             <li>The system computes the vector operation: B - A + C</li>
-            <li>Results show words with embedding vectors closest to the resulting vector, completing the analogy "A is to B as C is to D"</li>
+            <li>Results show words completing the analogy "A is to B as C is to D"</li>
+          </ul>
+        </div>
+        <div class="tooltip-usage">
+          <div class="tooltip-usage-title">Examples:</div>
+          <ul class="tooltip-usage-steps">
+            <li>man : king :: woman : ?</li>
+            <li>America : hamburger :: Japan : ?</li>
           </ul>
         </div>
       `;
