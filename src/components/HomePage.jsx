@@ -234,9 +234,9 @@ const HomePage = () => {
             words={words}
             setWords={setWords}
             setResponse={setError}
-            setLoading={setError}
+            setLoading={() => {/* No-op to prevent loading state issues */}}
             setError={setError}
-            loading={error}
+            loading={false}
             setRelatedClusters={setRelatedClusters}
             showWordTags={false}
           />

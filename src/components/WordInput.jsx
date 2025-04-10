@@ -64,6 +64,8 @@ const WordInput = ({
         } else {
           // Word doesn't exist in embeddings
           setError(`"${word}" is not in our dictionary`);
+          // Clear input even when word is not found
+          setWordInput('');
         }
       })
       .catch(fetchError => {
