@@ -1,16 +1,12 @@
-// Import essay files
-import vectorBasics from './text/Essay1.txt?raw';
-import transformerModels from './text/Essay2.txt?raw';
-import similarityMetrics from './text/Essay3.txt?raw';
+// Import from essay data
 import { availableEssays } from './essayData';
 
-// Map of essay titles to their content
+// Define static essay content for raw text fallback if needed
 const essayContentMap = {
-  'Vectors: Meaning in AI Systems': vectorBasics,
-  'The Why and How of Vector Embeddings': vectorBasics, // Keep for backward compatibility
-  'Exploring and Visualizing Vector Embeddings': transformerModels,
-  'Vector Databases and Large-Scale Retrieval': similarityMetrics
-  // Add more essays as they become available
+  'Vectors: Meaning in AI Systems': "This content would be loaded separately if needed.",
+  'The Why and How of Vector Embeddings': "This content would be loaded separately if needed.", // Keep for backward compatibility
+  'Exploring and Visualizing Vector Embeddings': "This content would be loaded separately if needed.",
+  'Vector Databases and Large-Scale Retrieval': "This content would be loaded separately if needed."
 };
 
 /**

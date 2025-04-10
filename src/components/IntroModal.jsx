@@ -82,7 +82,7 @@ const IntroModal = ({ isOpen, onClose }) => {
               This application allows you to:
             </p>
             <div className="concept-list">
-              <div className="concept-item"><strong>Visualize:</strong> See word relationships in 2D/3D projections of high-dimensional space</div>
+              <div className="concept-item"><strong>Visualize:</strong> See word relationships in 2D/3D space</div>
               <div className="concept-item"><strong>Find Neighbors:</strong> Discover semantically similar words and concepts</div>
               <div className="concept-item"><strong>Explore Analogies:</strong> Perform vector arithmetic to find word relationships</div>
             </div>

@@ -12,6 +12,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { hasPrecomputedEmbedding, createWordResult } from '../data/wordEmbeddings';
 import LearnPanel from './learn-panel/LearnPanel';
 import IntroModal from './IntroModal';
+import luminodeLogo from '../assets/luminodeLogoSmall.png';
 
 const HomePage = () => {
   const [words, setWords] = useState([]);
@@ -222,6 +223,13 @@ const HomePage = () => {
     <div className="app-container">
       <div className="main-layout">
         <div className="sidebar">
+          <div className="logo-container">
+            <Link to="/" className="logo-link">
+              <img src={luminodeLogo} alt="Luminode" />
+              <span className="logo-text">Luminode</span>
+            </Link>
+          </div>
+          
           <WordInput 
             words={words}
             setWords={setWords}

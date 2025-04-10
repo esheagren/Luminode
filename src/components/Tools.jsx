@@ -612,8 +612,8 @@ const Tools = ({
     
     // When enabling learn mode, set the active tool based on the current state
     if (!learnMode) {
-      if (viewMode === '3D') {
-        setActiveTool('3D');
+      if (viewMode === '2D/3D') {
+        setActiveTool('2D/3D');
       } else if (rulerActive) {
         setActiveTool('Measure');
       } else if (analogyMode) {
