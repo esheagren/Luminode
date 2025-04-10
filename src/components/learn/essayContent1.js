@@ -14,7 +14,7 @@ const essay1 = {
     {
       type: "paragraph",
       id: "intro-p2",
-      text: "Here we will dig into what vector embeddings are, look deeping into their technical mechanics and the specific tools in Luminode, and survey real-world applications from vector databases to retrieval-augmented generation (RAG).",
+      text: "Here we will dig into what vector embeddings are, looking deep into their technical mechanics and the specific tools in Luminode, and survey real-world applications from vector databases to retrieval-augmented generation (RAG).",
       diagramId: "E1_DictionaryVsAssociation",
       diagramColor: colors.dictionary
     },
@@ -31,7 +31,7 @@ const essay1 = {
       type: "heading",
       level: 2,
       id: "meaning-heading",
-      text: "1. How Meaning Can Exist in Vector Embeddings"
+      text: "How Meaning Can Exist in Vector Embeddings"
     },
     {
       type: "paragraph",

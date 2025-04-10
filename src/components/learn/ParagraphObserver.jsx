@@ -141,24 +141,24 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
     
     // Always give the first paragraph full opacity
     if (isFirstParagraph()) {
-      return 1;
+      return 0.85; // Increased from 0.7 for better visibility
     }
     
     // When paragraph has been seen but isn't currently visible,
-    // use a slightly lower opacity
+    // use a lower opacity
     if (!isVisible) {
-      return 0.96; // Nearly full opacity for better readability when not in view
+      return 0.75; // Increased from 0.6 for better visibility
     }
     
-    // When paragraphs are visible, use full opacity
+    // When paragraphs are visible, use slightly reduced opacity
     if (isVisible) {
-      return 1;
+      return 0.85; // Increased from 0.7 for better visibility
     }
     
     // Normal case: fade based on visibility ratio with a higher minimum opacity
     // Use a smoothing function for more gradual transitions
-    const smoothedRatio = Math.pow(visibilityRatio, 0.7); // Less aggressive curve
-    return Math.max(0.5, Math.min(smoothedRatio * 1.5, 1)); // Higher minimum opacity for better readability
+    const smoothedRatio = Math.pow(visibilityRatio, 0.7); 
+    return Math.max(0.4, Math.min(smoothedRatio * 1.2, 0.85)); // Higher min and max opacity
   };
   
   // Parse the rgba color to get its components
@@ -183,22 +183,9 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
     if (opacity === 0) return 'transparent';
     
     const color = parseColor(diagramColor);
-    // Make sure base opacity is at least 0.3 for better readability, then multiply by our transition opacity
-    const adjustedOpacity = Math.max(color.a, 0.3) * opacity;
+    // Adjusted opacity calculation for better visibility
+    const adjustedOpacity = Math.max(color.a * 0.75, 0.25) * opacity;
     return `rgba(${color.r}, ${color.g}, ${color.b}, ${adjustedOpacity})`;
-  };
-  
-  // Determine section boundaries for border radius
-  const isFirstInSection = () => {
-    return id.endsWith('-p1') || id.startsWith('intro');
-  };
-  
-  const isLastInSection = () => {
-    // Check if this is the last paragraph in its section
-    const paragraphNum = parseInt(id.split('-p')[1]) || 0;
-    
-    // Rough estimate - these are typically last paragraphs
-    return id.includes('-p9') || id.includes('-p8') || id.includes('-p7') || id.includes('-p6');
   };
   
   // Get threshold data for debugging
@@ -208,10 +195,10 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   const getTransitionStyle = () => {
     // For scrolling up, use no transition for instant un-highlighting
     if (scrollDirection === 'up') {
-      return 'background-color 0s';
+      return 'all 0s';
     }
     // For scrolling down or no scrolling, use the smooth transition
-    return 'background-color 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)';
+    return 'all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)';
   };
   
   return (
@@ -225,16 +212,30 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
       data-position={paragraphPosition}
       data-appear-threshold={thresholdData.appearThreshold}
       style={{ 
-        backgroundColor: getBackgroundColor(),
-        padding: '10px 10px 5px 10px', // Reduced bottom padding
+        position: 'relative',
+        padding: '10px 14px 5px 14px', // Increased horizontal padding
         marginBottom: '0px',
         marginTop: '0px',
         transition: getTransitionStyle(), // Dynamic transition based on scroll direction
-        borderRadius: isFirstInSection() ? '6px 6px 0 0' :     // First paragraph in section gets top rounded corners
-                     isLastInSection() ? '0 0 6px 6px' :       // Last paragraph in section gets bottom rounded corners
-                     '0'  // Middle paragraphs get no rounded corners for a continuous look
+        borderRadius: '8px', // All corners rounded
       }}
     >
+      {/* Background with soft edges */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: getBackgroundColor(),
+          borderRadius: '8px',
+          boxShadow: shouldShowBackground() ? `0 0 20px 0 ${getBackgroundColor()}` : 'none',
+          opacity: getOpacity() > 0 ? 1 : 0,
+          transition: getTransitionStyle(),
+          zIndex: -1,
+        }}
+      />
       {children}
     </div>
   );

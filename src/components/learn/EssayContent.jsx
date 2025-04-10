@@ -83,6 +83,7 @@ const EssayContent = ({ content, title }) => {
         <h2 className="essay-title">{title}</h2>
         <div className="essay-text">
           {essayData.content.map(renderContentItem)}
+          <div className="essay-bottom-space"></div>
         </div>
         
         <style jsx="true">{`
@@ -111,6 +112,11 @@ const EssayContent = ({ content, title }) => {
             margin-bottom: 0;
             margin-top: 0;
             text-align: left;
+          }
+          
+          .essay-bottom-space {
+            height: 70vh;
+            min-height: 500px;
           }
           
           .essay-text h1, .essay-text h2, .essay-text h3 {
@@ -163,6 +169,7 @@ const EssayContent = ({ content, title }) => {
         >
           {content}
         </ReactMarkdown>
+        <div className="essay-bottom-space"></div>
       </div>
       
       <style jsx="true">{`
@@ -191,6 +198,11 @@ const EssayContent = ({ content, title }) => {
           margin-bottom: 0;
           margin-top: 0;
           text-align: left;
+        }
+        
+        .essay-bottom-space {
+          height: 70vh;
+          min-height: 500px;
         }
         
         .essay-text h1, .essay-text h2, .essay-text h3 {
