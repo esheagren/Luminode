@@ -42,7 +42,7 @@ const LearnPage = () => {
   const [selectedEssay, setSelectedEssay] = useState('');
   const [essayContent, setEssayContent] = useState('');
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [showNotification, setShowNotification] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
 
   // List of available essays - prioritize the structured data format
   const essays = availableEssays || getAvailableEssays();

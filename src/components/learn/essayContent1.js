@@ -97,13 +97,7 @@ const essay1 = {
       diagramId: "",
       diagramColor: colors.summary
     },
-    {
-      type: "paragraph",
-      id: "summary-p3",
-      text: "In the next essays, we will explore how these embeddings can be visualized and manipulated and how they can be stored and retrieved at scale. By the end, you will see how what begins as a simple numeric representation of \"word meaning\" can evolve into a full ecosystem of methods—enabling everything from semantic search to retrieval-augmented generation.",
-      diagramId: "",
-      diagramColor: colors.summary
-    }
+    
   ]
 };
 
