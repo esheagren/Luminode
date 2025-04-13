@@ -57,7 +57,8 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   
   // Check if this is the first paragraph in the essay
   const isFirstParagraph = () => {
-    return id === 'intro-p1';
+    // Support first paragraphs from all essays
+    return id === 'intro-p1' || id === 'e2-intro-p1' || id === 'e3-intro-p1';
   };
   
   useEffect(() => {

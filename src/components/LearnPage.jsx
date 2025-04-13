@@ -15,10 +15,8 @@ import { availableEssays } from './learn/essayData';
 
 // Wrapper component that has access to the scroll context
 const DiagramContainer = () => {
-  const { userHasScrolled } = useScroll();
-  
   return (
-    <div className="diagram-container" style={{ opacity: userHasScrolled ? 1 : 0 }}>
+    <div className="diagram-container">
       <DiagramComponent />
     </div>
   );

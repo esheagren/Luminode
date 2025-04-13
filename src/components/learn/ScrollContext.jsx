@@ -21,6 +21,22 @@ export function ScrollProvider({ children }) {
   const lastScrollY = useRef(0);
   const contentRef = useRef(null);
   
+  // Function to reset the scroll state when switching essays
+  const resetScrollState = useCallback(() => {
+    setVisibleParagraphs([]);
+    setSeenParagraphs([]);
+    setFurthestSeenPosition(0);
+    setHighestVisiblePosition(0);
+    setParagraphThresholds({});
+    setCurrentDiagram(null);
+    setCurrentDiagramColor(null);
+    setScrollDirection('none');
+    setUserHasScrolled(false);
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  }, []);
+
   // Function to extract position number from paragraph ID
   const getPositionFromId = (id) => {
     if (!id) return 0;
@@ -248,7 +264,8 @@ export function ScrollProvider({ children }) {
       getPositionFromId,
       shouldUnhighlightWhenScrollingUp,
       paragraphThresholds,
-      userHasScrolled
+      userHasScrolled,
+      resetScrollState
     }}>
       {children}
     </ScrollContext.Provider>

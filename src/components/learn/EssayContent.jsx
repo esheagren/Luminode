@@ -17,10 +17,15 @@ const essayDataMap = {
 };
 
 const EssayContent = ({ content, title }) => {
-  const { handleVisibilityChange, userHasScrolled } = useScroll();
+  const { handleVisibilityChange, userHasScrolled, resetScrollState } = useScroll();
   
   // Get structured data for this essay if available
   const essayData = essayDataMap[title];
+  
+  // Reset scroll state when switching essays
+  useEffect(() => {
+    resetScrollState();
+  }, [title, resetScrollState]);
   
   // Make sure the first paragraph is highlighted on mount and when scroll state changes
   useEffect(() => {
@@ -29,7 +34,11 @@ const EssayContent = ({ content, title }) => {
       const firstParagraph = essayData.content.find(item => item.type === 'paragraph');
       if (firstParagraph) {
         // If user hasn't scrolled, only show the intro paragraph diagram
-        if (!userHasScrolled && firstParagraph.id.includes('intro')) {
+        // Support any of the essay intro paragraphs: intro-p1, e2-intro-p1, e3-intro-p1
+        if (!userHasScrolled && 
+            (firstParagraph.id.includes('intro-p1') || 
+             firstParagraph.id === 'e2-intro-p1' || 
+             firstParagraph.id === 'e3-intro-p1')) {
           // Manually trigger visibility for the first paragraph to ensure it's highlighted
           // Note: we're still passing diagramId even if it's empty to maintain the paragraph highlighting
           handleVisibilityChange({
@@ -94,24 +103,24 @@ const EssayContent = ({ content, title }) => {
           }
           
           .essay-title {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
+            font-size: 2.4rem;
+            margin-bottom: 1.8rem;
+            padding-bottom: 0.6rem;
             border-bottom: 2px solid rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.95);
             text-align: left;
           }
           
           .essay-text {
-            font-size: 1.1rem;
-            line-height: 1.7;
+            font-size: 1.5rem;
+            line-height: 1.8;
             color: rgba(255, 255, 255, 0.85);
             text-align: left;
           }
           
           .essay-text p {
-            margin-bottom: 0;
-            margin-top: 0;
+            margin-bottom: 0.5rem;
+            margin-top: 0.5rem;
             text-align: left;
           }
           
@@ -121,10 +130,18 @@ const EssayContent = ({ content, title }) => {
           }
           
           .essay-text h1, .essay-text h2, .essay-text h3 {
-            margin-top: 2rem;
-            margin-bottom: 1rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
             color: rgba(255, 255, 255, 0.95);
             text-align: left;
+          }
+          
+          .essay-text h2 {
+            font-size: 2.1rem;
+          }
+          
+          .essay-text h3 {
+            font-size: 1.8rem;
           }
           
           .essay-text a {
@@ -180,24 +197,24 @@ const EssayContent = ({ content, title }) => {
         }
         
         .essay-title {
-          font-size: 1.8rem;
-          margin-bottom: 1.5rem;
-          padding-bottom: 0.5rem;
+          font-size: 2.4rem;
+          margin-bottom: 1.8rem;
+          padding-bottom: 0.6rem;
           border-bottom: 2px solid rgba(255, 255, 255, 0.1);
           color: rgba(255, 255, 255, 0.95);
           text-align: left;
         }
         
         .essay-text {
-          font-size: 1.1rem;
-          line-height: 1.7;
+          font-size: 1.5rem;
+          line-height: 1.8;
           color: rgba(255, 255, 255, 0.85);
           text-align: left;
         }
         
         .essay-text p {
-          margin-bottom: 0;
-          margin-top: 0;
+          margin-bottom: 0.5rem;
+          margin-top: 0.5rem;
           text-align: left;
         }
         
@@ -207,10 +224,18 @@ const EssayContent = ({ content, title }) => {
         }
         
         .essay-text h1, .essay-text h2, .essay-text h3 {
-          margin-top: 2rem;
-          margin-bottom: 1rem;
+          margin-top: 2.5rem;
+          margin-bottom: 1.5rem;
           color: rgba(255, 255, 255, 0.95);
           text-align: left;
+        }
+        
+        .essay-text h2 {
+          font-size: 2.1rem;
+        }
+        
+        .essay-text h3 {
+          font-size: 1.8rem;
         }
         
         .essay-text a {

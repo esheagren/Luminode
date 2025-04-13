@@ -1,47 +1,18 @@
 import React from 'react';
 import { useScroll } from './ScrollContext';
 
-// Create a default diagram placeholder since actual diagrams are missing
-const DefaultDiagram = ({ title = 'Vector Embeddings', caption = 'Select an essay to view diagrams' }) => {
+// Create an empty diagram component instead of the default "Vector Embeddings" stand-in
+const EmptyDiagram = () => {
   return (
-    <div className="default-diagram">
-      <div className="diagram-content">
-        <div className="diagram-title">{title}</div>
-        <div className="diagram-caption">{caption}</div>
-      </div>
-      
+    <div className="empty-diagram">
       <style jsx="true">{`
-        .default-diagram {
+        .empty-diagram {
           width: 100%;
           height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          background-color: rgba(26, 26, 46, 0.7);
           border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-          padding: 20px;
-        }
-        
-        .diagram-content {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-        }
-        
-        .diagram-title {
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: white;
-          margin-bottom: 10px;
-        }
-        
-        .diagram-caption {
-          font-size: 1rem;
-          color: rgba(255, 255, 255, 0.7);
-          max-width: 80%;
         }
       `}</style>
     </div>
@@ -50,7 +21,7 @@ const DefaultDiagram = ({ title = 'Vector Embeddings', caption = 'Select an essa
 
 // Create placeholder components for each diagram type
 const PlaceholderDiagram = ({ caption }) => (
-  <DefaultDiagram title="Diagram Coming Soon" caption={caption} />
+  <EmptyDiagram />
 );
 
 // Diagram section colors - should match the ones in EssayContent.jsx
@@ -146,7 +117,7 @@ const DiagramComponent = () => {
   // Render the appropriate diagram
   const renderDiagram = () => {
     if (!diagramInfo) {
-      return <DefaultDiagram />;
+      return <EmptyDiagram />;
     }
     
     const DiagramToRender = diagramInfo.component;
