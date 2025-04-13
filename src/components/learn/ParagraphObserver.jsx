@@ -76,9 +76,10 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
         }
         
         // Pass paragraph ID and its diagram ID to callback when visibility changes
+        // Note: We're ensuring diagramId is always at least an empty string to avoid null/undefined issues
         onVisibilityChange({
           id, 
-          diagramId,
+          diagramId: diagramId || '',
           diagramColor, 
           isVisible: isIntersecting,
           sectionId,

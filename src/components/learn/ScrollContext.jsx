@@ -205,8 +205,10 @@ export function ScrollProvider({ children }) {
           const sorted = [...visibleWithRatio].sort((a, b) => b.ratio - a.ratio);
           const mostVisible = sorted[0];
           
-          // Update the current diagram if necessary
-          if (mostVisible && mostVisible.diagramId) {
+          // Only update diagram if a valid diagramId is provided (non-empty string)
+          // This change allows paragraphs with empty diagramId to maintain the highlighting
+          // without changing the current diagram
+          if (mostVisible && mostVisible.diagramId && mostVisible.diagramId.trim() !== '') {
             setCurrentDiagram(mostVisible.diagramId);
             setCurrentDiagramColor(mostVisible.diagramColor);
           }

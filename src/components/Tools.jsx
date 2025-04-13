@@ -700,8 +700,6 @@ const Tools = ({
           <button 
             className={`icon-button learn-button ${learnMode ? 'active' : ''}`}
             onClick={toggleLearnMode}
-            onMouseEnter={(e) => createToolbarTooltip('Learn', e)}
-            onMouseLeave={() => removeToolbarTooltip()}
           >
             <BookIcon />
             <span>Learn</span>

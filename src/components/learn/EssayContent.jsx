@@ -31,9 +31,10 @@ const EssayContent = ({ content, title }) => {
         // If user hasn't scrolled, only show the intro paragraph diagram
         if (!userHasScrolled && firstParagraph.id.includes('intro')) {
           // Manually trigger visibility for the first paragraph to ensure it's highlighted
+          // Note: we're still passing diagramId even if it's empty to maintain the paragraph highlighting
           handleVisibilityChange({
             id: firstParagraph.id,
-            diagramId: firstParagraph.diagramId,
+            diagramId: firstParagraph.diagramId || '',
             diagramColor: firstParagraph.diagramColor,
             isVisible: true,
             sectionId: firstParagraph.id.split('-')[0],
@@ -60,7 +61,7 @@ const EssayContent = ({ content, title }) => {
             <ParagraphObserver
               key={item.id || index}
               id={item.id}
-              diagramId={item.diagramId}
+              diagramId={item.diagramId || ''}
               diagramColor={item.diagramColor}
               onVisibilityChange={handleVisibilityChange}
             >
