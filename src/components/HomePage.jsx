@@ -438,14 +438,13 @@ const HomePage = () => {
             />
           </div>
 
-          {/* Quick suggested words */}
-          <div className="mobile-suggestions">
-            <SuggestedWords
-              onWordSelect={handleWordSelect}
-              currentWords={words}
-              numSuggestions={4}
-            />
-          </div>
+          {/* Quick suggested words - compact pills */}
+          <SuggestedWords
+            onWordSelect={handleWordSelect}
+            currentWords={words}
+            numSuggestions={5}
+            compact={true}
+          />
         </div>
 
         {/* Slide-out sidebar for full options */}
@@ -651,21 +650,13 @@ const HomePage = () => {
 
           .mobile-bottom-bar {
             background: #0f0f10;
-            padding: 8px 12px;
-            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            padding: 6px 10px;
+            padding-bottom: max(6px, env(safe-area-inset-bottom));
             border-top: 1px solid rgba(255, 255, 255, 0.1);
           }
 
           .mobile-input-row {
-            margin-bottom: 8px;
-          }
-
-          .mobile-suggestions {
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 4px;
+            margin-bottom: 6px;
           }
 
           /* Mobile sidebar */
