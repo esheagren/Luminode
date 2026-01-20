@@ -240,7 +240,6 @@ class VectorService {
       throw error; // Re-throw error for the route handler
     }
   }
-}
 
   /**
    * Find a linear interpolation path between two words
