@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import MidpointSelection from './MidpointSelection';
 import AnalogySelection from './AnalogySelection';
 import SliceSelection from './SliceSelection';
+import LinearPathSelection from './LinearPathSelection';
+import GreedyPathSelection from './GreedyPathSelection';
 import ViewButton from './ViewButton';
 import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
 import { findAnalogy } from '../utils/findAnalogy';
 import { findSlice, processSliceResults } from '../utils/sliceCalculation';
+import { findLinearPath, processLinearPathResults } from '../utils/linearPathCalculation';
+import { findGreedyPath, processGreedyPathResults } from '../utils/greedyPathCalculation';
 import { findNeighbors, processNeighborsResults } from '../utils/findNeighbors';
 import { createToolbarTooltip, removeToolbarTooltip } from './ToolbarTooltip';
 import './ToolbarStyles.css';
@@ -42,6 +46,26 @@ const SliceIcon = () => (
   </svg>
 );
 
+const LinearPathIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="4" cy="12" r="2"></circle>
+    <circle cx="20" cy="12" r="2"></circle>
+    <line x1="6" y1="12" x2="18" y2="12"></line>
+    <circle cx="9" cy="12" r="1" fill="currentColor"></circle>
+    <circle cx="12" cy="12" r="1" fill="currentColor"></circle>
+    <circle cx="15" cy="12" r="1" fill="currentColor"></circle>
+  </svg>
+);
+
+const GreedyPathIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="4" cy="18" r="2"></circle>
+    <circle cx="20" cy="6" r="2"></circle>
+    <path d="M6 17 L10 14 L14 15 L18 7"></path>
+    <polyline points="15,6 19,6 19,10"></polyline>
+  </svg>
+);
+
 const RulerIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 8c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8z"></path>
@@ -60,6 +84,12 @@ const NeighborsIcon = () => (
     <line x1="12" y1="20" x2="12" y2="22"></line>
     <line x1="20" y1="12" x2="22" y2="12"></line>
     <line x1="2" y1="12" x2="4" y2="12"></line>
+  </svg>
+);
+
+const SpinnerIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="spinner-icon">
+    <path d="M12 2a10 10 0 0 1 10 10"></path>
   </svg>
 );
 
@@ -94,6 +124,10 @@ const Tools = ({
   setIsSearchingAnalogy,
   sliceMode,
   setSliceMode,
+  linearPathMode,
+  setLinearPathMode,
+  greedyPathMode,
+  setGreedyPathMode,
   learnMode,
   setLearnMode,
   setActiveTool,
@@ -102,6 +136,7 @@ const Tools = ({
   const [activeTab, setActiveTab] = useState(null);
   const [showContent, setShowContent] = useState(false);
   const [neighborsActive, setNeighborsActive] = useState(false);
+  const [neighborsLoading, setNeighborsLoading] = useState(false);
   
   // Debug: Check the type of setMidpointClusters
   console.log('Tools component:', {
@@ -113,13 +148,15 @@ const Tools = ({
   const debugSetMidpointClusters = createDebugSetMidpointClusters(setMidpointClusters);
 
   const handleTabClick = (tab) => {
-    console.log(`Tab clicked: ${tab}`, { 
-      currentActiveTab: activeTab, 
-      selectionMode, 
+    console.log(`Tab clicked: ${tab}`, {
+      currentActiveTab: activeTab,
+      selectionMode,
       analogyMode,
-      sliceMode 
+      sliceMode,
+      linearPathMode,
+      greedyPathMode
     });
-    
+
     if (tab === activeTab) {
       // If clicking on tab when already active, toggle appropriate mode
       if (tab === 'analogy') {
@@ -128,6 +165,12 @@ const Tools = ({
       } else if (tab === 'slice') {
         console.log('Toggling slice mode');
         toggleSliceMode();
+      } else if (tab === 'linearPath') {
+        console.log('Toggling linear path mode');
+        toggleLinearPathMode();
+      } else if (tab === 'greedyPath') {
+        console.log('Toggling greedy path mode');
+        toggleGreedyPathMode();
       } else {
         setShowContent(!showContent);
       }
@@ -136,14 +179,14 @@ const Tools = ({
       console.log(`Switching tabs from ${activeTab} to ${tab}`);
       setActiveTab(tab);
       setShowContent(true);
-      
+
       // Cancel selection mode when switching tabs
       if (selectionMode) {
         console.log('Canceling selection mode due to tab switch');
         setSelectionMode(false);
         setSelectedPoints([]);
       }
-      
+
       // Cancel analogy mode when switching away from analogy tab
       if (analogyMode && tab !== 'analogy') {
         console.log('Canceling analogy mode due to tab switch');
@@ -158,7 +201,21 @@ const Tools = ({
         setSliceMode(false);
         setSelectedPoints([]);
       }
-      
+
+      // Cancel linear path mode when switching away from linearPath tab
+      if (linearPathMode && tab !== 'linearPath') {
+        console.log('Canceling linear path mode due to tab switch');
+        setLinearPathMode(false);
+        setSelectedPoints([]);
+      }
+
+      // Cancel greedy path mode when switching away from greedyPath tab
+      if (greedyPathMode && tab !== 'greedyPath') {
+        console.log('Canceling greedy path mode due to tab switch');
+        setGreedyPathMode(false);
+        setSelectedPoints([]);
+      }
+
       // Activate the appropriate mode for the tab
       if (tab === 'analogy' && !analogyMode) {
         console.log('Activating analogy mode on tab switch');
@@ -166,6 +223,12 @@ const Tools = ({
       } else if (tab === 'slice' && !sliceMode) {
         console.log('Activating slice mode on tab switch');
         toggleSliceMode();
+      } else if (tab === 'linearPath' && !linearPathMode) {
+        console.log('Activating linear path mode on tab switch');
+        toggleLinearPathMode();
+      } else if (tab === 'greedyPath' && !greedyPathMode) {
+        console.log('Activating greedy path mode on tab switch');
+        toggleGreedyPathMode();
       }
     }
   };
@@ -183,11 +246,13 @@ const Tools = ({
       console.log('Turning on analogy mode');
       setSelectionMode(false);
       setSliceMode(false);
+      setLinearPathMode(false);
+      setGreedyPathMode(false);
       // Turn on analogy mode
       setAnalogyMode(true);
       setAnalogyStep(0);
       setSelectedPoints([]);
-      
+
       // Log the state immediately after setting
       setTimeout(() => {
         console.log('Analogy mode state after toggle:', {
@@ -210,8 +275,48 @@ const Tools = ({
       console.log('Turning on slice mode');
       setSelectionMode(false);
       setAnalogyMode(false);
+      setLinearPathMode(false);
+      setGreedyPathMode(false);
       // Turn on slice mode
       setSliceMode(true);
+      setSelectedPoints([]);
+    }
+  };
+
+  // Toggle linear path mode
+  const toggleLinearPathMode = () => {
+    if (linearPathMode) {
+      console.log('Turning off linear path mode');
+      setLinearPathMode(false);
+      setSelectedPoints([]);
+    } else {
+      // Ensure other modes are off
+      console.log('Turning on linear path mode');
+      setSelectionMode(false);
+      setAnalogyMode(false);
+      setSliceMode(false);
+      setGreedyPathMode(false);
+      // Turn on linear path mode
+      setLinearPathMode(true);
+      setSelectedPoints([]);
+    }
+  };
+
+  // Toggle greedy path mode
+  const toggleGreedyPathMode = () => {
+    if (greedyPathMode) {
+      console.log('Turning off greedy path mode');
+      setGreedyPathMode(false);
+      setSelectedPoints([]);
+    } else {
+      // Ensure other modes are off
+      console.log('Turning on greedy path mode');
+      setSelectionMode(false);
+      setAnalogyMode(false);
+      setSliceMode(false);
+      setLinearPathMode(false);
+      // Turn on greedy path mode
+      setGreedyPathMode(true);
       setSelectedPoints([]);
     }
   };
@@ -485,6 +590,76 @@ const Tools = ({
     setIsSearchingAnalogy(false);
   };
 
+  // Handle analogy search from inline input (new UX)
+  const handleAnalogySearch = async (word1, word2, word3) => {
+    console.log(`Searching analogy: ${word1} → ${word2} ≈ ${word3} → ?`);
+
+    setIsSearchingAnalogy(true);
+    setLoading(true);
+    setAnalogyStep(3);
+
+    try {
+      const response = await findAnalogy(word1, word2, word3, 5);
+
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      if (!response.data || !response.data.results || response.data.results.length === 0) {
+        throw new Error('No analogy results found.');
+      }
+
+      console.log('Analogy results:', response.data.results);
+
+      // Process the results
+      const analogyResults = response.data.results.map(result => ({
+        word: result.word,
+        score: result.score,
+        isAnalogy: true,
+        analogySource: {
+          from: word3,
+          relation: `${word1}:${word2}::${word3}:${result.word}`
+        }
+      }));
+
+      // Create analogy cluster for visualization
+      const analogyCluster = {
+        type: 'analogy',
+        source: { word1, word2, word3 },
+        words: [
+          { word: word1, isAnalogy: false },
+          { word: word2, isAnalogy: false },
+          { word: word3, isAnalogy: false },
+          ...analogyResults
+        ]
+      };
+
+      // Update visualization
+      debugSetMidpointClusters([analogyCluster]);
+
+      // Move to completed state
+      setAnalogyStep(4);
+
+    } catch (error) {
+      console.error('Error finding analogy:', error);
+
+      let errorMessage = 'Failed to find analogy';
+      if (error.message?.includes('timeout') || error.message?.includes('504')) {
+        errorMessage = 'The server timed out. Please try again later.';
+      } else if (error.message?.includes('No analogy')) {
+        errorMessage = 'No strong analogies found. Try different words.';
+      } else {
+        errorMessage = `Failed to find analogy: ${error.message || 'Unknown error'}`;
+      }
+
+      setError(errorMessage);
+      setAnalogyStep(2);
+    } finally {
+      setLoading(false);
+      setIsSearchingAnalogy(false);
+    }
+  };
+
   // Reset slice selection
   const resetSliceSelection = () => {
     setSelectedPoints([]);
@@ -496,37 +671,164 @@ const Tools = ({
     setSelectedPoints([]);
   };
 
+  // Find linear path for the selected points
+  const findLinearPathForSelectedPoints = async () => {
+    if (selectedPoints.length !== 2) {
+      console.error('Cannot find linear path: need exactly 2 words, got', selectedPoints.length);
+      setError('Please select start and end points first');
+      return;
+    }
+
+    const [word1, word2] = selectedPoints;
+    console.log(`Finding linear path between "${word1}" and "${word2}"`);
+
+    setLoading(true);
+
+    try {
+      console.log('Initiating linear path calculation with parameters:', {
+        word1,
+        word2,
+        numSteps: 10
+      });
+
+      // Call the linear path API
+      const results = await findLinearPath(word1, word2, 10);
+      console.log('Linear path results received:', results);
+
+      // Process the results into visualization format
+      const linearPathCluster = processLinearPathResults(results, word1, word2);
+      console.log('Processed linear path cluster:', linearPathCluster);
+
+      // Update visualization
+      debugSetMidpointClusters([linearPathCluster]);
+
+      // Exit linear path mode
+      setLinearPathMode(false);
+
+    } catch (error) {
+      console.error('Error finding linear path:', error);
+
+      let errorMessage = 'Failed to find linear path';
+      if (error.message.includes('404')) {
+        errorMessage = 'The linear path API endpoint returned a 404 error. The server may need to be restarted.';
+      } else if (error.message.includes('timeout') || error.message.includes('Network Error')) {
+        errorMessage = 'Connection timed out. Please check your network and server status.';
+      } else {
+        errorMessage = `Failed to find linear path: ${error.message}`;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reset linear path selection
+  const resetLinearPathSelection = () => {
+    setSelectedPoints([]);
+  };
+
+  // Cancel linear path selection
+  const cancelLinearPathSelection = () => {
+    setLinearPathMode(false);
+    setSelectedPoints([]);
+  };
+
+  // Find greedy path for the selected points
+  const findGreedyPathForSelectedPoints = async () => {
+    if (selectedPoints.length !== 2) {
+      console.error('Cannot find greedy path: need exactly 2 words, got', selectedPoints.length);
+      setError('Please select start and target points first');
+      return;
+    }
+
+    const [word1, word2] = selectedPoints;
+    console.log(`Finding greedy path from "${word1}" to "${word2}"`);
+
+    setLoading(true);
+
+    try {
+      console.log('Initiating greedy path calculation with parameters:', {
+        word1,
+        word2,
+        maxHops: 20
+      });
+
+      // Call the greedy path API
+      const results = await findGreedyPath(word1, word2, 20);
+      console.log('Greedy path results received:', results);
+
+      // Process the results into visualization format
+      const greedyPathCluster = processGreedyPathResults(results, word1, word2);
+      console.log('Processed greedy path cluster:', greedyPathCluster);
+
+      // Update visualization
+      debugSetMidpointClusters([greedyPathCluster]);
+
+      // Exit greedy path mode
+      setGreedyPathMode(false);
+
+    } catch (error) {
+      console.error('Error finding greedy path:', error);
+
+      let errorMessage = 'Failed to find greedy path';
+      if (error.message.includes('404')) {
+        errorMessage = 'The greedy path API endpoint returned a 404 error. The server may need to be restarted.';
+      } else if (error.message.includes('timeout') || error.message.includes('Network Error')) {
+        errorMessage = 'Connection timed out. Please check your network and server status.';
+      } else {
+        errorMessage = `Failed to find greedy path: ${error.message}`;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reset greedy path selection
+  const resetGreedyPathSelection = () => {
+    setSelectedPoints([]);
+  };
+
+  // Cancel greedy path selection
+  const cancelGreedyPathSelection = () => {
+    setGreedyPathMode(false);
+    setSelectedPoints([]);
+  };
+
   // Handle finding neighbors for all words in the visualization
   const handleNeighborsToggle = async () => {
     // Toggle the state
     const newState = !neighborsActive;
     setNeighborsActive(newState);
-    
+
     if (!newState) {
       // If turning off, clear visualizations
       debugSetMidpointClusters([]);
       return;
     }
-    
+
     // Continue only if turning on
     if (words.length === 0) {
       setError('Please add some words first');
       setNeighborsActive(false); // Revert
       return;
     }
-    
+
+    setNeighborsLoading(true);
     setLoading(true);
-    
+
     try {
       // Find nearest neighbors for each word
       const neighborsClusters = [];
-      
+
       // Process words sequentially to avoid overwhelming the API
       for (const word of words) {
         try {
           console.log(`Finding neighbors for ${word}`);
           const results = await findNeighbors(word, 4); // 4 neighbors per word
-          
+
           if (results && results.nearestWords) {
             const cluster = processNeighborsResults(results, word);
             neighborsClusters.push(cluster);
@@ -536,7 +838,7 @@ const Tools = ({
           // Continue with other words even if one fails
         }
       }
-      
+
       // Update visualization with all clusters
       if (neighborsClusters.length > 0) {
         console.log(`Found neighbors for ${neighborsClusters.length} words`);
@@ -550,6 +852,7 @@ const Tools = ({
       setError(`Failed to find neighbors: ${error.message}`);
       setNeighborsActive(false); // Revert on error
     } finally {
+      setNeighborsLoading(false);
       setLoading(false);
     }
   };
@@ -601,11 +904,12 @@ const Tools = ({
     
     if (analogyMode) {
       return (
-        <AnalogySelection 
+        <AnalogySelection
           selectedPoints={selectedPoints}
           analogyStep={analogyStep}
           onReset={resetAnalogySelection}
           onCancel={cancelAnalogySelection}
+          onSearch={handleAnalogySearch}
           loading={loading || isSearchingAnalogy}
         />
       );
@@ -613,7 +917,7 @@ const Tools = ({
 
     if (sliceMode) {
       return (
-        <SliceSelection 
+        <SliceSelection
           selectedPoints={selectedPoints}
           onReset={resetSliceSelection}
           onCancel={cancelSliceSelection}
@@ -622,7 +926,31 @@ const Tools = ({
         />
       );
     }
-    
+
+    if (linearPathMode) {
+      return (
+        <LinearPathSelection
+          selectedPoints={selectedPoints}
+          onReset={resetLinearPathSelection}
+          onCancel={cancelLinearPathSelection}
+          onCalculate={findLinearPathForSelectedPoints}
+          loading={loading}
+        />
+      );
+    }
+
+    if (greedyPathMode) {
+      return (
+        <GreedyPathSelection
+          selectedPoints={selectedPoints}
+          onReset={resetGreedyPathSelection}
+          onCancel={cancelGreedyPathSelection}
+          onCalculate={findGreedyPathForSelectedPoints}
+          loading={loading}
+        />
+      );
+    }
+
     return null;
   };
 
@@ -657,7 +985,7 @@ const Tools = ({
           </button>
           
           <button
-            className={`icon-button ${neighborsActive ? 'active' : ''}`}
+            className={`icon-button ${neighborsActive ? 'active' : ''} ${neighborsLoading ? 'neighbors-loading' : ''}`}
             onClick={() => {
               handleNeighborsToggle();
               trackToolActivity('Neighbors');
@@ -666,8 +994,8 @@ const Tools = ({
             onMouseEnter={(e) => createToolbarTooltip('Neighbors', e)}
             onMouseLeave={() => removeToolbarTooltip()}
           >
-            <NeighborsIcon />
-            <span>Neighbors</span>
+            {neighborsLoading ? <SpinnerIcon /> : <NeighborsIcon />}
+            <span>{neighborsLoading ? 'Searching...' : 'Neighbors'}</span>
           </button>
           
           <button
@@ -681,7 +1009,7 @@ const Tools = ({
             onMouseLeave={() => removeToolbarTooltip()}
           >
             <AnalogyIcon />
-            <span>{analogyMode ? `Analogy (Step ${analogyStep + 1})` : "Analogy"}</span>
+            <span>Analogy</span>
           </button>
 
           <button
@@ -690,14 +1018,42 @@ const Tools = ({
               handleTabClick('slice');
               trackToolActivity('Slice');
             }}
-            disabled={loading || selectionMode || analogyMode}
+            disabled={loading || selectionMode || analogyMode || linearPathMode || greedyPathMode}
             onMouseEnter={(e) => createToolbarTooltip('Slice', e)}
             onMouseLeave={() => removeToolbarTooltip()}
           >
             <SliceIcon />
             <span>{sliceMode ? `Slice (${selectedPoints.length}/2)` : "Slice"}</span>
           </button>
-          
+
+          <button
+            className={`icon-button ${activeTab === 'linearPath' ? 'active' : ''} ${linearPathMode ? 'linear-path-active' : ''}`}
+            onClick={() => {
+              handleTabClick('linearPath');
+              trackToolActivity('Linear Path');
+            }}
+            disabled={loading || selectionMode || analogyMode || sliceMode || greedyPathMode}
+            onMouseEnter={(e) => createToolbarTooltip('Linear Path', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
+          >
+            <LinearPathIcon />
+            <span>{linearPathMode ? `Linear (${selectedPoints.length}/2)` : "Linear"}</span>
+          </button>
+
+          <button
+            className={`icon-button ${activeTab === 'greedyPath' ? 'active' : ''} ${greedyPathMode ? 'greedy-path-active' : ''}`}
+            onClick={() => {
+              handleTabClick('greedyPath');
+              trackToolActivity('Greedy Path');
+            }}
+            disabled={loading || selectionMode || analogyMode || sliceMode || linearPathMode}
+            onMouseEnter={(e) => createToolbarTooltip('Greedy Path', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
+          >
+            <GreedyPathIcon />
+            <span>{greedyPathMode ? `Greedy (${selectedPoints.length}/2)` : "Greedy"}</span>
+          </button>
+
           <div className="spacer"></div>
           
           <button 
@@ -824,11 +1180,39 @@ const Tools = ({
           box-shadow: inset 0 -2px 0 #8E44AD;
           animation: pulse 1.5s infinite;
         }
+
+        .icon-button.linear-path-active {
+          background: rgba(33, 150, 243, 0.15);
+          color: #2196F3;
+          box-shadow: inset 0 -2px 0 #2196F3;
+          animation: pulse 1.5s infinite;
+        }
+
+        .icon-button.greedy-path-active {
+          background: rgba(76, 175, 80, 0.15);
+          color: #4CAF50;
+          box-shadow: inset 0 -2px 0 #4CAF50;
+          animation: pulse 1.5s infinite;
+        }
         
         @keyframes pulse {
           0% { opacity: 0.8; }
           50% { opacity: 1; }
           100% { opacity: 0.8; }
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        .spinner-icon {
+          animation: spin 1s linear infinite;
+        }
+
+        .icon-button.neighbors-loading {
+          background: rgba(66, 133, 244, 0.1);
+          color: #4285F4;
         }
         
         .icon-button:disabled {

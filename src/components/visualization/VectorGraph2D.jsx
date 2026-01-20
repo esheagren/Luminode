@@ -275,15 +275,17 @@ const VectorGraph2D = ({
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fillStyle = getPointColor(
-        point.word, 
-        words, 
-        isPrimary, 
-        isContextSample, 
+        point.word,
+        words,
+        isPrimary,
+        isContextSample,
         isAnalogy,
         point.isSlice,
         point.isMainPoint,
         point.isEndpoint,
-        point.sliceLevel
+        point.sliceLevel,
+        point.isLinearPath,
+        point.isGreedyPath
       );
       ctx.fill();
       
@@ -312,6 +314,12 @@ const VectorGraph2D = ({
 
     // Draw slice progression lines if slice points exist
     drawSliceLines(ctx, pointsRef.current);
+
+    // Draw linear path lines if linear path points exist
+    drawLinearPathLines(ctx, pointsRef.current);
+
+    // Draw greedy path lines if greedy path points exist
+    drawGreedyPathLines(ctx, pointsRef.current);
 
     // Draw analogy selection lines if in analogy mode
     if (analogyMode && selectedPoints.length > 0) {
@@ -779,6 +787,177 @@ const VectorGraph2D = ({
       );
       ctx.closePath();
       ctx.fillStyle = '#9B59B6';
+      ctx.fill();
+    }
+  };
+
+  // Function to draw linear path lines - straight line through evenly spaced points
+  const drawLinearPathLines = (ctx, points) => {
+    // Find all linear path points
+    const linearPathPoints = points.filter(point => point.isLinearPath);
+
+    // If there are not enough points for a path, return
+    if (linearPathPoints.length < 2) return;
+
+    // Sort by pathIndex
+    linearPathPoints.sort((a, b) => a.pathIndex - b.pathIndex);
+
+    // Start drawing the path
+    ctx.beginPath();
+    ctx.moveTo(linearPathPoints[0].x, linearPathPoints[0].y);
+
+    // Create gradient path
+    const startPoint = linearPathPoints[0];
+    const endPoint = linearPathPoints[linearPathPoints.length - 1];
+
+    const gradient = ctx.createLinearGradient(
+      startPoint.x, startPoint.y,
+      endPoint.x, endPoint.y
+    );
+    gradient.addColorStop(0, '#2196F3');    // Start with deep blue
+    gradient.addColorStop(1, '#64B5F6');    // End with light blue
+
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 2;
+
+    // Draw lines through all points in sorted order
+    for (let i = 1; i < linearPathPoints.length; i++) {
+      ctx.lineTo(linearPathPoints[i].x, linearPathPoints[i].y);
+    }
+
+    // Render the complete path
+    ctx.stroke();
+
+    // Add direction arrows along the path segments
+    for (let i = 1; i < linearPathPoints.length; i++) {
+      const start = linearPathPoints[i - 1];
+      const end = linearPathPoints[i];
+
+      // Calculate direction vector
+      const dirX = end.x - start.x;
+      const dirY = end.y - start.y;
+      const length = Math.sqrt(dirX * dirX + dirY * dirY);
+
+      if (length < 20) continue; // Skip arrows for short segments
+
+      // Normalize direction vector
+      const normDirX = dirX / length;
+      const normDirY = dirY / length;
+
+      // Calculate position 70% along the line
+      const arrowX = start.x + normDirX * length * 0.7;
+      const arrowY = start.y + normDirY * length * 0.7;
+
+      // Draw arrow
+      const arrowSize = 5;
+      ctx.beginPath();
+      ctx.moveTo(arrowX, arrowY);
+      ctx.lineTo(
+        arrowX - arrowSize * (normDirX + normDirY * 0.5),
+        arrowY - arrowSize * (normDirY - normDirX * 0.5)
+      );
+      ctx.lineTo(
+        arrowX - arrowSize * (normDirX - normDirY * 0.5),
+        arrowY - arrowSize * (normDirY + normDirX * 0.5)
+      );
+      ctx.closePath();
+      ctx.fillStyle = '#64B5F6';
+      ctx.fill();
+    }
+  };
+
+  // Function to draw greedy path lines - curved/stepped line through hops
+  const drawGreedyPathLines = (ctx, points) => {
+    // Find all greedy path points
+    const greedyPathPoints = points.filter(point => point.isGreedyPath);
+
+    // If there are not enough points for a path, return
+    if (greedyPathPoints.length < 2) return;
+
+    // Sort by pathIndex (hop order)
+    greedyPathPoints.sort((a, b) => a.pathIndex - b.pathIndex);
+
+    // Start drawing the path
+    ctx.beginPath();
+    ctx.moveTo(greedyPathPoints[0].x, greedyPathPoints[0].y);
+
+    // Create gradient path
+    const startPoint = greedyPathPoints[0];
+    const endPoint = greedyPathPoints[greedyPathPoints.length - 1];
+
+    const gradient = ctx.createLinearGradient(
+      startPoint.x, startPoint.y,
+      endPoint.x, endPoint.y
+    );
+    gradient.addColorStop(0, '#4CAF50');    // Start with deep green
+    gradient.addColorStop(1, '#81C784');    // End with light green
+
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 2;
+
+    // Draw curved lines through all points using quadratic curves for smoother appearance
+    if (greedyPathPoints.length === 2) {
+      // Just two points - draw straight line
+      ctx.lineTo(greedyPathPoints[1].x, greedyPathPoints[1].y);
+    } else {
+      // Multiple points - use curves
+      for (let i = 1; i < greedyPathPoints.length - 1; i++) {
+        const current = greedyPathPoints[i];
+        const next = greedyPathPoints[i + 1];
+
+        // Calculate control point for quadratic curve
+        const cpX = current.x;
+        const cpY = current.y;
+
+        // Calculate midpoint for smoother curves
+        const midX = (current.x + next.x) / 2;
+        const midY = (current.y + next.y) / 2;
+
+        ctx.quadraticCurveTo(cpX, cpY, midX, midY);
+      }
+
+      // Draw final segment to the last point
+      const lastPoint = greedyPathPoints[greedyPathPoints.length - 1];
+      ctx.lineTo(lastPoint.x, lastPoint.y);
+    }
+
+    // Render the complete path
+    ctx.stroke();
+
+    // Add direction arrows along the path segments
+    for (let i = 1; i < greedyPathPoints.length; i++) {
+      const start = greedyPathPoints[i - 1];
+      const end = greedyPathPoints[i];
+
+      // Calculate direction vector
+      const dirX = end.x - start.x;
+      const dirY = end.y - start.y;
+      const length = Math.sqrt(dirX * dirX + dirY * dirY);
+
+      if (length < 20) continue; // Skip arrows for short segments
+
+      // Normalize direction vector
+      const normDirX = dirX / length;
+      const normDirY = dirY / length;
+
+      // Calculate position 70% along the line
+      const arrowX = start.x + normDirX * length * 0.7;
+      const arrowY = start.y + normDirY * length * 0.7;
+
+      // Draw arrow
+      const arrowSize = 5;
+      ctx.beginPath();
+      ctx.moveTo(arrowX, arrowY);
+      ctx.lineTo(
+        arrowX - arrowSize * (normDirX + normDirY * 0.5),
+        arrowY - arrowSize * (normDirY - normDirX * 0.5)
+      );
+      ctx.lineTo(
+        arrowX - arrowSize * (normDirX - normDirY * 0.5),
+        arrowY - arrowSize * (normDirY + normDirX * 0.5)
+      );
+      ctx.closePath();
+      ctx.fillStyle = '#81C784';
       ctx.fill();
     }
   };

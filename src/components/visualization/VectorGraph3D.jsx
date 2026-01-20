@@ -19,6 +19,8 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
   const pointsRef = useRef([]);
   const rulerLinesRef = useRef([]);
   const analogyLinesRef = useRef([]);
+  const linearPathLinesRef = useRef([]);
+  const greedyPathLinesRef = useRef([]);
   const [pinnedPoint, setPinnedPoint] = useState(null);
   const raycasterRef = useRef(null);
   const mouseRef = useRef(new THREE.Vector2());
@@ -77,8 +79,10 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       if (rulerActive) {
         addRulerLines();
       }
-      
+
       addAnalogyLines();
+      addLinearPathLines();
+      addGreedyPathLines();
     }
     
     // Clean up 3D scene when component unmounts
@@ -118,6 +122,26 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
           if (line.parent) line.parent.remove(line);
         });
         analogyLinesRef.current = [];
+      }
+
+      // Clean up linear path lines
+      if (linearPathLinesRef.current.length > 0) {
+        linearPathLinesRef.current.forEach(line => {
+          if (line.geometry) line.geometry.dispose();
+          if (line.material) line.material.dispose();
+          if (line.parent) line.parent.remove(line);
+        });
+        linearPathLinesRef.current = [];
+      }
+
+      // Clean up greedy path lines
+      if (greedyPathLinesRef.current.length > 0) {
+        greedyPathLinesRef.current.forEach(line => {
+          if (line.geometry) line.geometry.dispose();
+          if (line.material) line.material.dispose();
+          if (line.parent) line.parent.remove(line);
+        });
+        greedyPathLinesRef.current = [];
       }
     };
   }, [coordinates, words, rulerActive]);
@@ -278,15 +302,17 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       const isAnalogy = point.isAnalogy === true;
       
       const colorHex = getPointColor(
-        point.word, 
-        words, 
-        isPrimaryWord, 
-        isContextSample, 
+        point.word,
+        words,
+        isPrimaryWord,
+        isContextSample,
         isAnalogy,
         point.isSlice,
         point.isMainPoint,
         point.isEndpoint,
-        point.sliceLevel
+        point.sliceLevel,
+        point.isLinearPath,
+        point.isGreedyPath
       );
       const color = hexToThreeColor(colorHex);
       
@@ -827,6 +853,126 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     }
   };
   
+  // Add linear path lines
+  const addLinearPathLines = () => {
+    if (!sceneRef.current || coordinates.length === 0) return;
+
+    // Clean up existing linear path lines
+    linearPathLinesRef.current.forEach(line => {
+      if (line.parent) line.parent.remove(line);
+      if (line.geometry) line.geometry.dispose();
+      if (line.material) line.material.dispose();
+    });
+    linearPathLinesRef.current = [];
+
+    // Find linear path points
+    const linearPathPoints = coordinates.filter(point => point.isLinearPath);
+
+    if (linearPathPoints.length < 2) return;
+
+    // Sort by pathIndex
+    linearPathPoints.sort((a, b) => a.pathIndex - b.pathIndex);
+
+    // Find min/max values to normalize coordinates
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+
+    coordinates.forEach(point => {
+      minX = Math.min(minX, point.x);
+      maxX = Math.max(maxX, point.x);
+      minY = Math.min(minY, point.y);
+      maxY = Math.max(maxY, point.y);
+      minZ = Math.min(minZ, point.z || 0);
+      maxZ = Math.max(maxZ, point.z || 0);
+    });
+
+    const rangeX = maxX - minX || 1;
+    const rangeY = maxY - minY || 1;
+    const rangeZ = maxZ - minZ || 1;
+    const scale = 2.5;
+
+    // Create path geometry
+    const pathVertices = linearPathPoints.map(point => {
+      const normalizedX = ((point.x - minX) / rangeX * 2 - 1) * scale;
+      const normalizedY = ((point.y - minY) / rangeY * 2 - 1) * scale;
+      const normalizedZ = ((point.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+      return new THREE.Vector3(normalizedX, normalizedY, normalizedZ);
+    });
+
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(pathVertices);
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x2196F3, // Blue for linear path
+      linewidth: 2,
+      opacity: 0.8,
+      transparent: true
+    });
+
+    const line = new THREE.Line(lineGeometry, lineMaterial);
+    sceneRef.current.add(line);
+    linearPathLinesRef.current.push(line);
+  };
+
+  // Add greedy path lines
+  const addGreedyPathLines = () => {
+    if (!sceneRef.current || coordinates.length === 0) return;
+
+    // Clean up existing greedy path lines
+    greedyPathLinesRef.current.forEach(line => {
+      if (line.parent) line.parent.remove(line);
+      if (line.geometry) line.geometry.dispose();
+      if (line.material) line.material.dispose();
+    });
+    greedyPathLinesRef.current = [];
+
+    // Find greedy path points
+    const greedyPathPoints = coordinates.filter(point => point.isGreedyPath);
+
+    if (greedyPathPoints.length < 2) return;
+
+    // Sort by pathIndex
+    greedyPathPoints.sort((a, b) => a.pathIndex - b.pathIndex);
+
+    // Find min/max values to normalize coordinates
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    let minZ = Infinity, maxZ = -Infinity;
+
+    coordinates.forEach(point => {
+      minX = Math.min(minX, point.x);
+      maxX = Math.max(maxX, point.x);
+      minY = Math.min(minY, point.y);
+      maxY = Math.max(maxY, point.y);
+      minZ = Math.min(minZ, point.z || 0);
+      maxZ = Math.max(maxZ, point.z || 0);
+    });
+
+    const rangeX = maxX - minX || 1;
+    const rangeY = maxY - minY || 1;
+    const rangeZ = maxZ - minZ || 1;
+    const scale = 2.5;
+
+    // Create path geometry
+    const pathVertices = greedyPathPoints.map(point => {
+      const normalizedX = ((point.x - minX) / rangeX * 2 - 1) * scale;
+      const normalizedY = ((point.y - minY) / rangeY * 2 - 1) * scale;
+      const normalizedZ = ((point.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+      return new THREE.Vector3(normalizedX, normalizedY, normalizedZ);
+    });
+
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(pathVertices);
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x4CAF50, // Green for greedy path
+      linewidth: 2,
+      opacity: 0.8,
+      transparent: true
+    });
+
+    const line = new THREE.Line(lineGeometry, lineMaterial);
+    sceneRef.current.add(line);
+    greedyPathLinesRef.current.push(line);
+  };
+
   return (
     <>
       <canvas ref={canvasRef} className="vector-canvas" />

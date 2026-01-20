@@ -3,7 +3,25 @@ import * as THREE from 'three';
 // Utility functions for vector visualizations
 
 // Get color for a point based on whether it's primary or not
-export const getPointColor = (word, words, isPrimary, isContextSample, isAnalogy, isSlice, isMainPoint, isEndpoint, sliceLevel) => {
+export const getPointColor = (word, words, isPrimary, isContextSample, isAnalogy, isSlice, isMainPoint, isEndpoint, sliceLevel, isLinearPath, isGreedyPath) => {
+  // Linear path points get blue coloring
+  if (isLinearPath) {
+    if (isEndpoint) {
+      return '#2196F3'; // Deep blue for endpoints
+    } else {
+      return '#64B5F6'; // Light blue for intermediate points
+    }
+  }
+
+  // Greedy path points get green coloring
+  if (isGreedyPath) {
+    if (isEndpoint) {
+      return '#4CAF50'; // Deep green for endpoints
+    } else {
+      return '#81C784'; // Light green for intermediate points
+    }
+  }
+
   // Slice points get special coloring
   if (isSlice) {
     if (isEndpoint) {

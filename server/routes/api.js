@@ -366,6 +366,94 @@ router.post('/findSlice', async (req, res) => {
   }
 });
 
+// Endpoint to find linear interpolation path between two words
+router.post('/findLinearPath', async (req, res) => {
+  console.log(`[API /findLinearPath] Received request`);
+  try {
+    const { word1, word2 } = req.body;
+    // Validate and clamp numSteps to prevent resource exhaustion
+    const numSteps = Math.max(1, Math.min(req.body.numSteps || 10, 100));
+
+    console.log(`[API /findLinearPath] Body:`, { word1, word2, numSteps });
+
+    // Validate input
+    if (!word1 || !word2) {
+      console.warn('[API /findLinearPath] Validation failed: Both words required.');
+      return res.status(400).json({ error: 'Both words are required' });
+    }
+
+    // Check if words exist
+    console.log(`[API /findLinearPath] Checking existence for: ${word1}, ${word2}`);
+    const word1Exists = await vectorService.wordExists(word1);
+    const word2Exists = await vectorService.wordExists(word2);
+    console.log(`[API /findLinearPath] Existence results: ${word1}=${word1Exists}, ${word2}=${word2Exists}`);
+
+    if (!word1Exists || !word2Exists) {
+      const message = generateResponseMessage(word1, word2, word1Exists, word2Exists);
+      console.warn(`[API /findLinearPath] Word not found: ${message}`);
+      return res.status(404).json({ error: message });
+    }
+
+    // Calculate linear path
+    console.log(`[API /findLinearPath] Calling vectorService.findLinearPath`);
+    const linearPathResults = await vectorService.findLinearPath(word1, word2, numSteps);
+    console.log(`[API /findLinearPath] Path points count: ${linearPathResults.pathPoints?.length}`);
+
+    res.json({
+      message: 'Linear path calculation completed successfully',
+      data: linearPathResults
+    });
+
+  } catch (error) {
+    console.error('[API /findLinearPath] Error:', error);
+    res.status(500).json({ error: 'Failed to find linear path: ' + error.message });
+  }
+});
+
+// Endpoint to find greedy path between two words
+router.post('/findGreedyPath', async (req, res) => {
+  console.log(`[API /findGreedyPath] Received request`);
+  try {
+    const { word1, word2 } = req.body;
+    // Validate and clamp maxHops to prevent resource exhaustion
+    const maxHops = Math.max(1, Math.min(req.body.maxHops || 20, 50));
+
+    console.log(`[API /findGreedyPath] Body:`, { word1, word2, maxHops });
+
+    // Validate input
+    if (!word1 || !word2) {
+      console.warn('[API /findGreedyPath] Validation failed: Both words required.');
+      return res.status(400).json({ error: 'Both words are required' });
+    }
+
+    // Check if words exist
+    console.log(`[API /findGreedyPath] Checking existence for: ${word1}, ${word2}`);
+    const word1Exists = await vectorService.wordExists(word1);
+    const word2Exists = await vectorService.wordExists(word2);
+    console.log(`[API /findGreedyPath] Existence results: ${word1}=${word1Exists}, ${word2}=${word2Exists}`);
+
+    if (!word1Exists || !word2Exists) {
+      const message = generateResponseMessage(word1, word2, word1Exists, word2Exists);
+      console.warn(`[API /findGreedyPath] Word not found: ${message}`);
+      return res.status(404).json({ error: message });
+    }
+
+    // Calculate greedy path
+    console.log(`[API /findGreedyPath] Calling vectorService.findGreedyPath`);
+    const greedyPathResults = await vectorService.findGreedyPath(word1, word2, maxHops);
+    console.log(`[API /findGreedyPath] Path points count: ${greedyPathResults.pathPoints?.length}`);
+
+    res.json({
+      message: 'Greedy path calculation completed successfully',
+      data: greedyPathResults
+    });
+
+  } catch (error) {
+    console.error('[API /findGreedyPath] Error:', error);
+    res.status(500).json({ error: 'Failed to find greedy path: ' + error.message });
+  }
+});
+
 // Helper function to generate appropriate response message
 function generateResponseMessage(word1, word2, word1Exists, word2Exists) {
   if (!word1Exists && !word2Exists) {

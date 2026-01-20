@@ -38,6 +38,8 @@ const HomePage = () => {
   const [analogyStep, setAnalogyStep] = useState(0);
   const [isSearchingAnalogy, setIsSearchingAnalogy] = useState(false);
   const [sliceMode, setSliceMode] = useState(false);
+  const [linearPathMode, setLinearPathMode] = useState(false);
+  const [greedyPathMode, setGreedyPathMode] = useState(false);
   const [learnMode, setLearnMode] = useState(false);
   const [activeTool, setActiveTool] = useState('Vector Embeddings');
   const [showIntroModal, setShowIntroModal] = useState(false);
@@ -130,17 +132,19 @@ const HomePage = () => {
   
   // Handle point selection from the graph
   const handlePointSelected = (word) => {
-    if (!selectionMode && !analogyMode && !sliceMode) {
-      console.log('Point selection ignored - not in selection, analogy, or slice mode:', word);
+    if (!selectionMode && !analogyMode && !sliceMode && !linearPathMode && !greedyPathMode) {
+      console.log('Point selection ignored - not in any selection mode:', word);
       return;
     }
-    
-    console.log('Point selected:', word, { 
-      analogyMode, 
+
+    console.log('Point selected:', word, {
+      analogyMode,
       selectionMode,
       sliceMode,
+      linearPathMode,
+      greedyPathMode,
       analogyStep,
-      currentSelectedPoints: selectedPoints 
+      currentSelectedPoints: selectedPoints
     });
     
     if (analogyMode) {
@@ -177,11 +181,11 @@ const HomePage = () => {
       return;
     }
     
-    if (selectionMode || sliceMode) {
+    if (selectionMode || sliceMode || linearPathMode || greedyPathMode) {
       // Clear any previous errors
       if (error) setError(null);
-      
-      // Midpoint or Slice selection logic - they work the same way
+
+      // Midpoint, Slice, Linear Path, or Greedy Path selection logic - they work the same way
       if (selectedPoints.includes(word)) {
         setSelectedPoints(selectedPoints.filter(p => p !== word));
       } else if (selectedPoints.length < 2) {
@@ -199,45 +203,87 @@ const HomePage = () => {
     if (!active) {
       setSelectedPoints([]);
     }
-    
+
     // Ensure other modes are off when selection mode is on
     if (active) {
       setAnalogyMode(false);
       setAnalogyStep(0);
       setSliceMode(false);
+      setLinearPathMode(false);
+      setGreedyPathMode(false);
     }
   };
-  
+
   // Set analogy mode
   const setAnalogySelectionMode = (active, step = 0) => {
     setAnalogyMode(active);
     setAnalogyStep(step);
-    
+
     if (!active) {
       setSelectedPoints([]);
       setIsSearchingAnalogy(false);
     }
-    
+
     // Ensure other modes are off when analogy mode is on
     if (active) {
       setSelectionMode(false);
       setSliceMode(false);
+      setLinearPathMode(false);
+      setGreedyPathMode(false);
     }
   };
   
   // Set slice mode
   const setSliceSelectionMode = (active) => {
     setSliceMode(active);
-    
+
     if (!active) {
       setSelectedPoints([]);
     }
-    
+
     // Ensure other modes are off when slice mode is on
     if (active) {
       setSelectionMode(false);
       setAnalogyMode(false);
       setAnalogyStep(0);
+      setLinearPathMode(false);
+      setGreedyPathMode(false);
+    }
+  };
+
+  // Set linear path mode
+  const setLinearPathSelectionMode = (active) => {
+    setLinearPathMode(active);
+
+    if (!active) {
+      setSelectedPoints([]);
+    }
+
+    // Ensure other modes are off when linear path mode is on
+    if (active) {
+      setSelectionMode(false);
+      setAnalogyMode(false);
+      setAnalogyStep(0);
+      setSliceMode(false);
+      setGreedyPathMode(false);
+    }
+  };
+
+  // Set greedy path mode
+  const setGreedyPathSelectionMode = (active) => {
+    setGreedyPathMode(active);
+
+    if (!active) {
+      setSelectedPoints([]);
+    }
+
+    // Ensure other modes are off when greedy path mode is on
+    if (active) {
+      setSelectionMode(false);
+      setAnalogyMode(false);
+      setAnalogyStep(0);
+      setSliceMode(false);
+      setLinearPathMode(false);
     }
   };
   
@@ -283,7 +329,19 @@ const HomePage = () => {
       setSliceMode(false);
       setSelectedPoints([]);
     }
-    
+
+    // Reset linear path mode
+    if (linearPathMode) {
+      setLinearPathMode(false);
+      setSelectedPoints([]);
+    }
+
+    // Reset greedy path mode
+    if (greedyPathMode) {
+      setGreedyPathMode(false);
+      setSelectedPoints([]);
+    }
+
     // Clear any errors
     setError(null);
   };
@@ -301,7 +359,7 @@ const HomePage = () => {
             viewMode={viewMode}
             setViewMode={setViewMode}
             rulerActive={rulerActive}
-            selectionMode={selectionMode || sliceMode}
+            selectionMode={selectionMode || sliceMode || linearPathMode || greedyPathMode}
             onPointSelected={handlePointSelected}
             selectedPoints={selectedPoints}
             analogyMode={analogyMode}
@@ -394,6 +452,10 @@ const HomePage = () => {
             setIsSearchingAnalogy={setSearchingAnalogy}
             sliceMode={sliceMode}
             setSliceMode={setSliceSelectionMode}
+            linearPathMode={linearPathMode}
+            setLinearPathMode={setLinearPathSelectionMode}
+            greedyPathMode={greedyPathMode}
+            setGreedyPathMode={setGreedyPathSelectionMode}
             learnMode={learnMode}
             setLearnMode={setLearnMode}
             setActiveTool={setActiveTool}
@@ -823,6 +885,10 @@ const HomePage = () => {
               setIsSearchingAnalogy={setSearchingAnalogy}
               sliceMode={sliceMode}
               setSliceMode={setSliceSelectionMode}
+              linearPathMode={linearPathMode}
+              setLinearPathMode={setLinearPathSelectionMode}
+              greedyPathMode={greedyPathMode}
+              setGreedyPathMode={setGreedyPathSelectionMode}
               learnMode={learnMode}
               setLearnMode={setLearnMode}
               setActiveTool={setActiveTool}
@@ -838,7 +904,7 @@ const HomePage = () => {
                 viewMode={viewMode}
                 setViewMode={setViewMode}
                 rulerActive={rulerActive}
-                selectionMode={selectionMode || sliceMode} // Treat slice mode similar to selection mode
+                selectionMode={selectionMode || sliceMode || linearPathMode || greedyPathMode} // Treat slice mode similar to selection mode
                 onPointSelected={handlePointSelected}
                 selectedPoints={selectedPoints}
                 analogyMode={analogyMode}
