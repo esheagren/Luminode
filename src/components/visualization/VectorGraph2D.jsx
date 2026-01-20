@@ -4,10 +4,10 @@ import { getPointColor, calculateCosineSimilarity, formatSimilarity } from './Ve
 import SimpleLoadingAnimation from './SimpleLoadingAnimation';
 import drawAnalogyProjection from './AnalogyProjection';
 
-const VectorGraph2D = ({ 
-  coordinates, 
-  words, 
-  containerRef, 
+const VectorGraph2D = ({
+  coordinates,
+  words,
+  containerRef,
   rulerActive,
   selectionMode = false,
   onPointSelected = null,
@@ -20,6 +20,18 @@ const VectorGraph2D = ({
   const pointsRef = useRef([]);
   const [isLoading, setIsLoading] = useState(true);
   const animationFrameRef = useRef(null);
+  const touchStartRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 480 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Cancel animation frame on unmount
   useEffect(() => {
@@ -166,7 +178,7 @@ const VectorGraph2D = ({
     return () => {
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [coordinates, containerRef, rulerActive, selectedPoints, selectionMode, analogyMode, analogyStep, isSearchingAnalogy]);
+  }, [coordinates, containerRef, rulerActive, selectedPoints, selectionMode, analogyMode, analogyStep, isSearchingAnalogy, isMobile]);
   
   const drawVisualization = (coordsToRender = coordinates) => {
     if (!coordsToRender.length || !canvasRef.current) {
@@ -228,15 +240,17 @@ const VectorGraph2D = ({
       }
       
       // Determine radius based on point type
+      // Increase radius by 1.3x on mobile for easier touch selection
+      const mobileMultiplier = isMobile ? 1.3 : 1;
       let radius;
       if (isPrimary) {
-        radius = 8; // Primary words (user input)
+        radius = 8 * mobileMultiplier; // Primary words (user input)
       } else if (isAnalogy) {
-        radius = 7; // Analogy results (slightly larger than related)
+        radius = 7 * mobileMultiplier; // Analogy results (slightly larger than related)
       } else if (isContextSample) {
-        radius = 3; // Context sample words (smaller)
+        radius = 3 * mobileMultiplier; // Context sample words (smaller)
       } else {
-        radius = 5; // Related words
+        radius = 5 * mobileMultiplier; // Related words
       }
       
       // Store point info for interaction
@@ -935,7 +949,83 @@ const VectorGraph2D = ({
       console.log('Click did not hit any point');
     }
   };
-  
+
+  // Handle touch start for mobile
+  const handleTouchStart = (e) => {
+    if (!canvasRef.current) return;
+
+    const touch = e.touches[0];
+    const rect = canvasRef.current.getBoundingClientRect();
+    touchStartRef.current = {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+      time: Date.now()
+    };
+  };
+
+  // Handle touch end for mobile tap detection
+  const handleTouchEnd = (e) => {
+    if (!touchStartRef.current || !canvasRef.current || !pointsRef.current.length) {
+      touchStartRef.current = null;
+      return;
+    }
+
+    const touch = e.changedTouches[0];
+    const rect = canvasRef.current.getBoundingClientRect();
+    const touchEnd = {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+      time: Date.now()
+    };
+
+    // Calculate if this was a tap (short duration and small movement)
+    const dx = touchEnd.x - touchStartRef.current.x;
+    const dy = touchEnd.y - touchStartRef.current.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const duration = touchEnd.time - touchStartRef.current.time;
+
+    // If movement is less than 10px and duration less than 300ms, it's a tap
+    if (distance < 10 && duration < 300) {
+      // Prevent default to avoid scroll/zoom in selection modes
+      if (selectionMode || analogyMode) {
+        e.preventDefault();
+      }
+
+      // Check if in selection or analogy mode
+      if ((selectionMode || analogyMode) && onPointSelected) {
+        // Check if tap is over any point
+        for (const point of pointsRef.current) {
+          const pointDistance = Math.sqrt(
+            Math.pow(touchEnd.x - point.x, 2) + Math.pow(touchEnd.y - point.y, 2)
+          );
+
+          // Increase hit area for touch (add 10px to radius)
+          if (pointDistance <= point.radius + 10) {
+            console.log('Touch selected point:', point.word);
+            onPointSelected(point.word);
+            break;
+          }
+        }
+      } else {
+        // Show tooltip on tap when not in selection mode
+        for (const point of pointsRef.current) {
+          const pointDistance = Math.sqrt(
+            Math.pow(touchEnd.x - point.x, 2) + Math.pow(touchEnd.y - point.y, 2)
+          );
+
+          if (pointDistance <= point.radius + 10) {
+            createTooltip(point, { clientX: touch.clientX, clientY: touch.clientY });
+            // Hide tooltip after 3 seconds
+            setTimeout(() => removeTooltip(), 3000);
+            break;
+          }
+        }
+      }
+    }
+
+    touchStartRef.current = null;
+  };
+
   return (
     <>
       {isLoading ? (
@@ -944,12 +1034,14 @@ const VectorGraph2D = ({
           height={containerRef.current?.clientHeight || 600} 
         />
       ) : (
-        <canvas 
-          ref={canvasRef} 
+        <canvas
+          ref={canvasRef}
           className="vector-canvas"
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onClick={handleClick}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         />
       )}
     </>

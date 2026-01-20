@@ -107,6 +107,45 @@ const MidpointSelection = ({
         .calculate-btn {
           font-weight: bold;
         }
+
+        /* Mobile responsive */
+        @media (max-width: 480px) {
+          .toolbar-inner {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .selected-points {
+            width: 100%;
+          }
+
+          .point-list {
+            flex-wrap: wrap;
+            justify-content: center;
+          }
+
+          .no-points,
+          .point-instruction {
+            font-size: 0.85rem;
+            text-align: center;
+          }
+
+          .selection-actions {
+            width: 100%;
+            justify-content: center;
+            margin-left: 0;
+          }
+
+          .search-btn {
+            min-height: 44px;
+            padding: 0.5rem 1rem;
+          }
+
+          .calculate-btn {
+            margin-left: 0 !important;
+            margin-top: 0.5rem;
+          }
+        }
       `}</style>
     </div>
   );

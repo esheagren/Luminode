@@ -112,6 +112,90 @@ const LearnPanel = ({ activeTool, onClose }) => {
           color: #FF9D42;
           font-weight: 600;
         }
+
+        /* Tablet responsive */
+        @media (max-width: 768px) {
+          .learn-panel {
+            padding: 1rem;
+            border-radius: 8px;
+          }
+
+          .learn-panel h2 {
+            font-size: 1.1rem;
+          }
+
+          .learn-panel-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+          }
+
+          .close-button {
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+        }
+
+        /* Mobile - full screen modal */
+        @media (max-width: 480px) {
+          .learn-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            max-height: 100vh;
+            border-radius: 0;
+            z-index: 1000;
+            padding: 1rem;
+            padding-top: 0.75rem;
+          }
+
+          .learn-panel-header {
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            position: sticky;
+            top: 0;
+            background-color: #0f0f10;
+            z-index: 1;
+          }
+
+          .learn-panel h2 {
+            font-size: 1rem;
+          }
+
+          .close-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            min-width: 44px;
+            min-height: 44px;
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+          }
+
+          .learn-panel-content {
+            font-size: 0.9rem;
+            line-height: 1.65;
+            padding-right: 0.25rem;
+            padding-bottom: 2rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .learn-panel-content p {
+            margin: 1rem 0;
+            text-align: left;
+          }
+        }
       `}</style>
     </div>
   );

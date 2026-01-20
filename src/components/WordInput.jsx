@@ -238,7 +238,53 @@ const WordInput = ({
         @media (max-width: 768px) {
           input {
             padding: 0.6rem 0.8rem;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+          }
+
+          .word-tag {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.85rem;
+          }
+        }
+
+        /* Mobile touch-friendly styles */
+        @media (max-width: 480px) {
+          .word-input-container {
+            width: 100%;
+          }
+
+          form {
+            margin-bottom: 0.75rem;
+          }
+
+          input {
+            /* 16px font-size prevents iOS auto-zoom on focus */
+            font-size: 16px;
+            padding: 0.75rem 1rem;
+            min-height: 48px;
+            border-radius: 10px;
+          }
+
+          .selected-words {
+            gap: 0.4rem;
+            margin-top: 0.4rem;
+          }
+
+          .word-tag {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.85rem;
+            border-radius: 14px;
+            /* Ensure touch targets are at least 44px */
+            min-height: 32px;
+          }
+
+          .remove-word {
+            /* Increase touch target for remove button */
+            padding: 4px;
+            margin-left: 0.35rem;
+            font-size: 1.2rem;
+            min-width: 24px;
+            min-height: 24px;
           }
         }
       `}</style>

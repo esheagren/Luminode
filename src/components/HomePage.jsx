@@ -13,6 +13,8 @@ import { hasPrecomputedEmbedding, createWordResult } from '../data/wordEmbedding
 import LearnPanel from './learn-panel/LearnPanel';
 import IntroModal from './IntroModal';
 import luminodeLogo from '../assets/luminodeLogoSmall.png';
+import HamburgerMenu from './common/HamburgerMenu';
+import { useIsMobile, useIsTablet } from '../hooks/useMediaQuery';
 
 // Add reset icon component
 const ResetIcon = () => (
@@ -39,8 +41,32 @@ const HomePage = () => {
   const [learnMode, setLearnMode] = useState(false);
   const [activeTool, setActiveTool] = useState('Vector Embeddings');
   const [showIntroModal, setShowIntroModal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const dispatch = useDispatch();
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+
+  // Close sidebar when switching from mobile to desktop
+  useEffect(() => {
+    if (!isMobile && sidebarOpen) {
+      setSidebarOpen(false);
+    }
+  }, [isMobile]); // Removed sidebarOpen to prevent potential infinite loops
+
+  // Close sidebar on Escape key for accessibility
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+
+    if (sidebarOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [sidebarOpen]);
   
   // Check if this is the first visit and show intro modal
   useEffect(() => {
@@ -265,7 +291,23 @@ const HomePage = () => {
   return (
     <div className="app-container">
       <div className="main-layout">
-        <div className="sidebar">
+        {/* Mobile hamburger button */}
+        {isMobile && (
+          <HamburgerMenu
+            isOpen={sidebarOpen}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          />
+        )}
+
+        {/* Overlay for mobile sidebar */}
+        {isMobile && (
+          <div
+            className={`sidebar-overlay ${sidebarOpen ? 'visible' : ''}`}
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        <div id="mobile-sidebar" className={`sidebar ${isMobile ? 'mobile' : ''} ${sidebarOpen ? 'open' : ''}`}>
           <div className="logo-container">
             <Link to="/" className="logo-link">
               <img src={luminodeLogo} alt="Luminode" />
@@ -656,6 +698,135 @@ const HomePage = () => {
         
         .footer-links a:hover {
           color: rgba(217, 175, 93, 0.9); /* Slightly brighter on hover */
+        }
+
+        /* Mobile sidebar overlay */
+        .sidebar-overlay {
+          display: none;
+        }
+
+        /* Mobile-specific hamburger positioning */
+        .hamburger-menu {
+          position: fixed;
+          top: 10px;
+          left: 10px;
+          z-index: 1001;
+        }
+
+        /* Tablet styles */
+        @media (max-width: 768px) {
+          .sidebar {
+            width: 260px;
+            min-width: 260px;
+          }
+
+          .graph-area {
+            min-height: 400px;
+          }
+
+          .words-container {
+            max-height: 45vh;
+          }
+
+          .home-footer {
+            padding: 0.6rem 1rem;
+          }
+        }
+
+        /* Mobile styles */
+        @media (max-width: 480px) {
+          .main-layout {
+            flex-direction: column;
+          }
+
+          .sidebar {
+            position: fixed;
+            left: -100%;
+            top: 0;
+            width: 85vw;
+            max-width: 320px;
+            height: 100vh;
+            z-index: 1000;
+            transition: left 0.3s ease;
+            background-color: #0f0f10;
+            padding-top: 60px;
+          }
+
+          .sidebar.mobile.open {
+            left: 0;
+          }
+
+          .sidebar-overlay {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+          }
+
+          .sidebar-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+          }
+
+          .content-area {
+            width: 100%;
+            height: 100%;
+          }
+
+          .graph-area {
+            min-height: 60vh;
+            height: calc(100vh - 160px);
+          }
+
+          .words-container {
+            max-height: 35vh;
+          }
+
+          .tools-bar {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .graph-and-learn-container.with-learn-panel {
+            flex-direction: column;
+          }
+
+          .graph-area.with-learn-panel {
+            flex: none;
+            height: 50vh;
+          }
+
+          .learn-panel-container {
+            flex: none;
+            height: 45vh;
+            padding-left: 0;
+            padding-top: 10px;
+          }
+
+          .logo-container img {
+            height: 32px;
+            width: 32px;
+          }
+
+          .logo-text {
+            font-size: 1.2rem;
+          }
+
+          .home-footer {
+            padding: 0.5rem 1rem;
+          }
+
+          .footer-links {
+            gap: 1rem;
+          }
+
+          .footer-links a {
+            font-size: 0.8rem;
+          }
         }
       `}</style>
     </div>

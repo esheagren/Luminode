@@ -867,6 +867,83 @@ const Tools = ({
           color: #FF9D42;
           box-shadow: inset 0 -2px 0 #FF9D42;
         }
+
+        /* Tablet responsive styles */
+        @media (max-width: 768px) {
+          .tool-buttons {
+            flex-wrap: wrap;
+            gap: 0.25rem;
+          }
+
+          .icon-button {
+            padding: 0.35rem 0.5rem;
+            font-size: 0.8rem;
+          }
+
+          .icon-button span {
+            display: none;
+          }
+
+          .icon-button svg {
+            width: 18px;
+            height: 18px;
+          }
+
+          .spacer {
+            flex-grow: 0;
+            width: 0.25rem;
+          }
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 480px) {
+          .tools-container {
+            border-radius: 0;
+          }
+
+          .tools-header {
+            padding: 0.25rem 0.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .tool-buttons {
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            gap: 0.15rem;
+            min-width: max-content;
+          }
+
+          .icon-button {
+            padding: 0.4rem 0.5rem;
+            min-height: 44px;
+            min-width: 44px;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+
+          .icon-button span {
+            display: none;
+          }
+
+          .icon-button svg {
+            width: 20px;
+            height: 20px;
+          }
+
+          .spacer {
+            flex-grow: 1;
+            min-width: 0.25rem;
+          }
+
+          .learn-button {
+            margin-right: 0.5rem;
+          }
+
+          .tool-content.visible {
+            max-height: 300px;
+          }
+        }
       `}</style>
     </div>
   );

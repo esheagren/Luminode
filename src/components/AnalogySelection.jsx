@@ -217,6 +217,55 @@ const AnalogySelection = ({
           50% { opacity: 1; }
           100% { opacity: 0.7; }
         }
+
+        /* Mobile responsive */
+        @media (max-width: 480px) {
+          .analogy-selection-status {
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0.75rem;
+          }
+
+          .analogy-status-text {
+            font-size: 0.85rem;
+            text-align: center;
+            width: 100%;
+          }
+
+          .analogy-controls {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .reset-btn, .cancel-btn {
+            min-height: 44px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+          }
+
+          .analogy-step-indicator {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+          }
+
+          .step-dot {
+            width: 28px;
+            height: 28px;
+          }
+
+          .step-label {
+            display: none;
+          }
+
+          .step-line {
+            width: 20px;
+          }
+
+          .analogy-explanation-text {
+            font-size: 0.75rem;
+            text-align: center;
+          }
+        }
       `}</style>
     </div>
   );

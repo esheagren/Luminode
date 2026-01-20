@@ -167,6 +167,45 @@ const SliceSelection = ({
         .control-button.calculate:hover {
           background: #9B59B6;
         }
+
+        /* Mobile responsive */
+        @media (max-width: 480px) {
+          .slice-selection {
+            padding: 0.5rem;
+          }
+
+          .info-text {
+            font-size: 0.85rem;
+            text-align: center;
+          }
+
+          .selected-points {
+            justify-content: center;
+          }
+
+          .point-tag {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.8rem;
+          }
+
+          .selection-controls {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+          }
+
+          .control-button {
+            min-height: 44px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            flex: 1;
+            min-width: 80px;
+          }
+
+          .control-button.calculate {
+            flex: 2;
+          }
+        }
       `}</style>
     </div>
   );
