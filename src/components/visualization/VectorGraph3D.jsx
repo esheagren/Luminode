@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { createTooltip, removeTooltip } from './VectorTooltip';
@@ -19,7 +19,16 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
   const pointsRef = useRef([]);
   const rulerLinesRef = useRef([]);
   const analogyLinesRef = useRef([]);
-  
+  const [pinnedPoint, setPinnedPoint] = useState(null);
+  const raycasterRef = useRef(null);
+  const mouseRef = useRef(new THREE.Vector2());
+  const cleanupRaycastingRef = useRef(null);
+
+  // Clear pinned point when coordinates change to avoid stale data
+  useEffect(() => {
+    setPinnedPoint(null);
+  }, [coordinates]);
+
   // Set up canvas size based on container
   useEffect(() => {
     const resizeCanvas = () => {
@@ -74,17 +83,23 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     
     // Clean up 3D scene when component unmounts
     return () => {
+      // Clean up raycasting event listeners
+      if (cleanupRaycastingRef.current) {
+        cleanupRaycastingRef.current();
+        cleanupRaycastingRef.current = null;
+      }
+
       if (rendererRef.current) {
         rendererRef.current.dispose();
       }
-      
+
       if (objectsRef.current.length > 0) {
         objectsRef.current.forEach(obj => {
           if (obj.geometry) obj.geometry.dispose();
           if (obj.material) obj.material.dispose();
         });
       }
-      
+
       // Clean up ruler lines
       if (rulerLinesRef.current.length > 0) {
         rulerLinesRef.current.forEach(obj => {
@@ -94,7 +109,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
         });
         rulerLinesRef.current = [];
       }
-      
+
       // Clean up analogy lines
       if (analogyLinesRef.current.length > 0) {
         analogyLinesRef.current.forEach(line => {
@@ -184,9 +199,14 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     };
     
     animate();
-    
+
+    // Clean up previous raycasting handlers before setting up new ones
+    if (cleanupRaycastingRef.current) {
+      cleanupRaycastingRef.current();
+    }
+
     // Add raycaster for point interaction
-    setupRaycasting(canvas);
+    cleanupRaycastingRef.current = setupRaycasting(canvas);
   };
   
   // Render the THREE.js scene
@@ -580,54 +600,136 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     }
   };
   
-  // Set up raycasting for tooltips in 3D
-  const setupRaycasting = (canvas) => {
-    if (!sceneRef.current) return;
-    
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    
-    canvas.addEventListener('mousemove', (event) => {
-      // Calculate mouse position in normalized device coordinates
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = ((event.clientX - rect.left) / canvas.width) * 2 - 1;
-      mouse.y = -((event.clientY - rect.top) / canvas.height) * 2 + 1;
-      
-      // Update the raycaster
-      raycaster.setFromCamera(mouse, sceneRef.current.children.find(child => child.isCamera));
-      
-      // Find intersections with points
-      const intersects = raycaster.intersectObjects(objectsRef.current.filter(obj => obj.userData?.isDataPoint));
-      
-      if (intersects.length > 0) {
-        canvas.style.cursor = 'pointer';
-        
-        // Find the closest point to the intersection
-        const intersection = intersects[0].point;
-        let closestPoint = null;
-        let minDistance = Infinity;
-        
-        pointsRef.current.forEach(point => {
-          const distance = intersection.distanceTo(point.position);
-          if (distance < minDistance) {
-            minDistance = distance;
-            closestPoint = point;
-          }
-        });
-        
-        if (closestPoint) {
-          createTooltip(closestPoint, event);
+  // Helper function to find point at mouse position
+  const findPointAtPosition = (canvas, clientX, clientY) => {
+    if (!sceneRef.current || !raycasterRef.current) return null;
+
+    const rect = canvas.getBoundingClientRect();
+    mouseRef.current.x = ((clientX - rect.left) / canvas.width) * 2 - 1;
+    mouseRef.current.y = -((clientY - rect.top) / canvas.height) * 2 + 1;
+
+    const camera = sceneRef.current.children.find(child => child.isCamera);
+    if (!camera) return null;
+
+    raycasterRef.current.setFromCamera(mouseRef.current, camera);
+
+    const intersects = raycasterRef.current.intersectObjects(
+      objectsRef.current.filter(obj => obj.userData?.isDataPoint)
+    );
+
+    if (intersects.length > 0) {
+      const intersection = intersects[0].point;
+      let closestPoint = null;
+      let minDistance = Infinity;
+
+      pointsRef.current.forEach(point => {
+        const distance = intersection.distanceTo(point.position);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestPoint = point;
         }
+      });
+
+      return closestPoint;
+    }
+
+    return null;
+  };
+
+  // Set up raycasting for tooltips and click handling in 3D
+  const setupRaycasting = (canvas) => {
+    if (!sceneRef.current) return null;
+
+    raycasterRef.current = new THREE.Raycaster();
+
+    // Store handler references for cleanup
+    const handleMouseMove = (event) => {
+      const closestPoint = findPointAtPosition(canvas, event.clientX, event.clientY);
+
+      if (closestPoint) {
+        canvas.style.cursor = 'pointer';
+        createTooltip(closestPoint, event);
       } else {
         canvas.style.cursor = 'default';
         removeTooltip();
       }
-    });
-    
-    canvas.addEventListener('mouseleave', () => {
-      // Remove tooltip when mouse leaves canvas
+    };
+
+    const handleMouseLeave = () => {
       removeTooltip();
-    });
+    };
+
+    // Click handler for pinning points
+    const handleClick = (event) => {
+      const clickedPoint = findPointAtPosition(canvas, event.clientX, event.clientY);
+
+      if (clickedPoint) {
+        // Toggle pin - if clicking the same point, unpin it
+        setPinnedPoint(prev => {
+          if (prev && prev.word === clickedPoint.word) {
+            return null;
+          }
+          return clickedPoint;
+        });
+      } else {
+        // Clicked on empty space, unpin
+        setPinnedPoint(null);
+      }
+    };
+
+    // Touch handler for pinning on mobile
+    let touchStart = null;
+    const handleTouchStart = (event) => {
+      const touch = event.touches[0];
+      touchStart = {
+        x: touch.clientX,
+        y: touch.clientY,
+        time: Date.now()
+      };
+    };
+
+    const handleTouchEnd = (event) => {
+      if (!touchStart) return;
+
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - touchStart.x;
+      const dy = touch.clientY - touchStart.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const duration = Date.now() - touchStart.time;
+
+      // If it's a tap (short duration, small movement)
+      if (distance < 10 && duration < 300) {
+        const tappedPoint = findPointAtPosition(canvas, touch.clientX, touch.clientY);
+
+        if (tappedPoint) {
+          setPinnedPoint(prev => {
+            if (prev && prev.word === tappedPoint.word) {
+              return null;
+            }
+            return tappedPoint;
+          });
+        } else {
+          setPinnedPoint(null);
+        }
+      }
+
+      touchStart = null;
+    };
+
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+    canvas.addEventListener('click', handleClick);
+    canvas.addEventListener('touchstart', handleTouchStart);
+    canvas.addEventListener('touchend', handleTouchEnd);
+
+    // Return cleanup function
+    return () => {
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
+      canvas.removeEventListener('click', handleClick);
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+    };
   };
   
   // Add analogy lines between primary points
@@ -757,7 +859,122 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
   };
   
   return (
-    <canvas ref={canvasRef} className="vector-canvas" />
+    <>
+      <canvas ref={canvasRef} className="vector-canvas" />
+
+      {/* Pinned point info card */}
+      {pinnedPoint && (
+        <div className="pinned-point-card">
+          <div className="pinned-point-header">
+            <span className="pinned-point-word">{pinnedPoint.word}</span>
+            <button
+              className="pinned-point-close"
+              onClick={() => setPinnedPoint(null)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+          <div className="pinned-point-info">
+            {pinnedPoint.isPrimary && <span className="pinned-point-badge primary">Primary</span>}
+          </div>
+          {pinnedPoint.truncatedVector && (
+            <div className="pinned-point-vector">
+              <span className="vector-label">Vector:</span>
+              <span className="vector-value">{pinnedPoint.truncatedVector}</span>
+            </div>
+          )}
+          <style jsx="true">{`
+            .pinned-point-card {
+              position: absolute;
+              bottom: 16px;
+              left: 16px;
+              background: rgba(15, 23, 42, 0.95);
+              border: 1px solid rgba(255, 255, 255, 0.2);
+              border-radius: 12px;
+              padding: 12px 16px;
+              min-width: 200px;
+              max-width: 320px;
+              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+              z-index: 100;
+              backdrop-filter: blur(8px);
+            }
+
+            .pinned-point-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 8px;
+            }
+
+            .pinned-point-word {
+              font-size: 18px;
+              font-weight: 600;
+              color: #f8fafc;
+            }
+
+            .pinned-point-close {
+              background: none;
+              border: none;
+              color: #94a3b8;
+              font-size: 20px;
+              cursor: pointer;
+              padding: 0 4px;
+              line-height: 1;
+              transition: color 0.2s;
+            }
+
+            .pinned-point-close:hover {
+              color: #f8fafc;
+            }
+
+            .pinned-point-info {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 6px;
+              margin-bottom: 8px;
+            }
+
+            .pinned-point-badge {
+              font-size: 11px;
+              padding: 2px 8px;
+              border-radius: 10px;
+              font-weight: 500;
+            }
+
+            .pinned-point-badge.primary {
+              background: rgba(255, 157, 66, 0.2);
+              color: #FF9D42;
+            }
+
+            .pinned-point-vector {
+              font-size: 12px;
+              color: #94a3b8;
+              word-break: break-all;
+            }
+
+            .vector-label {
+              color: #64748b;
+              margin-right: 4px;
+            }
+
+            .vector-value {
+              font-family: monospace;
+            }
+
+            @media (max-width: 480px) {
+              .pinned-point-card {
+                bottom: 8px;
+                left: 8px;
+                right: 8px;
+                max-width: none;
+                min-width: auto;
+              }
+            }
+          `}</style>
+        </div>
+      )}
+    </>
   );
 };
 

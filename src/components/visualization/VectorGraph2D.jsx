@@ -22,6 +22,12 @@ const VectorGraph2D = ({
   const animationFrameRef = useRef(null);
   const touchStartRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [pinnedPoint, setPinnedPoint] = useState(null);
+
+  // Clear pinned point when coordinates change to avoid stale data
+  useEffect(() => {
+    setPinnedPoint(null);
+  }, [coordinates]);
 
   // Detect mobile device
   useEffect(() => {
@@ -899,54 +905,52 @@ const VectorGraph2D = ({
     removeTooltip();
   };
   
-  // Update handle click to support both midpoint and analogy modes
+  // Update handle click to support both midpoint and analogy modes, plus pinning
   const handleClick = (e) => {
-    // Log all the conditions to better understand why this might not be triggering
-    console.log('Click event on canvas detected:', {
-      selectionMode,
-      analogyMode,
-      analogyStep,
-      selectedPointsCount: selectedPoints.length,
-      hasOnPointSelected: !!onPointSelected,
-      hasCanvas: !!canvasRef.current,
-      hasPoints: pointsRef.current.length > 0,
-      willProceed: (selectionMode || analogyMode) && !!onPointSelected && !!canvasRef.current && pointsRef.current.length > 0
-    });
-    
-    if ((!selectionMode && !analogyMode) || !onPointSelected || !canvasRef.current || !pointsRef.current.length) {
-      console.log('Aborting click processing due to conditions not met');
-      return;
-    }
-    
+    if (!canvasRef.current || !pointsRef.current.length) return;
+
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-    
+
     // Check if mouse is over any point
-    let foundPoint = false;
+    let clickedPoint = null;
     for (const point of pointsRef.current) {
       const distance = Math.sqrt(
         Math.pow(mouseX - point.x, 2) + Math.pow(mouseY - point.y, 2)
       );
-      
+
       if (distance <= point.radius) {
-        // Log the point being selected
-        console.log('Selected point:', point.word, { 
-          selectionMode, 
-          analogyMode,
-          analogyStep,
-          selectedWords: selectedPoints 
-        });
-        
-        // Trigger the selection callback
-        onPointSelected(point.word);
-        foundPoint = true;
+        clickedPoint = point;
         break;
       }
     }
-    
-    if (!foundPoint) {
-      console.log('Click did not hit any point');
+
+    // If in selection or analogy mode, use the selection callback
+    if ((selectionMode || analogyMode) && onPointSelected) {
+      if (clickedPoint) {
+        console.log('Selected point:', clickedPoint.word, {
+          selectionMode,
+          analogyMode,
+          analogyStep,
+          selectedWords: selectedPoints
+        });
+        onPointSelected(clickedPoint.word);
+      }
+      return;
+    }
+
+    // Otherwise, handle pinning
+    if (clickedPoint) {
+      // Toggle pin - if clicking the same point, unpin it
+      if (pinnedPoint && pinnedPoint.word === clickedPoint.word) {
+        setPinnedPoint(null);
+      } else {
+        setPinnedPoint(clickedPoint);
+      }
+    } else {
+      // Clicked on empty space, unpin
+      setPinnedPoint(null);
     }
   };
 
@@ -991,34 +995,38 @@ const VectorGraph2D = ({
         e.preventDefault();
       }
 
+      // Find the tapped point
+      let tappedPoint = null;
+      for (const point of pointsRef.current) {
+        const pointDistance = Math.sqrt(
+          Math.pow(touchEnd.x - point.x, 2) + Math.pow(touchEnd.y - point.y, 2)
+        );
+
+        // Increase hit area for touch (add 10px to radius)
+        if (pointDistance <= point.radius + 10) {
+          tappedPoint = point;
+          break;
+        }
+      }
+
       // Check if in selection or analogy mode
       if ((selectionMode || analogyMode) && onPointSelected) {
-        // Check if tap is over any point
-        for (const point of pointsRef.current) {
-          const pointDistance = Math.sqrt(
-            Math.pow(touchEnd.x - point.x, 2) + Math.pow(touchEnd.y - point.y, 2)
-          );
-
-          // Increase hit area for touch (add 10px to radius)
-          if (pointDistance <= point.radius + 10) {
-            console.log('Touch selected point:', point.word);
-            onPointSelected(point.word);
-            break;
-          }
+        if (tappedPoint) {
+          console.log('Touch selected point:', tappedPoint.word);
+          onPointSelected(tappedPoint.word);
         }
       } else {
-        // Show tooltip on tap when not in selection mode
-        for (const point of pointsRef.current) {
-          const pointDistance = Math.sqrt(
-            Math.pow(touchEnd.x - point.x, 2) + Math.pow(touchEnd.y - point.y, 2)
-          );
-
-          if (pointDistance <= point.radius + 10) {
-            createTooltip(point, { clientX: touch.clientX, clientY: touch.clientY });
-            // Hide tooltip after 3 seconds
-            setTimeout(() => removeTooltip(), 3000);
-            break;
+        // Handle pinning on tap when not in selection mode
+        if (tappedPoint) {
+          // Toggle pin - if tapping the same point, unpin it
+          if (pinnedPoint && pinnedPoint.word === tappedPoint.word) {
+            setPinnedPoint(null);
+          } else {
+            setPinnedPoint(tappedPoint);
           }
+        } else {
+          // Tapped on empty space, unpin
+          setPinnedPoint(null);
         }
       }
     }
@@ -1029,9 +1037,9 @@ const VectorGraph2D = ({
   return (
     <>
       {isLoading ? (
-        <SimpleLoadingAnimation 
-          width={containerRef.current?.clientWidth || 800} 
-          height={containerRef.current?.clientHeight || 600} 
+        <SimpleLoadingAnimation
+          width={containerRef.current?.clientWidth || 800}
+          height={containerRef.current?.clientHeight || 600}
         />
       ) : (
         <canvas
@@ -1043,6 +1051,143 @@ const VectorGraph2D = ({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         />
+      )}
+
+      {/* Pinned point info card */}
+      {pinnedPoint && (
+        <div className="pinned-point-card">
+          <div className="pinned-point-header">
+            <span className="pinned-point-word">{pinnedPoint.word}</span>
+            <button
+              className="pinned-point-close"
+              onClick={() => setPinnedPoint(null)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+          <div className="pinned-point-info">
+            {pinnedPoint.isPrimary && <span className="pinned-point-badge primary">Primary</span>}
+            {pinnedPoint.isAnalogy && <span className="pinned-point-badge analogy">Analogy Result</span>}
+            {pinnedPoint.isContextSample && <span className="pinned-point-badge context">Context</span>}
+            {pinnedPoint.isMidpoint && <span className="pinned-point-badge midpoint">Midpoint</span>}
+            {pinnedPoint.isSlice && <span className="pinned-point-badge slice">Slice</span>}
+          </div>
+          {pinnedPoint.truncatedVector && (
+            <div className="pinned-point-vector">
+              <span className="vector-label">Vector:</span>
+              <span className="vector-value">{pinnedPoint.truncatedVector}</span>
+            </div>
+          )}
+          <style jsx="true">{`
+            .pinned-point-card {
+              position: absolute;
+              bottom: 16px;
+              left: 16px;
+              background: rgba(15, 23, 42, 0.95);
+              border: 1px solid rgba(255, 255, 255, 0.2);
+              border-radius: 12px;
+              padding: 12px 16px;
+              min-width: 200px;
+              max-width: 320px;
+              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+              z-index: 100;
+              backdrop-filter: blur(8px);
+            }
+
+            .pinned-point-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 8px;
+            }
+
+            .pinned-point-word {
+              font-size: 18px;
+              font-weight: 600;
+              color: #f8fafc;
+            }
+
+            .pinned-point-close {
+              background: none;
+              border: none;
+              color: #94a3b8;
+              font-size: 20px;
+              cursor: pointer;
+              padding: 0 4px;
+              line-height: 1;
+              transition: color 0.2s;
+            }
+
+            .pinned-point-close:hover {
+              color: #f8fafc;
+            }
+
+            .pinned-point-info {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 6px;
+              margin-bottom: 8px;
+            }
+
+            .pinned-point-badge {
+              font-size: 11px;
+              padding: 2px 8px;
+              border-radius: 10px;
+              font-weight: 500;
+            }
+
+            .pinned-point-badge.primary {
+              background: rgba(255, 157, 66, 0.2);
+              color: #FF9D42;
+            }
+
+            .pinned-point-badge.analogy {
+              background: rgba(156, 39, 176, 0.2);
+              color: #ce93d8;
+            }
+
+            .pinned-point-badge.context {
+              background: rgba(100, 116, 139, 0.2);
+              color: #94a3b8;
+            }
+
+            .pinned-point-badge.midpoint {
+              background: rgba(52, 168, 83, 0.2);
+              color: #4ade80;
+            }
+
+            .pinned-point-badge.slice {
+              background: rgba(142, 68, 173, 0.2);
+              color: #c084fc;
+            }
+
+            .pinned-point-vector {
+              font-size: 12px;
+              color: #94a3b8;
+              word-break: break-all;
+            }
+
+            .vector-label {
+              color: #64748b;
+              margin-right: 4px;
+            }
+
+            .vector-value {
+              font-family: monospace;
+            }
+
+            @media (max-width: 480px) {
+              .pinned-point-card {
+                bottom: 8px;
+                left: 8px;
+                right: 8px;
+                max-width: none;
+                min-width: auto;
+              }
+            }
+          `}</style>
+        </div>
       )}
     </>
   );
