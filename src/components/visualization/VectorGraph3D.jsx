@@ -478,82 +478,51 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
         const midY = (normalizedY1 + normalizedY2) / 2;
         const midZ = (normalizedZ1 + normalizedZ2) / 2;
         
-        // Extract vectors for similarity calculation
+        // Vector extraction - only use actual embedding vectors, never synthetic coordinates
         const extractVector = (vecStr, point) => {
-          // Enhanced debugging
-          console.log('3D: Attempting to extract vector for:', point?.word || 'unknown word');
-        
-          // First try to use the measureVector if available (most accurate)
+          // First try to use the measureVector if available (most accurate - full embedding)
           if (point && point.measureVector && Array.isArray(point.measureVector)) {
-            console.log('3D: Using measureVector property:', point.measureVector.length, 'elements');
             return point.measureVector;
           }
-          
-          // Try to use vectors array if available (fallback for direct JSON conversion)
+
+          // Try to use vectors array if available
           if (point && point.vectors && Array.isArray(point.vectors)) {
-            console.log('3D: Using vectors array property:', point.vectors.length, 'elements');
             return point.vectors;
           }
 
-          // Special fallback: If we have coordinates but no vectors, create synthetic vectors
-          // This allows for visual measurement even if real vector data is missing
-          if (point && point.x !== undefined && point.y !== undefined) {
-            const syntheticVector = [point.x, point.y];
-            if (point.z !== undefined) {
-              syntheticVector.push(point.z);
-            }
-            console.log('3D FALLBACK: Created synthetic vector from coordinates:', syntheticVector);
-            return syntheticVector;
-          }
-          
-          // Debug information about the vector string
-          console.log('3D: Vector string to extract:', vecStr, typeof vecStr);
-          
-          if (!vecStr) {
-            console.log('3D: Missing vector string');
-            return null;
+          // Use fullVector if available (complete embedding)
+          if (point && point.fullVector && Array.isArray(point.fullVector)) {
+            return point.fullVector;
           }
 
-          // Try different patterns to extract vector values
-          // Pattern 1: Standard format with [...] notation
+          // If it's already an array, use it directly
+          if (Array.isArray(vecStr)) {
+            return vecStr;
+          }
+
+          // Try to parse from string format - but only if it looks like a complete vector
           if (typeof vecStr === 'string') {
-            let matches = vecStr.match(/\[(.*?)\.\.\.]/);
-            if (matches && matches[1]) {
-              try {
-                const values = matches[1].split(',').map(num => parseFloat(num.trim()));
-                console.log('3D: Pattern 1 extracted vector:', values.length, 'elements');
-                return values;
-              } catch (e) {
-                console.error('3D: Failed to parse vector format 1:', e);
-              }
+            // Skip truncated vectors (containing "...")
+            if (vecStr.includes('...')) {
+              return null;
             }
 
-            // Pattern 2: Try to extract array content with any character separator
-            matches = vecStr.match(/\[(.*?)\]/);
+            // Try to extract complete array content
+            const matches = vecStr.match(/\[(.*?)\]/);
             if (matches && matches[1]) {
               try {
                 const values = matches[1].split(/[,\s]+/).map(num => parseFloat(num.trim()));
-                console.log('3D: Pattern 2 extracted vector:', values.length, 'elements');
-                return values;
+                // Only use if we have a reasonable number of dimensions (at least 50)
+                if (values.length >= 50 && values.every(v => !isNaN(v))) {
+                  return values;
+                }
               } catch (e) {
-                console.error('3D: Failed to parse vector format 2:', e);
+                // Parsing failed, return null
               }
             }
           }
-          
-          // Pattern 3: If it's already an array, use it directly
-          if (Array.isArray(vecStr)) {
-            console.log('3D: Pattern 3 using existing array:', vecStr.length, 'elements');
-            return vecStr;
-          }
-          
-          // Pattern 4: If point has a fullVector property (might be in some deployments)
-          if (point && point.fullVector && Array.isArray(point.fullVector)) {
-            console.log('3D: Pattern 4 using fullVector property:', point.fullVector.length, 'elements');
-            return point.fullVector.slice(0, 5); // Just use first few dimensions
-          }
-          
-          console.log('3D: No vector extraction patterns matched');
+
+          // No valid vector found - return null rather than using misleading synthetic data
           return null;
         };
         
