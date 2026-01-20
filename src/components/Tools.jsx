@@ -135,6 +135,7 @@ const Tools = ({
 }) => {
   const [activeTab, setActiveTab] = useState(null);
   const [showContent, setShowContent] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
   const [neighborsActive, setNeighborsActive] = useState(false);
   const [neighborsLoading, setNeighborsLoading] = useState(false);
   
@@ -682,7 +683,8 @@ const Tools = ({
     const [word1, word2] = selectedPoints;
     console.log(`Finding linear path between "${word1}" and "${word2}"`);
 
-    setLoading(true);
+    setIsCalculating(true);
+    setError(null);
 
     try {
       console.log('Initiating linear path calculation with parameters:', {
@@ -709,7 +711,9 @@ const Tools = ({
       console.error('Error finding linear path:', error);
 
       let errorMessage = 'Failed to find linear path';
-      if (error.message.includes('404')) {
+      if (error.message.includes('405')) {
+        errorMessage = 'Linear path not available. Please redeploy the server with the new endpoints.';
+      } else if (error.message.includes('404')) {
         errorMessage = 'The linear path API endpoint returned a 404 error. The server may need to be restarted.';
       } else if (error.message.includes('timeout') || error.message.includes('Network Error')) {
         errorMessage = 'Connection timed out. Please check your network and server status.';
@@ -719,7 +723,7 @@ const Tools = ({
 
       setError(errorMessage);
     } finally {
-      setLoading(false);
+      setIsCalculating(false);
     }
   };
 
@@ -745,7 +749,8 @@ const Tools = ({
     const [word1, word2] = selectedPoints;
     console.log(`Finding greedy path from "${word1}" to "${word2}"`);
 
-    setLoading(true);
+    setIsCalculating(true);
+    setError(null);
 
     try {
       console.log('Initiating greedy path calculation with parameters:', {
@@ -772,7 +777,9 @@ const Tools = ({
       console.error('Error finding greedy path:', error);
 
       let errorMessage = 'Failed to find greedy path';
-      if (error.message.includes('404')) {
+      if (error.message.includes('405')) {
+        errorMessage = 'Greedy path not available. Please redeploy the server with the new endpoints.';
+      } else if (error.message.includes('404')) {
         errorMessage = 'The greedy path API endpoint returned a 404 error. The server may need to be restarted.';
       } else if (error.message.includes('timeout') || error.message.includes('Network Error')) {
         errorMessage = 'Connection timed out. Please check your network and server status.';
@@ -782,7 +789,7 @@ const Tools = ({
 
       setError(errorMessage);
     } finally {
-      setLoading(false);
+      setIsCalculating(false);
     }
   };
 
@@ -799,6 +806,9 @@ const Tools = ({
 
   // Handle finding neighbors for all words in the visualization
   const handleNeighborsToggle = async () => {
+    // Prevent toggling while already loading
+    if (neighborsLoading) return;
+
     // Toggle the state
     const newState = !neighborsActive;
     setNeighborsActive(newState);
@@ -934,7 +944,7 @@ const Tools = ({
           onReset={resetLinearPathSelection}
           onCancel={cancelLinearPathSelection}
           onCalculate={findLinearPathForSelectedPoints}
-          loading={loading}
+          loading={isCalculating}
         />
       );
     }
@@ -946,7 +956,7 @@ const Tools = ({
           onReset={resetGreedyPathSelection}
           onCancel={cancelGreedyPathSelection}
           onCalculate={findGreedyPathForSelectedPoints}
-          loading={loading}
+          loading={isCalculating}
         />
       );
     }

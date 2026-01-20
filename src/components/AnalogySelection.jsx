@@ -22,14 +22,14 @@ const AnalogySelection = ({
 
   // Sync local state with selectedPoints from visualization clicks
   useEffect(() => {
-    if (selectedPoints.length >= 1 && selectedPoints[0] !== word1) {
-      setWord1(selectedPoints[0]);
+    if (selectedPoints.length >= 1) {
+      setWord1(prev => selectedPoints[0] !== prev ? selectedPoints[0] : prev);
     }
-    if (selectedPoints.length >= 2 && selectedPoints[1] !== word2) {
-      setWord2(selectedPoints[1]);
+    if (selectedPoints.length >= 2) {
+      setWord2(prev => selectedPoints[1] !== prev ? selectedPoints[1] : prev);
     }
-    if (selectedPoints.length >= 3 && selectedPoints[2] !== word3) {
-      setWord3(selectedPoints[2]);
+    if (selectedPoints.length >= 3) {
+      setWord3(prev => selectedPoints[2] !== prev ? selectedPoints[2] : prev);
     }
   }, [selectedPoints]);
 
@@ -40,9 +40,9 @@ const AnalogySelection = ({
     }
   }, []);
 
-  // Handle input changes and notify parent
+  // Handle input changes - lowercase only, trim on blur/submit
   const handleInputChange = (field, value) => {
-    const cleanValue = value.toLowerCase().trim();
+    const cleanValue = value.toLowerCase();
 
     if (field === 1) {
       setWord1(cleanValue);
@@ -71,21 +71,32 @@ const AnalogySelection = ({
     }
   };
 
-  // Handle blur to validate and update parent
+  // Handle blur to trim and validate
   const handleBlur = (field) => {
     setFocusedField(null);
-    if (field === 1 && word1 && onWordInput) {
-      onWordInput(word1, 0);
-    } else if (field === 2 && word2 && onWordInput) {
-      onWordInput(word2, 1);
-    } else if (field === 3 && word3 && onWordInput) {
-      onWordInput(word3, 2);
+    // Trim on blur
+    if (field === 1) {
+      const trimmed = word1.trim();
+      if (trimmed !== word1) setWord1(trimmed);
+      if (trimmed && onWordInput) onWordInput(trimmed, 0);
+    } else if (field === 2) {
+      const trimmed = word2.trim();
+      if (trimmed !== word2) setWord2(trimmed);
+      if (trimmed && onWordInput) onWordInput(trimmed, 1);
+    } else if (field === 3) {
+      const trimmed = word3.trim();
+      if (trimmed !== word3) setWord3(trimmed);
+      if (trimmed && onWordInput) onWordInput(trimmed, 2);
     }
   };
 
   const handleSearch = () => {
-    if (word1 && word2 && word3 && onSearch) {
-      onSearch(word1, word2, word3);
+    const w1 = word1.trim();
+    const w2 = word2.trim();
+    const w3 = word3.trim();
+
+    if (w1 && w2 && w3 && onSearch) {
+      onSearch(w1, w2, w3);
     }
   };
 
@@ -117,6 +128,7 @@ const AnalogySelection = ({
           disabled={loading}
           autoComplete="off"
           spellCheck="false"
+          aria-label="First word in analogy"
         />
 
         <span className="analogy-arrow">→</span>
@@ -135,6 +147,7 @@ const AnalogySelection = ({
           disabled={loading}
           autoComplete="off"
           spellCheck="false"
+          aria-label="Second word in analogy"
         />
 
         <span className="analogy-equals">≈</span>
@@ -153,6 +166,7 @@ const AnalogySelection = ({
           disabled={loading}
           autoComplete="off"
           spellCheck="false"
+          aria-label="Third word in analogy"
         />
 
         <span className="analogy-arrow">→</span>
@@ -247,7 +261,8 @@ const AnalogySelection = ({
         .analogy-input:focus {
           border-color: #FF8008;
           background-color: rgba(255, 128, 8, 0.1);
-          box-shadow: 0 0 0 2px rgba(255, 128, 8, 0.2);
+          box-shadow: 0 0 0 3px rgba(255, 128, 8, 0.35);
+          outline: none;
         }
 
         .analogy-input.filled {
