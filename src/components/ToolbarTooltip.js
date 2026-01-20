@@ -224,6 +224,54 @@ const getTooltipContent = (toolType) => {
           </ul>
         </div>
       `;
+    case 'Linear Path':
+      return `
+        <div class="tooltip-title">Linear Path Tool</div>
+        <div class="tooltip-description">
+          Find evenly-spaced words along the geometric line between two words in embedding space. This tool samples points at regular intervals along the straight-line path between two embedding vectors, then finds the nearest real word to each sampled point. This reveals what lies "in between" two concepts geometrically.
+        </div>
+        <div class="tooltip-usage">
+          <div class="tooltip-usage-title">How to use:</div>
+          <ul class="tooltip-usage-steps">
+            <li>Click to activate linear path mode</li>
+            <li>Select a starting word and an ending word</li>
+            <li>Click "Calculate Linear Path" to sample along the vector line</li>
+            <li>Results show words whose embeddings lie closest to the interpolated points, connected by a blue path</li>
+          </ul>
+        </div>
+        <div class="tooltip-usage">
+          <div class="tooltip-usage-title">Best for:</div>
+          <ul class="tooltip-usage-steps">
+            <li>Exploring geometric "in-between" concepts</li>
+            <li>Understanding the linear structure of embedding space</li>
+            <li>Comparing with greedy path to see geometric vs. semantic routes</li>
+          </ul>
+        </div>
+      `;
+    case 'Greedy Path':
+      return `
+        <div class="tooltip-title">Greedy Path Tool</div>
+        <div class="tooltip-description">
+          Find a path between two words by hopping through semantic neighbors. At each step, the algorithm picks the unvisited neighbor that is closest to the target word. This reveals natural semantic connections and how concepts link together through related words.
+        </div>
+        <div class="tooltip-usage">
+          <div class="tooltip-usage-title">How to use:</div>
+          <ul class="tooltip-usage-steps">
+            <li>Click to activate greedy path mode</li>
+            <li>Select a starting word and a target word</li>
+            <li>Click "Calculate Greedy Path" to find the neighbor-hopping route</li>
+            <li>Results show the chain of semantically related words, connected by a green path</li>
+          </ul>
+        </div>
+        <div class="tooltip-usage">
+          <div class="tooltip-usage-title">Best for:</div>
+          <ul class="tooltip-usage-steps">
+            <li>Discovering semantic bridges between concepts</li>
+            <li>Finding how unrelated words connect through associations</li>
+            <li>Exploring the local neighborhood structure of embedding space</li>
+          </ul>
+        </div>
+      `;
     case 'Reset':
       return `
         <div class="tooltip-title">Reset Tool</div>
