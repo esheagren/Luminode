@@ -96,7 +96,8 @@ const Tools = ({
   setSliceMode,
   learnMode,
   setLearnMode,
-  setActiveTool
+  setActiveTool,
+  hideViewButton = false
 }) => {
   const [activeTab, setActiveTab] = useState(null);
   const [showContent, setShowContent] = useState(false);
@@ -629,16 +630,18 @@ const Tools = ({
     <div className="tools-container">
       <div className="tools-header">
         <div className="tool-buttons">
-          <ViewButton 
-            viewMode={viewMode} 
-            setViewMode={(mode) => {
-              setViewMode(mode);
-              trackToolActivity('3D');
-            }} 
-            isCompact={true}
-            onMouseEnter={(e) => createToolbarTooltip('3D', e)}
-            onMouseLeave={() => removeToolbarTooltip()}
-          />
+          {!hideViewButton && (
+            <ViewButton
+              viewMode={viewMode}
+              setViewMode={(mode) => {
+                setViewMode(mode);
+                trackToolActivity('3D');
+              }}
+              isCompact={true}
+              onMouseEnter={(e) => createToolbarTooltip('3D', e)}
+              onMouseLeave={() => removeToolbarTooltip()}
+            />
+          )}
 
           <button
             className={`icon-button ${rulerActive ? 'active' : ''}`}

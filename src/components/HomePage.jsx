@@ -42,7 +42,6 @@ const HomePage = () => {
   const [activeTool, setActiveTool] = useState('Vector Embeddings');
   const [showIntroModal, setShowIntroModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
   const dispatch = useDispatch();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -370,57 +369,36 @@ const HomePage = () => {
           </div>
         )}
 
-        {/* Collapsible tools drawer */}
-        <div className={`mobile-tools-drawer ${mobileToolsOpen ? 'open' : ''}`}>
-          <button
-            className="mobile-tools-toggle"
-            onClick={() => setMobileToolsOpen(!mobileToolsOpen)}
-          >
-            <span>Tools</span>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              style={{ transform: mobileToolsOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
-            >
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-
-          {mobileToolsOpen && (
-            <div className="mobile-tools-content">
-              <Tools
-                words={words}
-                numMidpoints={numNeighbors}
-                setMidpointClusters={debugSetRelatedClusters}
-                setLoading={setError}
-                setError={setError}
-                loading={error}
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-                rulerActive={rulerActive}
-                setRulerActive={setRulerActive}
-                selectionMode={selectionMode}
-                setSelectionMode={setPointSelectionMode}
-                selectedPoints={selectedPoints}
-                setSelectedPoints={setSelectedPoints}
-                analogyMode={analogyMode}
-                setAnalogyMode={setAnalogySelectionMode}
-                analogyStep={analogyStep}
-                setAnalogyStep={setAnalogyStep}
-                isSearchingAnalogy={isSearchingAnalogy}
-                setIsSearchingAnalogy={setSearchingAnalogy}
-                sliceMode={sliceMode}
-                setSliceMode={setSliceSelectionMode}
-                learnMode={learnMode}
-                setLearnMode={setLearnMode}
-                setActiveTool={setActiveTool}
-              />
-            </div>
-          )}
+        {/* Tools bar - always visible */}
+        <div className="mobile-tools-bar">
+          <Tools
+            words={words}
+            numMidpoints={numNeighbors}
+            setMidpointClusters={debugSetRelatedClusters}
+            setLoading={setError}
+            setError={setError}
+            loading={error}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            rulerActive={rulerActive}
+            setRulerActive={setRulerActive}
+            selectionMode={selectionMode}
+            setSelectionMode={setPointSelectionMode}
+            selectedPoints={selectedPoints}
+            setSelectedPoints={setSelectedPoints}
+            analogyMode={analogyMode}
+            setAnalogyMode={setAnalogySelectionMode}
+            analogyStep={analogyStep}
+            setAnalogyStep={setAnalogyStep}
+            isSearchingAnalogy={isSearchingAnalogy}
+            setIsSearchingAnalogy={setSearchingAnalogy}
+            sliceMode={sliceMode}
+            setSliceMode={setSliceSelectionMode}
+            learnMode={learnMode}
+            setLearnMode={setLearnMode}
+            setActiveTool={setActiveTool}
+            hideViewButton={true}
+          />
         </div>
 
         {/* Bottom input bar */}
@@ -623,29 +601,11 @@ const HomePage = () => {
             text-align: center;
           }
 
-          .mobile-tools-drawer {
-            background: #1a1a1c;
+          .mobile-tools-bar {
+            background: #0f0f10;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-          }
-
-          .mobile-tools-toggle {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px;
-            background: none;
-            border: none;
-            color: #aaa;
-            font-size: 0.85rem;
-            cursor: pointer;
-          }
-
-          .mobile-tools-content {
-            padding: 0 8px 8px;
-            max-height: 200px;
-            overflow-y: auto;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
           }
 
           .mobile-bottom-bar {
