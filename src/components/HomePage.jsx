@@ -42,6 +42,7 @@ const HomePage = () => {
   const [activeTool, setActiveTool] = useState('Vector Embeddings');
   const [showIntroModal, setShowIntroModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
   const dispatch = useDispatch();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -288,35 +289,509 @@ const HomePage = () => {
     setError(null);
   };
 
+  // Mobile-specific layout: Graph on top, input at bottom
+  if (isMobile) {
+    return (
+      <div className="mobile-app-container">
+        {/* Graph area - takes most of the screen */}
+        <div className="mobile-graph-area">
+          <VectorGraph
+            words={words}
+            midpointWords={relatedClusters}
+            numMidpoints={numNeighbors}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            rulerActive={rulerActive}
+            selectionMode={selectionMode || sliceMode}
+            onPointSelected={handlePointSelected}
+            selectedPoints={selectedPoints}
+            analogyMode={analogyMode}
+            analogyStep={analogyStep}
+            isSearchingAnalogy={isSearchingAnalogy}
+          />
+
+          {/* Floating 2D/3D toggle */}
+          <div className="mobile-view-toggle">
+            <ViewButton
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              isCompact={true}
+            />
+          </div>
+
+          {/* Floating info button for sidebar */}
+          <button
+            className="mobile-info-button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </button>
+        </div>
+
+        {/* Selected words bar - shows current words */}
+        {words.length > 0 && (
+          <div className="mobile-words-bar">
+            <div className="mobile-words-scroll">
+              {words.map((word, index) => (
+                <div key={`word-${index}`} className="mobile-word-tag">
+                  {word}
+                  <button
+                    className="mobile-remove-word"
+                    onClick={() => {
+                      const newWords = [...words];
+                      newWords.splice(index, 1);
+                      setWords(newWords);
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              className="mobile-reset-btn"
+              onClick={handleReset}
+              title="Reset all"
+            >
+              <ResetIcon />
+            </button>
+          </div>
+        )}
+
+        {/* Error message */}
+        {error && (
+          <div className="mobile-error">
+            {error}
+          </div>
+        )}
+
+        {/* Collapsible tools drawer */}
+        <div className={`mobile-tools-drawer ${mobileToolsOpen ? 'open' : ''}`}>
+          <button
+            className="mobile-tools-toggle"
+            onClick={() => setMobileToolsOpen(!mobileToolsOpen)}
+          >
+            <span>Tools</span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              style={{ transform: mobileToolsOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          {mobileToolsOpen && (
+            <div className="mobile-tools-content">
+              <Tools
+                words={words}
+                numMidpoints={numNeighbors}
+                setMidpointClusters={debugSetRelatedClusters}
+                setLoading={setError}
+                setError={setError}
+                loading={error}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                rulerActive={rulerActive}
+                setRulerActive={setRulerActive}
+                selectionMode={selectionMode}
+                setSelectionMode={setPointSelectionMode}
+                selectedPoints={selectedPoints}
+                setSelectedPoints={setSelectedPoints}
+                analogyMode={analogyMode}
+                setAnalogyMode={setAnalogySelectionMode}
+                analogyStep={analogyStep}
+                setAnalogyStep={setAnalogyStep}
+                isSearchingAnalogy={isSearchingAnalogy}
+                setIsSearchingAnalogy={setSearchingAnalogy}
+                sliceMode={sliceMode}
+                setSliceMode={setSliceSelectionMode}
+                learnMode={learnMode}
+                setLearnMode={setLearnMode}
+                setActiveTool={setActiveTool}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Bottom input bar */}
+        <div className="mobile-bottom-bar">
+          <div className="mobile-input-row">
+            <WordInput
+              words={words}
+              setWords={setWords}
+              setResponse={setError}
+              setLoading={() => {}}
+              setError={setError}
+              loading={false}
+              setRelatedClusters={setRelatedClusters}
+              showWordTags={false}
+            />
+          </div>
+
+          {/* Quick suggested words */}
+          <div className="mobile-suggestions">
+            <SuggestedWords
+              onWordSelect={handleWordSelect}
+              currentWords={words}
+              numSuggestions={4}
+            />
+          </div>
+        </div>
+
+        {/* Slide-out sidebar for full options */}
+        <div
+          className={`mobile-sidebar-overlay ${sidebarOpen ? 'visible' : ''}`}
+          onClick={() => setSidebarOpen(false)}
+        />
+        <div className={`mobile-sidebar ${sidebarOpen ? 'open' : ''}`}>
+          <div className="mobile-sidebar-header">
+            <Link to="/" className="mobile-logo-link">
+              <img src={luminodeLogo} alt="Luminode" />
+              <span>Luminode</span>
+            </Link>
+            <button
+              className="mobile-close-sidebar"
+              onClick={() => setSidebarOpen(false)}
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="mobile-sidebar-content">
+            <h3>All Suggested Words</h3>
+            <SuggestedWords
+              onWordSelect={(word) => {
+                handleWordSelect(word);
+                setSidebarOpen(false);
+              }}
+              currentWords={words}
+              numSuggestions={12}
+            />
+          </div>
+
+          <div className="mobile-sidebar-footer">
+            <a href="https://eriksheagren.notion.site" target="_blank" rel="noopener noreferrer">
+              Contact
+            </a>
+            <a href="https://github.com/esheagren/Luminode" target="_blank" rel="noopener noreferrer">
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        {/* Learn panel as modal on mobile */}
+        {learnMode && (
+          <div className="mobile-learn-modal">
+            <LearnPanel
+              activeTool={activeTool}
+              onClose={() => setLearnMode(false)}
+            />
+          </div>
+        )}
+
+        {/* Intro Modal */}
+        <IntroModal
+          isOpen={showIntroModal}
+          onClose={handleCloseIntroModal}
+        />
+
+        <style jsx="true">{`
+          .mobile-app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh;
+            background-color: #0f0f10;
+            overflow: hidden;
+          }
+
+          .mobile-graph-area {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+            overflow: hidden;
+          }
+
+          .mobile-graph-area > div:first-child {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+          }
+
+          .mobile-view-toggle {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 100;
+            background: rgba(15, 15, 16, 0.9);
+            border-radius: 8px;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+          }
+
+          .mobile-info-button {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 100;
+            width: 44px;
+            height: 44px;
+            background: rgba(15, 15, 16, 0.9);
+            border: none;
+            border-radius: 50%;
+            color: #FF9D42;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+          }
+
+          .mobile-words-bar {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: #1a1a1c;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 8px;
+          }
+
+          .mobile-words-scroll {
+            flex: 1;
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+          }
+
+          .mobile-words-scroll::-webkit-scrollbar {
+            display: none;
+          }
+
+          .mobile-word-tag {
+            display: flex;
+            align-items: center;
+            background: #2a2a2c;
+            border-radius: 14px;
+            padding: 4px 10px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+          }
+
+          .mobile-remove-word {
+            background: none;
+            border: none;
+            color: #FF5757;
+            margin-left: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            line-height: 1;
+          }
+
+          .mobile-reset-btn {
+            width: 36px;
+            height: 36px;
+            background: none;
+            border: none;
+            color: #ff5757;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+
+          .mobile-error {
+            padding: 8px 12px;
+            background: rgba(255, 87, 87, 0.1);
+            color: #FF5757;
+            font-size: 0.8rem;
+            text-align: center;
+          }
+
+          .mobile-tools-drawer {
+            background: #1a1a1c;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .mobile-tools-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 0.85rem;
+            cursor: pointer;
+          }
+
+          .mobile-tools-content {
+            padding: 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+          }
+
+          .mobile-bottom-bar {
+            background: #0f0f10;
+            padding: 8px 12px;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .mobile-input-row {
+            margin-bottom: 8px;
+          }
+
+          .mobile-suggestions {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 4px;
+          }
+
+          /* Mobile sidebar */
+          .mobile-sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+          }
+
+          .mobile-sidebar-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+          }
+
+          .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 85vw;
+            max-width: 320px;
+            height: 100%;
+            background: #0f0f10;
+            z-index: 1000;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .mobile-sidebar.open {
+            left: 0;
+          }
+
+          .mobile-sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .mobile-logo-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #f8fafc;
+            font-weight: 600;
+            font-size: 1.2rem;
+          }
+
+          .mobile-logo-link img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+          }
+
+          .mobile-close-sidebar {
+            width: 44px;
+            height: 44px;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .mobile-sidebar-content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+          }
+
+          .mobile-sidebar-content h3 {
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+          }
+
+          .mobile-sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 24px;
+          }
+
+          .mobile-sidebar-footer a {
+            color: rgba(217, 175, 93, 0.75);
+            text-decoration: none;
+            font-size: 0.9rem;
+          }
+
+          /* Mobile learn modal */
+          .mobile-learn-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1001;
+            background: #0f0f10;
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Desktop/Tablet layout
   return (
     <div className="app-container">
       <div className="main-layout">
-        {/* Mobile hamburger button */}
-        {isMobile && (
-          <HamburgerMenu
-            isOpen={sidebarOpen}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          />
-        )}
-
-        {/* Overlay for mobile sidebar */}
-        {isMobile && (
-          <div
-            className={`sidebar-overlay ${sidebarOpen ? 'visible' : ''}`}
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        <div id="mobile-sidebar" className={`sidebar ${isMobile ? 'mobile' : ''} ${sidebarOpen ? 'open' : ''}`}>
+        <div id="mobile-sidebar" className={`sidebar`}>
           <div className="logo-container">
             <Link to="/" className="logo-link">
               <img src={luminodeLogo} alt="Luminode" />
               <span className="logo-text">Luminode</span>
             </Link>
           </div>
-          
+
           <div className="input-wrapper">
-            <WordInput 
+            <WordInput
               words={words}
               setWords={setWords}
               setResponse={setError}
@@ -326,23 +801,23 @@ const HomePage = () => {
               setRelatedClusters={setRelatedClusters}
               showWordTags={false}
             />
-            <button 
-              className="reset-button" 
+            <button
+              className="reset-button"
               onClick={handleReset}
               title="Reset words"
             >
               <ResetIcon />
             </button>
           </div>
-          
+
           <div className="words-container">
             {words.length > 0 && (
               <div className="selected-words">
                 {words.map((word, index) => (
                   <div key={`word-${index}`} className="word-tag">
                     {word}
-                    <button 
-                      className="remove-word" 
+                    <button
+                      className="remove-word"
                       onClick={() => {
                         const newWords = [...words];
                         newWords.splice(index, 1);
@@ -356,22 +831,22 @@ const HomePage = () => {
               </div>
             )}
           </div>
-          
+
           {error && (
             <div className="error-message">
               {error}
             </div>
           )}
-          
+
           <div className="suggestions-section">
-            <SuggestedWords 
+            <SuggestedWords
               onWordSelect={handleWordSelect}
               currentWords={words}
               numSuggestions={8}
             />
           </div>
         </div>
-        
+
         <div className="content-area">
           <div className="tools-bar">
             <Tools
@@ -402,10 +877,10 @@ const HomePage = () => {
               setActiveTool={setActiveTool}
             />
           </div>
-          
+
           <div className={`graph-and-learn-container ${learnMode ? 'with-learn-panel' : ''}`}>
             <div className={`graph-area ${learnMode ? 'with-learn-panel' : ''}`}>
-              <VectorGraph 
+              <VectorGraph
                 words={words}
                 midpointWords={relatedClusters}
                 numMidpoints={numNeighbors}
@@ -420,11 +895,11 @@ const HomePage = () => {
                 isSearchingAnalogy={isSearchingAnalogy}
               />
             </div>
-            
+
             {learnMode && (
               <div className="learn-panel-container">
-                <LearnPanel 
-                  activeTool={activeTool} 
+                <LearnPanel
+                  activeTool={activeTool}
                   onClose={() => setLearnMode(false)}
                 />
               </div>
@@ -432,13 +907,13 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Intro Modal */}
-      <IntroModal 
-        isOpen={showIntroModal} 
-        onClose={handleCloseIntroModal} 
+      <IntroModal
+        isOpen={showIntroModal}
+        onClose={handleCloseIntroModal}
       />
-      
+
       {/* Footer Links */}
       <footer className="home-footer">
         <div className="footer-links">
@@ -700,19 +1175,6 @@ const HomePage = () => {
           color: rgba(217, 175, 93, 0.9); /* Slightly brighter on hover */
         }
 
-        /* Mobile sidebar overlay */
-        .sidebar-overlay {
-          display: none;
-        }
-
-        /* Mobile-specific hamburger positioning */
-        .hamburger-menu {
-          position: fixed;
-          top: 10px;
-          left: 10px;
-          z-index: 1001;
-        }
-
         /* Tablet styles */
         @media (max-width: 768px) {
           .sidebar {
@@ -730,102 +1192,6 @@ const HomePage = () => {
 
           .home-footer {
             padding: 0.6rem 1rem;
-          }
-        }
-
-        /* Mobile styles */
-        @media (max-width: 480px) {
-          .main-layout {
-            flex-direction: column;
-          }
-
-          .sidebar {
-            position: fixed;
-            left: -100%;
-            top: 0;
-            width: 85vw;
-            max-width: 320px;
-            height: 100vh;
-            z-index: 1000;
-            transition: left 0.3s ease;
-            background-color: #0f0f10;
-            padding-top: 60px;
-          }
-
-          .sidebar.mobile.open {
-            left: 0;
-          }
-
-          .sidebar-overlay {
-            display: block;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-          }
-
-          .sidebar-overlay.visible {
-            opacity: 1;
-            pointer-events: auto;
-          }
-
-          .content-area {
-            width: 100%;
-            height: 100%;
-          }
-
-          .graph-area {
-            min-height: 60vh;
-            height: calc(100vh - 160px);
-          }
-
-          .words-container {
-            max-height: 35vh;
-          }
-
-          .tools-bar {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-          }
-
-          .graph-and-learn-container.with-learn-panel {
-            flex-direction: column;
-          }
-
-          .graph-area.with-learn-panel {
-            flex: none;
-            height: 50vh;
-          }
-
-          .learn-panel-container {
-            flex: none;
-            height: 45vh;
-            padding-left: 0;
-            padding-top: 10px;
-          }
-
-          .logo-container img {
-            height: 32px;
-            width: 32px;
-          }
-
-          .logo-text {
-            font-size: 1.2rem;
-          }
-
-          .home-footer {
-            padding: 0.5rem 1rem;
-          }
-
-          .footer-links {
-            gap: 1rem;
-          }
-
-          .footer-links a {
-            font-size: 0.8rem;
           }
         }
       `}</style>
