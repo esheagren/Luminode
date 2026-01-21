@@ -75,13 +75,13 @@ export default async function handler(req, res) {
       
       // Ensure we always have a consistent format for the vector data that can be used by the measurement tool
       if (vector) {
-        // Include truncated vector in string format for visualization
+        // Include truncated vector in string format for display
         point.truncatedVector = `[${vector.slice(0, 5).join(', ')}...]`;
-        
-        // Include vector data for measurement calculations
-        // Using 10 dimensions is enough for good similarity calculations while keeping payload small
-        point.measureVector = vector.slice(0, 10);
-        
+
+        // Include FULL vector for accurate similarity calculations
+        // Using only partial vectors leads to misleading similarity values
+        point.measureVector = vector;
+
         // Log vector information for debugging
         console.log(`[API] Vector for "${word}": ${point.truncatedVector} (${vector.length} dimensions)`);
       } else {

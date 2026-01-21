@@ -94,11 +94,14 @@ router.post('/getVectorCoordinates', async (req, res) => {
     // Format the response
     const formattedResult = result.words.map((word, index) => {
       const truncatedVector = result.truncatedVectors ? result.truncatedVectors[word] : null;
+      // Include full vector for accurate similarity measurement
+      const fullVector = result.vectors ? result.vectors[index] : null;
       const point = {
         word: word,
-        truncatedVector: truncatedVector // Include the truncated vector string
+        truncatedVector: truncatedVector, // Truncated string for display
+        measureVector: fullVector // Full vector for similarity calculations
       };
-      
+
       // Add coordinates based on dimensions
       if (projectionDimensions === 2) {
         point.x = result.coordinates[index][0];
@@ -108,7 +111,7 @@ router.post('/getVectorCoordinates', async (req, res) => {
         point.y = result.coordinates[index][1];
         point.z = result.coordinates[index][2];
       }
-      
+
       return point;
     });
     
