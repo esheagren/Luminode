@@ -169,11 +169,53 @@ const VectorGraph = ({
               sliceSource = sliceWord.sliceSource || null;
               similarity = sliceWord.similarity || null;
               distance = sliceWord.distance || null;
-              
+
               console.log(`Found slice word ${point.word} with level ${sliceLevel}`, sliceWord);
             }
           }
-          
+
+          // Check if this point is part of a linear path result
+          const linearPathCluster = midpointWords.find(cluster =>
+            cluster.type === 'linearPath' &&
+            cluster.words.some(w => w.word === point.word)
+          );
+
+          let isLinearPath = false;
+          let linearPathIndex = null;
+          let linearPathEndpoint = false;
+
+          if (linearPathCluster) {
+            const linearPathWord = linearPathCluster.words.find(w => w.word === point.word);
+            if (linearPathWord) {
+              isLinearPath = !!linearPathWord.isLinearPath;
+              linearPathIndex = linearPathWord.pathIndex;
+              linearPathEndpoint = !!linearPathWord.isEndpoint;
+
+              console.log(`Found linear path word ${point.word} at index ${linearPathIndex}`, linearPathWord);
+            }
+          }
+
+          // Check if this point is part of a greedy path result
+          const greedyPathCluster = midpointWords.find(cluster =>
+            cluster.type === 'greedyPath' &&
+            cluster.words.some(w => w.word === point.word)
+          );
+
+          let isGreedyPath = false;
+          let greedyPathIndex = null;
+          let greedyPathEndpoint = false;
+
+          if (greedyPathCluster) {
+            const greedyPathWord = greedyPathCluster.words.find(w => w.word === point.word);
+            if (greedyPathWord) {
+              isGreedyPath = !!greedyPathWord.isGreedyPath;
+              greedyPathIndex = greedyPathWord.pathIndex;
+              greedyPathEndpoint = !!greedyPathWord.isEndpoint;
+
+              console.log(`Found greedy path word ${point.word} at index ${greedyPathIndex}`, greedyPathWord);
+            }
+          }
+
           return {
             ...point, // Includes word, x, y, [z], truncatedVector from API
             isAnalogy,
@@ -183,13 +225,16 @@ const VectorGraph = ({
             midpointSource,
             isSlice,
             isMainPoint,
-            isEndpoint,
+            isEndpoint: isEndpoint || linearPathEndpoint || greedyPathEndpoint,
             sliceLevel,
             sliceIndex,
             sliceDepth,
             sliceSource,
             similarity,
-            distance
+            distance,
+            isLinearPath,
+            pathIndex: linearPathIndex ?? greedyPathIndex,
+            isGreedyPath
           };
         });
         
