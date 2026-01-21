@@ -457,6 +457,70 @@ router.post('/findGreedyPath', async (req, res) => {
   }
 });
 
+// Debug endpoint to test similarity calculation
+router.post('/debugSimilarity', async (req, res) => {
+  console.log(`[API /debugSimilarity] Received request`);
+  try {
+    const { word1, word2 } = req.body;
+
+    if (!word1 || !word2) {
+      return res.status(400).json({ error: 'Both words are required' });
+    }
+
+    const { cosineSimilarity } = await import('../utils/mathHelpers.js');
+
+    // Get vectors
+    const vector1 = await vectorService.getWordVector(word1);
+    const vector2 = await vectorService.getWordVector(word2);
+
+    if (!vector1 || !vector2) {
+      return res.status(404).json({ error: 'One or both words not found' });
+    }
+
+    // Compute similarity
+    const similarity = cosineSimilarity(vector1, vector2);
+
+    // Compute vector statistics
+    const stats1 = {
+      length: vector1.length,
+      min: Math.min(...vector1),
+      max: Math.max(...vector1),
+      mean: vector1.reduce((a, b) => a + b, 0) / vector1.length,
+      magnitude: Math.sqrt(vector1.reduce((a, b) => a + b * b, 0)),
+      sample: vector1.slice(0, 10)
+    };
+
+    const stats2 = {
+      length: vector2.length,
+      min: Math.min(...vector2),
+      max: Math.max(...vector2),
+      mean: vector2.reduce((a, b) => a + b, 0) / vector2.length,
+      magnitude: Math.sqrt(vector2.reduce((a, b) => a + b * b, 0)),
+      sample: vector2.slice(0, 10)
+    };
+
+    // Compute dot product components
+    let dotProduct = 0;
+    for (let i = 0; i < vector1.length; i++) {
+      dotProduct += vector1[i] * vector2[i];
+    }
+
+    res.json({
+      word1,
+      word2,
+      similarity,
+      similarityPercent: (similarity * 100).toFixed(2) + '%',
+      dotProduct,
+      vector1Stats: stats1,
+      vector2Stats: stats2
+    });
+
+  } catch (error) {
+    console.error('[API /debugSimilarity] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Helper function to generate appropriate response message
 function generateResponseMessage(word1, word2, word1Exists, word2Exists) {
   if (!word1Exists && !word2Exists) {
