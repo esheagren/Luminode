@@ -477,6 +477,15 @@ router.post('/debugSimilarity', async (req, res) => {
       return res.status(404).json({ error: 'One or both words not found' });
     }
 
+    // Validate vector dimensions match
+    if (vector1.length !== vector2.length) {
+      return res.status(500).json({
+        error: 'Vector dimension mismatch',
+        vector1Length: vector1.length,
+        vector2Length: vector2.length
+      });
+    }
+
     // Compute similarity
     const similarity = cosineSimilarity(vector1, vector2);
 

@@ -410,8 +410,10 @@ class VectorService {
         }
 
         // Check if we're making progress (prevent getting stuck in local maximum)
-        if (bestSimilarity <= previousBestSimilarity * 0.999) {
-          console.log(`[Service findGreedyPath] No improvement at hop ${hop}, terminating`);
+        // Use absolute difference since llama embeddings have compressed similarity range (80-100%)
+        const improvement = bestSimilarity - previousBestSimilarity;
+        if (improvement < 0.001) {
+          console.log(`[Service findGreedyPath] No improvement at hop ${hop} (delta: ${improvement.toFixed(4)}), terminating`);
           break;
         }
 
@@ -427,8 +429,9 @@ class VectorService {
         previousBestSimilarity = bestSimilarity;
 
         // Early termination if very close to target
-        if (bestSimilarity > 0.95) {
-          console.log(`[Service findGreedyPath] Early termination - high similarity (${bestSimilarity})`);
+        // Threshold set to 0.99 since llama embeddings have compressed similarity range (80-100%)
+        if (bestSimilarity > 0.99) {
+          console.log(`[Service findGreedyPath] Early termination - high similarity (${bestSimilarity.toFixed(4)})`);
           break;
         }
       }

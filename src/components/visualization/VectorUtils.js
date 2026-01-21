@@ -128,10 +128,29 @@ export const calculateCosineSimilarity = (vector1, vector2) => {
   return dotProduct / (magnitude1 * magnitude2);
 };
 
+// Normalize similarity from compressed range (0.80-1.0) to intuitive (0-100%)
+// The llama-text-embed-v2 model produces embeddings where unrelated words
+// have ~80% similarity, so we rescale to make the range more meaningful
+export const normalizeSimilarity = (rawSimilarity) => {
+  if (rawSimilarity === null) return null;
+
+  // Baseline similarity for unrelated words in llama embeddings
+  const BASELINE = 0.80;
+
+  // Normalize: 0.80 -> 0%, 1.0 -> 100%
+  const normalized = (rawSimilarity - BASELINE) / (1.0 - BASELINE);
+
+  // Clamp to 0-1 range (in case some pairs are below baseline)
+  return Math.max(0, Math.min(1, normalized));
+};
+
 // Format similarity value for display
 export const formatSimilarity = (similarity) => {
   if (similarity === null) return 'N/A';
-  
-  // Convert to percentage with 2 decimal places
-  return `${(similarity * 100).toFixed(2)}%`;
+
+  // Normalize from compressed range to intuitive 0-100%
+  const normalized = normalizeSimilarity(similarity);
+
+  // Convert to percentage with 1 decimal place
+  return `${(normalized * 100).toFixed(1)}%`;
 }; 
