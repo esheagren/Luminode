@@ -21,6 +21,14 @@
       "memory": 512,
       "maxDuration": 30
     },
+    "api/findLinearPath.js": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/findGreedyPath.js": {
+      "memory": 512,
+      "maxDuration": 60
+    },
     "api/findNeighbors.js": {
       "memory": 256,
       "maxDuration": 10
