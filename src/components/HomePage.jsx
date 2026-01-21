@@ -403,6 +403,10 @@ const HomePage = () => {
                       const newWords = [...words];
                       newWords.splice(index, 1);
                       setWords(newWords);
+                      // Clear related clusters when all words are removed
+                      if (newWords.length === 0) {
+                        setRelatedClusters([]);
+                      }
                     }}
                   >
                     ×
@@ -835,6 +839,10 @@ const HomePage = () => {
                         const newWords = [...words];
                         newWords.splice(index, 1);
                         setWords(newWords);
+                        // Clear related clusters when all words are removed
+                        if (newWords.length === 0) {
+                          setRelatedClusters([]);
+                        }
                       }}
                     >
                       ×

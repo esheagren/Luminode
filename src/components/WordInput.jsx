@@ -147,12 +147,16 @@ const WordInput = ({
           {words.map((word, index) => (
             <div key={`word-${index}`} className="word-tag">
               {word}
-              <button 
-                className="remove-word" 
+              <button
+                className="remove-word"
                 onClick={() => {
                   const newWords = [...words];
                   newWords.splice(index, 1);
                   setWords(newWords);
+                  // Clear related clusters when all words are removed
+                  if (newWords.length === 0 && setRelatedClusters) {
+                    setRelatedClusters([]);
+                  }
                 }}
               >
                 ×
