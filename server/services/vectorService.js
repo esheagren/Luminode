@@ -459,6 +459,82 @@ class VectorService {
       throw error;
     }
   }
+  /**
+   * Project words onto a semantic axis defined by two endpoint words.
+   * Returns a normalized position (0 = axisWord1, 1 = axisWord2) and
+   * perpendicular distance (how far off-axis the word is).
+   */
+  async findAxisProjection(axisWord1, axisWord2, wordsToProject) {
+    console.log(`[Service findAxisProjection] Projecting ${wordsToProject.length} words onto "${axisWord1}" → "${axisWord2}"`);
+
+    try {
+      await this.initialize();
+
+      const vec1 = await this.getWordVector(axisWord1);
+      const vec2 = await this.getWordVector(axisWord2);
+
+      if (!vec1 || !vec2) {
+        throw new Error(`Axis word vectors not found: '${axisWord1}', '${axisWord2}'`);
+      }
+
+      // Compute direction vector and its magnitude
+      const direction = vec1.map((v, i) => vec2[i] - v);
+      let magnitude = 0;
+      for (let i = 0; i < direction.length; i++) {
+        magnitude += direction[i] * direction[i];
+      }
+      magnitude = Math.sqrt(magnitude);
+
+      if (magnitude === 0) {
+        throw new Error('Axis words have identical vectors');
+      }
+
+      // Normalize direction
+      const dirNorm = direction.map(v => v / magnitude);
+
+      const projections = [];
+
+      for (const word of wordsToProject) {
+        const vecWord = await this.getWordVector(word);
+        if (!vecWord) {
+          console.warn(`[Service findAxisProjection] Skipping "${word}" — not found`);
+          continue;
+        }
+
+        // Displacement from axis origin
+        const disp = vecWord.map((v, i) => v - vec1[i]);
+
+        // Scalar projection along axis
+        let scalarProjection = 0;
+        for (let i = 0; i < disp.length; i++) {
+          scalarProjection += disp[i] * dirNorm[i];
+        }
+
+        // Normalized position: 0 = axisWord1, 1 = axisWord2
+        const position = scalarProjection / magnitude;
+
+        // Perpendicular distance (how far off-axis)
+        let perpDistSq = 0;
+        for (let i = 0; i < disp.length; i++) {
+          const perpComponent = disp[i] - scalarProjection * dirNorm[i];
+          perpDistSq += perpComponent * perpComponent;
+        }
+        const perpendicularDistance = Math.sqrt(perpDistSq);
+
+        projections.push({ word, position, perpendicularDistance });
+      }
+
+      // Sort by position along axis
+      projections.sort((a, b) => a.position - b.position);
+
+      console.log(`[Service findAxisProjection] Computed ${projections.length} projections`);
+
+      return { axisWord1, axisWord2, projections };
+    } catch (error) {
+      console.error(`[Service findAxisProjection] Error:`, error);
+      throw error;
+    }
+  }
 }
 
 // Create a singleton instance

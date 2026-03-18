@@ -4,12 +4,14 @@ import AnalogySelection from './AnalogySelection';
 import SliceSelection from './SliceSelection';
 import LinearPathSelection from './LinearPathSelection';
 import GreedyPathSelection from './GreedyPathSelection';
+import ProjectionSelection from './ProjectionSelection';
 import ViewButton from './ViewButton';
 import { findMidpoint, processMidpointResults } from '../utils/vectorCalculation';
 import { findAnalogy } from '../utils/findAnalogy';
 import { findSlice, processSliceResults } from '../utils/sliceCalculation';
 import { findLinearPath, processLinearPathResults } from '../utils/linearPathCalculation';
 import { findGreedyPath, processGreedyPathResults } from '../utils/greedyPathCalculation';
+import { findAxisProjection, processAxisProjectionResults } from '../utils/axisProjectionCalculation';
 import { findNeighbors, processNeighborsResults } from '../utils/findNeighbors';
 import { createToolbarTooltip, removeToolbarTooltip } from './ToolbarTooltip';
 import './ToolbarStyles.css';
@@ -54,6 +56,18 @@ const LinearPathIcon = () => (
     <circle cx="9" cy="12" r="1" fill="currentColor"></circle>
     <circle cx="12" cy="12" r="1" fill="currentColor"></circle>
     <circle cx="15" cy="12" r="1" fill="currentColor"></circle>
+  </svg>
+);
+
+const ProjectionIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="3" y1="20" x2="21" y2="4"></line>
+    <circle cx="3" cy="20" r="1.5" fill="currentColor"></circle>
+    <circle cx="21" cy="4" r="1.5" fill="currentColor"></circle>
+    <line x1="8" y1="6" x2="9.5" y2="13.5" strokeDasharray="2 2"></line>
+    <circle cx="8" cy="6" r="1.5" fill="currentColor" opacity="0.6"></circle>
+    <line x1="16" y1="18" x2="14.5" y2="11" strokeDasharray="2 2"></line>
+    <circle cx="16" cy="18" r="1.5" fill="currentColor" opacity="0.6"></circle>
   </svg>
 );
 
@@ -128,6 +142,8 @@ const Tools = ({
   setLinearPathMode,
   greedyPathMode,
   setGreedyPathMode,
+  projectionMode,
+  setProjectionMode,
   learnMode,
   setLearnMode,
   setActiveTool,
@@ -172,6 +188,9 @@ const Tools = ({
       } else if (tab === 'greedyPath') {
         console.log('Toggling greedy path mode');
         toggleGreedyPathMode();
+      } else if (tab === 'projection') {
+        console.log('Toggling projection mode');
+        toggleProjectionMode();
       } else {
         setShowContent(!showContent);
       }
@@ -217,6 +236,13 @@ const Tools = ({
         setSelectedPoints([]);
       }
 
+      // Cancel projection mode when switching away from projection tab
+      if (projectionMode && tab !== 'projection') {
+        console.log('Canceling projection mode due to tab switch');
+        setProjectionMode(false);
+        setSelectedPoints([]);
+      }
+
       // Activate the appropriate mode for the tab
       if (tab === 'analogy' && !analogyMode) {
         console.log('Activating analogy mode on tab switch');
@@ -230,6 +256,9 @@ const Tools = ({
       } else if (tab === 'greedyPath' && !greedyPathMode) {
         console.log('Activating greedy path mode on tab switch');
         toggleGreedyPathMode();
+      } else if (tab === 'projection' && !projectionMode) {
+        console.log('Activating projection mode on tab switch');
+        toggleProjectionMode();
       }
     }
   };
@@ -804,6 +833,71 @@ const Tools = ({
     setSelectedPoints([]);
   };
 
+  // Toggle projection mode
+  const toggleProjectionMode = () => {
+    if (projectionMode) {
+      setProjectionMode(false);
+      setSelectedPoints([]);
+    } else {
+      setSelectionMode(false);
+      setAnalogyMode(false);
+      setSliceMode(false);
+      setLinearPathMode(false);
+      setGreedyPathMode(false);
+      setProjectionMode(true);
+      setSelectedPoints([]);
+    }
+  };
+
+  // Find axis projection for the selected points
+  const findAxisProjectionForSelectedPoints = async () => {
+    if (selectedPoints.length < 3) {
+      setError('Select two axis words and at least one word to project');
+      return;
+    }
+
+    const axisWord1 = selectedPoints[0];
+    const axisWord2 = selectedPoints[1];
+    const wordsToProject = selectedPoints.slice(2);
+    console.log(`Projecting [${wordsToProject.join(', ')}] onto axis "${axisWord1}" → "${axisWord2}"`);
+
+    setIsCalculating(true);
+    setError(null);
+
+    try {
+      const results = await findAxisProjection(axisWord1, axisWord2, wordsToProject);
+      console.log('Axis projection results received:', results);
+
+      const projectionCluster = processAxisProjectionResults(results, axisWord1, axisWord2);
+      console.log('Processed axis projection cluster:', projectionCluster);
+
+      debugSetMidpointClusters([projectionCluster]);
+      setProjectionMode(false);
+    } catch (error) {
+      console.error('Error finding axis projection:', error);
+
+      let errorMessage = 'Failed to calculate axis projection';
+      if (error.message.includes('timeout') || error.message.includes('Network Error')) {
+        errorMessage = 'Connection timed out. Please check your network and server status.';
+      } else {
+        errorMessage = `Failed to calculate projection: ${error.message}`;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  const resetProjectionSelection = () => {
+    setSelectedPoints([]);
+  };
+
+  const cancelProjectionSelection = () => {
+    setProjectionMode(false);
+    setSelectedPoints([]);
+  };
+
   // Handle finding neighbors for all words in the visualization
   const handleNeighborsToggle = async () => {
     // Prevent toggling while already loading
@@ -881,6 +975,8 @@ const Tools = ({
         setActiveTool('Analogy');
       } else if (sliceMode) {
         setActiveTool('Slice');
+      } else if (projectionMode) {
+        setActiveTool('Projection');
       } else {
         setActiveTool('Vector Embeddings');
       }
@@ -956,6 +1052,18 @@ const Tools = ({
           onReset={resetGreedyPathSelection}
           onCancel={cancelGreedyPathSelection}
           onCalculate={findGreedyPathForSelectedPoints}
+          loading={isCalculating}
+        />
+      );
+    }
+
+    if (projectionMode) {
+      return (
+        <ProjectionSelection
+          selectedPoints={selectedPoints}
+          onReset={resetProjectionSelection}
+          onCancel={cancelProjectionSelection}
+          onCalculate={findAxisProjectionForSelectedPoints}
           loading={isCalculating}
         />
       );
@@ -1062,6 +1170,20 @@ const Tools = ({
           >
             <GreedyPathIcon />
             <span>{greedyPathMode ? `Greedy (${selectedPoints.length}/2)` : "Greedy"}</span>
+          </button>
+
+          <button
+            className={`icon-button ${activeTab === 'projection' ? 'active' : ''} ${projectionMode ? 'projection-active' : ''}`}
+            onClick={() => {
+              handleTabClick('projection');
+              trackToolActivity('Projection');
+            }}
+            disabled={loading || selectionMode || analogyMode || sliceMode || linearPathMode || greedyPathMode}
+            onMouseEnter={(e) => createToolbarTooltip('Projection', e)}
+            onMouseLeave={() => removeToolbarTooltip()}
+          >
+            <ProjectionIcon />
+            <span>{projectionMode ? `Project (${selectedPoints.length})` : "Project"}</span>
           </button>
 
           <div className="spacer"></div>

@@ -530,6 +530,42 @@ router.post('/debugSimilarity', async (req, res) => {
   }
 });
 
+// Endpoint to project words onto a semantic axis
+router.post('/findAxisProjection', async (req, res) => {
+  console.log(`[API /findAxisProjection] Received request`);
+  try {
+    const { axisWord1, axisWord2, wordsToProject } = req.body;
+
+    console.log(`[API /findAxisProjection] Body:`, { axisWord1, axisWord2, wordsToProject });
+
+    if (!axisWord1 || !axisWord2) {
+      return res.status(400).json({ error: 'Both axis words are required' });
+    }
+    if (!wordsToProject || !Array.isArray(wordsToProject) || wordsToProject.length === 0) {
+      return res.status(400).json({ error: 'At least one word to project is required' });
+    }
+
+    // Check axis words exist
+    const axis1Exists = await vectorService.wordExists(axisWord1);
+    const axis2Exists = await vectorService.wordExists(axisWord2);
+
+    if (!axis1Exists || !axis2Exists) {
+      const message = generateResponseMessage(axisWord1, axisWord2, axis1Exists, axis2Exists);
+      return res.status(404).json({ error: message });
+    }
+
+    const results = await vectorService.findAxisProjection(axisWord1, axisWord2, wordsToProject);
+
+    res.json({
+      message: 'Axis projection calculated successfully',
+      data: results
+    });
+  } catch (error) {
+    console.error('[API /findAxisProjection] Error:', error);
+    res.status(500).json({ error: 'Failed to calculate axis projection: ' + error.message });
+  }
+});
+
 // Helper function to generate appropriate response message
 function generateResponseMessage(word1, word2, word1Exists, word2Exists) {
   if (!word1Exists && !word2Exists) {
