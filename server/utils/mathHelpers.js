@@ -143,26 +143,30 @@ export async function performPCA(vectors, dimensions = 2) {
     }
     normalize(pc);
     
-    // Power iteration (fewer iterations to save memory)
-    for (let iter = 0; iter < 8; iter++) {
+    // Power iteration — 25 iterations for reliable convergence in high-dimensional spaces.
+    // (Previously 8, which was insufficient for 1024-dimensional vectors.)
+    for (let iter = 0; iter < 25; iter++) {
       // Apply covariance operator
       const newPc = matrixVectorProduct(pc);
-      
-      // Make orthogonal to previous components
+
+      // Gram-Schmidt: make orthogonal to previous components, then re-normalize
+      // to prevent numerical instability from accumulating small magnitudes.
       for (let p = 0; p < d; p++) {
         const prevPc = principalComponents[p];
         let dot = 0;
         for (let i = 0; i < vectorDim; i++) {
           dot += newPc[i] * prevPc[i];
         }
-        
+
         for (let i = 0; i < vectorDim; i++) {
           newPc[i] -= dot * prevPc[i];
         }
       }
-      
-      // Copy back to pc (reusing memory)
+
+      // Normalize after orthogonalization to maintain unit length
       normalize(newPc);
+
+      // Copy back to pc (reusing memory)
       for (let i = 0; i < vectorDim; i++) {
         pc[i] = newPc[i];
       }

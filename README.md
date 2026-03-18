@@ -17,7 +17,7 @@ The application uses:
 - React with Vite for the frontend
 - Express.js for the backend API
 - Pinecone vector database for cloud-based vector storage and search
-- GloVe word embeddings (200-dimensional vectors)
+- Llama Text Embed v2 word embeddings (1024-dimensional vectors, generated via Pinecone's integrated inference)
 - Memory-optimized PCA implementation for visualization
 - Three.js for 3D rendering of vector spaces
 
@@ -52,7 +52,7 @@ The application uses:
 To use Pinecone vector database:
 
 1. Create an account on [Pinecone](https://www.pinecone.io/)
-2. Create an index named "quickstart" with 200 dimensions and metric "cosine"
+2. Create an index named "quickstart" using the `llama-text-embed-v2` embedding model (1024 dimensions, cosine metric)
 3. Add your Pinecone API key to both `.env` files
 4. Load embeddings into Pinecone:
    ```

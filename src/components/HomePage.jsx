@@ -29,6 +29,7 @@ const HomePage = () => {
   const [words, setWords] = useState([]);
   const [relatedClusters, setRelatedClusters] = useState([]);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [numNeighbors] = useState(5); // Default to 5 neighbors
   const [viewMode, setViewMode] = useState('2D'); // Default to 2D view
   const [rulerActive, setRulerActive] = useState(false);
@@ -86,19 +87,8 @@ const HomePage = () => {
     setShowIntroModal(false);
   };
   
-  // Debug: Log the state functions
-  console.log('HomePage component:', {
-    setRelatedClustersType: typeof setRelatedClusters
-  });
-  
-  // Add effect to monitor relatedClusters changes
-  useEffect(() => {
-    console.log('relatedClusters changed:', relatedClusters);
-  }, [relatedClusters]);
-  
-  // Create a debug wrapper for setRelatedClusters
-  const debugSetRelatedClusters = (newClusters) => {
-    console.log('Setting related clusters:', newClusters);
+  // Wrapper for setRelatedClusters (previously had debug logging)
+  const updateRelatedClusters = (newClusters) => {
     setRelatedClusters(newClusters);
   };
 
@@ -197,95 +187,47 @@ const HomePage = () => {
     }
   };
   
-  // Toggle selection mode
-  const setPointSelectionMode = (active) => {
-    setSelectionMode(active);
-    if (!active) {
-      setSelectedPoints([]);
-    }
+  // Unified selection mode setter — activates one mode and deactivates all others.
+  // This replaces five nearly-identical functions that each had to know about every other mode.
+  const setToolSelectionMode = (mode, active, step = 0) => {
+    const modes = {
+      selection: setSelectionMode,
+      analogy: setAnalogyMode,
+      slice: setSliceMode,
+      linearPath: setLinearPathMode,
+      greedyPath: setGreedyPathMode,
+    };
 
-    // Ensure other modes are off when selection mode is on
-    if (active) {
-      setAnalogyMode(false);
-      setAnalogyStep(0);
-      setSliceMode(false);
-      setLinearPathMode(false);
-      setGreedyPathMode(false);
-    }
-  };
+    // Set the target mode
+    modes[mode](active);
 
-  // Set analogy mode
-  const setAnalogySelectionMode = (active, step = 0) => {
-    setAnalogyMode(active);
-    setAnalogyStep(step);
-
-    if (!active) {
-      setSelectedPoints([]);
-      setIsSearchingAnalogy(false);
+    // Analogy has extra state
+    if (mode === 'analogy') {
+      setAnalogyStep(step);
+      if (!active) setIsSearchingAnalogy(false);
     }
-
-    // Ensure other modes are off when analogy mode is on
-    if (active) {
-      setSelectionMode(false);
-      setSliceMode(false);
-      setLinearPathMode(false);
-      setGreedyPathMode(false);
-    }
-  };
-  
-  // Set slice mode
-  const setSliceSelectionMode = (active) => {
-    setSliceMode(active);
 
     if (!active) {
       setSelectedPoints([]);
     }
 
-    // Ensure other modes are off when slice mode is on
+    // Turn off all other modes when activating
     if (active) {
-      setSelectionMode(false);
-      setAnalogyMode(false);
-      setAnalogyStep(0);
-      setLinearPathMode(false);
-      setGreedyPathMode(false);
-    }
-  };
-
-  // Set linear path mode
-  const setLinearPathSelectionMode = (active) => {
-    setLinearPathMode(active);
-
-    if (!active) {
       setSelectedPoints([]);
-    }
-
-    // Ensure other modes are off when linear path mode is on
-    if (active) {
-      setSelectionMode(false);
-      setAnalogyMode(false);
-      setAnalogyStep(0);
-      setSliceMode(false);
-      setGreedyPathMode(false);
+      for (const [key, setter] of Object.entries(modes)) {
+        if (key !== mode) setter(false);
+      }
+      // Always reset analogy step when switching away from analogy
+      if (mode !== 'analogy') setAnalogyStep(0);
     }
   };
 
-  // Set greedy path mode
-  const setGreedyPathSelectionMode = (active) => {
-    setGreedyPathMode(active);
-
-    if (!active) {
-      setSelectedPoints([]);
-    }
-
-    // Ensure other modes are off when greedy path mode is on
-    if (active) {
-      setSelectionMode(false);
-      setAnalogyMode(false);
-      setAnalogyStep(0);
-      setSliceMode(false);
-      setLinearPathMode(false);
-    }
-  };
+  // Convenience wrappers to preserve the existing prop interface
+  const setPointSelectionMode = (active) => setToolSelectionMode('selection', active);
+  const setAnalogySelectionMode = (active, step = 0) => setToolSelectionMode('analogy', active, step);
+  const setSliceSelectionMode = (active) => setToolSelectionMode('slice', active);
+  const setLinearPathSelectionMode = (active) => setToolSelectionMode('linearPath', active);
+  const setGreedyPathSelectionMode = (active) => setToolSelectionMode('greedyPath', active);
   
   // Updated set searching analogy state
   const setSearchingAnalogy = (isSearching) => {
@@ -436,10 +378,10 @@ const HomePage = () => {
           <Tools
             words={words}
             numMidpoints={numNeighbors}
-            setMidpointClusters={debugSetRelatedClusters}
-            setLoading={setError}
+            setMidpointClusters={updateRelatedClusters}
+            setLoading={setIsLoading}
             setError={setError}
-            loading={error}
+            loading={isLoading}
             viewMode={viewMode}
             setViewMode={setViewMode}
             rulerActive={rulerActive}
@@ -873,10 +815,10 @@ const HomePage = () => {
             <Tools
               words={words}
               numMidpoints={numNeighbors}
-              setMidpointClusters={debugSetRelatedClusters}
-              setLoading={setError}
+              setMidpointClusters={updateRelatedClusters}
+              setLoading={setIsLoading}
               setError={setError}
-              loading={error}
+              loading={isLoading}
               viewMode={viewMode}
               setViewMode={setViewMode}
               rulerActive={rulerActive}

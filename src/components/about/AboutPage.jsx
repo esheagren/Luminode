@@ -78,7 +78,7 @@ const AboutPage = () => {
               <p>
                 Luminode is built with React and Vite for the frontend, Express.js for the backend API, 
                 and uses Pinecone vector database for cloud-based vector storage and search. The application 
-                utilizes GloVe word embeddings (200-dimensional vectors) and employs memory-optimized PCA 
+                utilizes Llama Text Embed v2 word embeddings (1024-dimensional vectors, generated via Pinecone's integrated inference) and employs memory-optimized PCA
                 implementation for visualization with Three.js for 3D rendering.
               </p>
             </div>
