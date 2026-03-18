@@ -8,16 +8,7 @@ dotenv.config();
 export default async function handler(req, res) {
   console.log(`[API] debugSimilarity called: ${req.method}`);
 
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
-
-  // Handle OPTIONS method for preflight requests
+  // CORS headers are set at the platform level in vercel.json
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
