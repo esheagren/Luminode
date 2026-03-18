@@ -285,7 +285,8 @@ const VectorGraph2D = ({
         point.isEndpoint,
         point.sliceLevel,
         point.isLinearPath,
-        point.isGreedyPath
+        point.isGreedyPath,
+        point.isAxisProjection
       );
       ctx.fill();
       
@@ -320,6 +321,9 @@ const VectorGraph2D = ({
 
     // Draw greedy path lines if greedy path points exist
     drawGreedyPathLines(ctx, pointsRef.current);
+
+    // Draw axis projection lines if axis projection points exist
+    drawAxisProjectionLines(ctx, pointsRef.current);
 
     // Draw analogy selection lines if in analogy mode
     if (analogyMode && selectedPoints.length > 0) {
@@ -960,6 +964,87 @@ const VectorGraph2D = ({
       ctx.fillStyle = '#81C784';
       ctx.fill();
     }
+  };
+
+  // Function to draw axis projection visualization — dashed axis line + perpendicular drop lines
+  const drawAxisProjectionLines = (ctx, points) => {
+    const projPoints = points.filter(point => point.isAxisProjection);
+    if (projPoints.length < 2) return;
+
+    const endpoints = projPoints.filter(p => p.isEndpoint);
+    const projected = projPoints.filter(p => !p.isEndpoint);
+
+    if (endpoints.length < 2) return;
+
+    const axisStart = endpoints[0];
+    const axisEnd = endpoints[1];
+
+    // Draw dashed axis line
+    ctx.beginPath();
+    ctx.setLineDash([8, 4]);
+    ctx.moveTo(axisStart.x, axisStart.y);
+    ctx.lineTo(axisEnd.x, axisEnd.y);
+    ctx.strokeStyle = '#FF9800';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Direction arrow on axis
+    const dirX = axisEnd.x - axisStart.x;
+    const dirY = axisEnd.y - axisStart.y;
+    const axisLen = Math.sqrt(dirX * dirX + dirY * dirY);
+
+    if (axisLen > 30) {
+      const normX = dirX / axisLen;
+      const normY = dirY / axisLen;
+      const arrowX = axisStart.x + normX * axisLen * 0.85;
+      const arrowY = axisStart.y + normY * axisLen * 0.85;
+      const arrowSize = 6;
+
+      ctx.beginPath();
+      ctx.moveTo(arrowX, arrowY);
+      ctx.lineTo(
+        arrowX - arrowSize * (normX + normY * 0.5),
+        arrowY - arrowSize * (normY - normX * 0.5)
+      );
+      ctx.lineTo(
+        arrowX - arrowSize * (normX - normY * 0.5),
+        arrowY - arrowSize * (normY + normX * 0.5)
+      );
+      ctx.closePath();
+      ctx.fillStyle = '#FF9800';
+      ctx.fill();
+    }
+
+    // Draw perpendicular drop lines from each projected word to the axis
+    if (axisLen === 0) return;
+    const ux = dirX / axisLen;
+    const uy = dirY / axisLen;
+
+    projected.forEach(p => {
+      // Project point onto screen-space axis line
+      const dx = p.x - axisStart.x;
+      const dy = p.y - axisStart.y;
+      const t = (dx * ux + dy * uy);
+      const projX = axisStart.x + t * ux;
+      const projY = axisStart.y + t * uy;
+
+      // Draw thin perpendicular line
+      ctx.beginPath();
+      ctx.setLineDash([3, 3]);
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(projX, projY);
+      ctx.strokeStyle = 'rgba(255, 183, 77, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw small dot at projection point on axis
+      ctx.beginPath();
+      ctx.arc(projX, projY, 3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 152, 0, 0.7)';
+      ctx.fill();
+    });
   };
 
   const drawAnalogySelectionLines = (ctx, points, selectedWords) => {

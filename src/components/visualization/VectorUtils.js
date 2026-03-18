@@ -3,7 +3,16 @@ import * as THREE from 'three';
 // Utility functions for vector visualizations
 
 // Get color for a point based on whether it's primary or not
-export const getPointColor = (word, words, isPrimary, isContextSample, isAnalogy, isSlice, isMainPoint, isEndpoint, sliceLevel, isLinearPath, isGreedyPath) => {
+export const getPointColor = (word, words, isPrimary, isContextSample, isAnalogy, isSlice, isMainPoint, isEndpoint, sliceLevel, isLinearPath, isGreedyPath, isAxisProjection) => {
+  // Axis projection points get orange coloring
+  if (isAxisProjection) {
+    if (isEndpoint) {
+      return '#FF9800'; // Deep orange for axis endpoints
+    } else {
+      return '#FFB74D'; // Light orange for projected words
+    }
+  }
+
   // Linear path points get blue coloring
   if (isLinearPath) {
     if (isEndpoint) {

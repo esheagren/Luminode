@@ -216,6 +216,29 @@ const VectorGraph = ({
             }
           }
 
+          // Check if this point is part of an axis projection result
+          const axisProjectionCluster = midpointWords.find(cluster =>
+            cluster.type === 'axisProjection' &&
+            cluster.words.some(w => w.word === point.word)
+          );
+
+          let isAxisProjection = false;
+          let axisProjectionEndpoint = false;
+          let projectionPosition = null;
+          let perpendicularDistance = null;
+
+          if (axisProjectionCluster) {
+            const projWord = axisProjectionCluster.words.find(w => w.word === point.word);
+            if (projWord) {
+              isAxisProjection = !!projWord.isAxisProjection;
+              axisProjectionEndpoint = !!projWord.isEndpoint;
+              projectionPosition = projWord.position;
+              perpendicularDistance = projWord.perpendicularDistance;
+
+              console.log(`Found axis projection word ${point.word} at position ${projectionPosition}`, projWord);
+            }
+          }
+
           return {
             ...point, // Includes word, x, y, [z], truncatedVector from API
             isAnalogy,
@@ -225,7 +248,7 @@ const VectorGraph = ({
             midpointSource,
             isSlice,
             isMainPoint,
-            isEndpoint: isEndpoint || linearPathEndpoint || greedyPathEndpoint,
+            isEndpoint: isEndpoint || linearPathEndpoint || greedyPathEndpoint || axisProjectionEndpoint,
             sliceLevel,
             sliceIndex,
             sliceDepth,
@@ -234,7 +257,10 @@ const VectorGraph = ({
             distance,
             isLinearPath,
             pathIndex: linearPathIndex ?? greedyPathIndex,
-            isGreedyPath
+            isGreedyPath,
+            isAxisProjection,
+            projectionPosition,
+            perpendicularDistance
           };
         });
         
