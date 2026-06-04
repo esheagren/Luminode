@@ -19,7 +19,7 @@ export const isProduction = () => {
  * Gets the API server URL based on the environment
  * @returns {string} The base API URL
  */
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   // Check for explicit API URL from environment
   const envApiUrl = import.meta.env.VITE_API_URL;
   if (envApiUrl) {

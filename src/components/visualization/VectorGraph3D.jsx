@@ -294,7 +294,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       // Normalize coordinates to [-scale, scale] range
       const normalizedX = ((point.x - minX) / rangeX * 2 - 1) * scale;
       const normalizedY = ((point.y - minY) / rangeY * 2 - 1) * scale;
-      const normalizedZ = ((point.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+      const normalizedZ = (((point.z || 0) - minZ) / rangeZ * 2 - 1) * scale;
       
       // Alternate approach for clearer gradient - use point color based on type
       const isPrimaryWord = words.includes(point.word);
@@ -470,11 +470,11 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
         // Normalize coordinates
         const normalizedX1 = ((point1.x - minX) / rangeX * 2 - 1) * scale;
         const normalizedY1 = ((point1.y - minY) / rangeY * 2 - 1) * scale;
-        const normalizedZ1 = ((point1.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+        const normalizedZ1 = (((point1.z || 0) - minZ) / rangeZ * 2 - 1) * scale;
         
         const normalizedX2 = ((point2.x - minX) / rangeX * 2 - 1) * scale;
         const normalizedY2 = ((point2.y - minY) / rangeY * 2 - 1) * scale;
-        const normalizedZ2 = ((point2.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+        const normalizedZ2 = (((point2.z || 0) - minZ) / rangeZ * 2 - 1) * scale;
         
         // Create line geometry with normalized coordinates
         const lineGeometry = new THREE.BufferGeometry().setFromPoints([
@@ -783,11 +783,11 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
         // Normalize coordinates
         const normalizedX1 = ((sourcePoint.x - minX) / rangeX * 2 - 1) * scale;
         const normalizedY1 = ((sourcePoint.y - minY) / rangeY * 2 - 1) * scale;
-        const normalizedZ1 = ((sourcePoint.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+        const normalizedZ1 = (((sourcePoint.z || 0) - minZ) / rangeZ * 2 - 1) * scale;
         
         const normalizedX2 = ((analogyPoint.x - minX) / rangeX * 2 - 1) * scale;
         const normalizedY2 = ((analogyPoint.y - minY) / rangeY * 2 - 1) * scale;
-        const normalizedZ2 = ((analogyPoint.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+        const normalizedZ2 = (((analogyPoint.z || 0) - minZ) / rangeZ * 2 - 1) * scale;
         
         // Create line geometry
         const lineGeometry = new THREE.BufferGeometry().setFromPoints([
@@ -822,11 +822,11 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
       // Normalize coordinates
       const normalizedX1 = ((point1.x - minX) / rangeX * 2 - 1) * scale;
       const normalizedY1 = ((point1.y - minY) / rangeY * 2 - 1) * scale;
-      const normalizedZ1 = ((point1.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+      const normalizedZ1 = (((point1.z || 0) - minZ) / rangeZ * 2 - 1) * scale;
       
       const normalizedX2 = ((point2.x - minX) / rangeX * 2 - 1) * scale;
       const normalizedY2 = ((point2.y - minY) / rangeY * 2 - 1) * scale;
-      const normalizedZ2 = ((point2.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+      const normalizedZ2 = (((point2.z || 0) - minZ) / rangeZ * 2 - 1) * scale;
       
       // Create line geometry
       const lineGeometry = new THREE.BufferGeometry().setFromPoints([
@@ -896,7 +896,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     const pathVertices = linearPathPoints.map(point => {
       const normalizedX = ((point.x - minX) / rangeX * 2 - 1) * scale;
       const normalizedY = ((point.y - minY) / rangeY * 2 - 1) * scale;
-      const normalizedZ = ((point.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+      const normalizedZ = (((point.z || 0) - minZ) / rangeZ * 2 - 1) * scale;
       return new THREE.Vector3(normalizedX, normalizedY, normalizedZ);
     });
 
@@ -956,7 +956,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
     const pathVertices = greedyPathPoints.map(point => {
       const normalizedX = ((point.x - minX) / rangeX * 2 - 1) * scale;
       const normalizedY = ((point.y - minY) / rangeY * 2 - 1) * scale;
-      const normalizedZ = ((point.z || 0 - minZ) / rangeZ * 2 - 1) * scale;
+      const normalizedZ = (((point.z || 0) - minZ) / rangeZ * 2 - 1) * scale;
       return new THREE.Vector3(normalizedX, normalizedY, normalizedZ);
     });
 

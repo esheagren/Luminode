@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getApiServerUrl, getApiUrl, isProduction, logEnvironmentInfo } from '../utils/environment';
+import { getBaseUrl, getApiUrl, isProduction, logEnvironmentInfo } from '../utils/environment';
 
 // Log environment information for debugging
 logEnvironmentInfo();
@@ -7,7 +7,7 @@ logEnvironmentInfo();
 // Create axios instance with dynamic configuration
 const getApiClient = () => {
   // Get the base URL for API requests based on environment
-  const baseURL = getApiServerUrl();
+  const baseURL = getBaseUrl();
   
   // Create and configure the axios instance
   const client = axios.create({
