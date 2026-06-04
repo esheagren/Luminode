@@ -38,14 +38,11 @@ The application uses:
    ```
 3. Create a `.env` file in the root directory with the following variables:
    ```
-   VITE_API_URL=http://localhost:5001
    PINECONE_API_KEY=your_pinecone_api_key
    ```
-4. Create a `.env` file in the `server/` directory with the following variables:
-   ```
-   PORT=5001
-   PINECONE_API_KEY=your_pinecone_api_key
-   ```
+   Optionally set `VITE_API_URL` to point the frontend at a specific API origin. If
+   omitted, the frontend uses the current origin in production and `vercel dev`'s port
+   locally.
 
 ## Pinecone Setup
 
@@ -63,48 +60,26 @@ To use Pinecone vector database:
 
 ### Running the Application
 
-#### Option 1: Start both frontend and backend together (recommended)
+The API runs as Vercel serverless functions (`api/*.js`), so local development uses
+the Vercel CLI to serve the frontend and the API together:
+
 ```
-npm run dev-all
+vercel dev
 ```
-This starts the backend server on port 5001 and the frontend development server on a free port.
 
-#### Option 2: Start separately
-1. Start the server:
-   ```
-   npm run start-server
-   ```
-   This will start the server on port 5001.
+This serves both the Vite frontend and the `/api/*` functions on a single local port.
 
-2. In a separate terminal, start the client:
-   ```
-   npm run dev
-   ```
+To run only the frontend (e.g. against a deployed API origin set via `VITE_API_URL`):
 
-3. Open your browser to the URL shown in the dev terminal (typically http://localhost:5173 or another port if 5173 is in use)
-
-### Troubleshooting Connection Issues
-
-If you encounter `ERR_CONNECTION_REFUSED` errors:
-
-1. Ensure the server is running on port 5001
-   ```
-   npm run restart-server
-   ```
-
-2. Verify that both `.env` files have consistent port configurations:
-   - Root `.env`: `VITE_API_URL=http://localhost:5001`
-   - Server `.env`: `PORT=5001`
-
-3. Check the server console for port binding issues. If the server is running on a different port, update your frontend `.env` file to match.
-
-For a detailed explanation of port configuration issues and solutions, see [PORT_ISSUES.md](docs/PORT_ISSUES.md).
+```
+npm run dev
+```
 
 ### Additional Commands
 
-- `npm run restart-server` - Restart the backend server
-- `npm run stop-server` - Stop the backend server
+- `npm run build` - Build the production frontend
 - `npm run load-pinecone` - Load word embeddings into Pinecone
+- `npm run generate-embeddings` - Generate embeddings locally
 
 ## Core Functionality
 
