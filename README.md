@@ -15,7 +15,7 @@ An educational application for exploring word embeddings, finding semantic relat
 
 The application uses:
 - React with Vite for the frontend
-- Express.js for the backend API
+- Vercel serverless functions (`api/*.js`) for the backend API
 - Pinecone vector database for cloud-based vector storage and search
 - Llama Text Embed v2 word embeddings (1024-dimensional vectors, generated via Pinecone's integrated inference)
 - Memory-optimized PCA implementation for visualization
@@ -50,7 +50,7 @@ To use Pinecone vector database:
 
 1. Create an account on [Pinecone](https://www.pinecone.io/)
 2. Create an index named "quickstart" using the `llama-text-embed-v2` embedding model (1024 dimensions, cosine metric)
-3. Add your Pinecone API key to both `.env` files
+3. Add your Pinecone API key to the `.env` file
 4. Load embeddings into Pinecone:
    ```
    npm run load-pinecone
@@ -103,6 +103,10 @@ The application provides the following API endpoints:
 - `POST /api/findMidpoint` - Find the semantic midpoint between two words
 - `POST /api/findAnalogy` - Solve analogy problems
 - `POST /api/findSlice` - Find semantic path between two words
+- `POST /api/findLinearPath` - Find a linear interpolation path between two words
+- `POST /api/findGreedyPath` - Find a greedy nearest-neighbor path between two words
+- `POST /api/findAxisProjection` - Project words onto a direction/axis defined by two words
+- `POST /api/getVectorCoordinates` - Get 2D/3D PCA coordinates for a set of words
 - `POST /api/checkWord` - Check if a word exists in the embeddings
 
 ## Deployment
