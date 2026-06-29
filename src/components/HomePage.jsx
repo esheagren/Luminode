@@ -55,6 +55,14 @@ const HomePage = () => {
     }
   }, [isMobile]); // Removed sidebarOpen to prevent potential infinite loops
 
+  // Seed words handed off from the interactive textbook ("Open in explorer").
+  useEffect(() => {
+    const handoffWords = location.state?.words;
+    if (Array.isArray(handoffWords) && handoffWords.length > 0) {
+      setWords(handoffWords);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- run once on mount
+
   // Close sidebar on Escape key for accessibility
   useEffect(() => {
     const handleEscape = (e) => {
@@ -72,8 +80,11 @@ const HomePage = () => {
   // Check if this is the first visit and show intro modal
   useEffect(() => {
     const hasSeenIntro = localStorage.getItem('luminode_has_seen_intro');
+    // Don't interrupt an intentional handoff from the textbook ("Open in explorer")
+    // with onboarding — the user already arrived with words to explore.
+    const fromTextbookHandoff = location.state?.words?.length > 0;
     // Show intro modal if user hasn't seen it before or is coming from landing page
-    if (!hasSeenIntro || location.state?.fromLanding) {
+    if (!fromTextbookHandoff && (!hasSeenIntro || location.state?.fromLanding)) {
       setShowIntroModal(true);
       // Mark that the user has seen the intro
       localStorage.setItem('luminode_has_seen_intro', 'true');
