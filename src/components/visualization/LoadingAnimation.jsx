@@ -18,7 +18,7 @@ const LoadingAnimation = ({ width = 200, height = 200 }) => {
     
     let time = 0;
     
-    const draw = (timestamp) => {
+    const draw = () => {
       // Clear canvas with a very faint background to create trails
       ctx.fillStyle = 'rgba(26, 26, 46, 0.05)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -31,8 +31,6 @@ const LoadingAnimation = ({ width = 200, height = 200 }) => {
       time += 0.005;
       
       // Create a subtle pulsing effect
-      const pulseSize = Math.sin(time) * 0.1 + 0.9;
-      
       // Draw a subtle particle field - adjust number of particles based on canvas size
       const canvasArea = canvasWidth * canvasHeight;
       const baseParticles = 200;

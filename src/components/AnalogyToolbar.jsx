@@ -7,7 +7,6 @@ const AnalogyToolbar = ({
   setLoading, 
   setError, 
   loading,
-  wordsValid,
   setMidpointClusters
 }) => {
   const [selectedWords, setSelectedWords] = useState({

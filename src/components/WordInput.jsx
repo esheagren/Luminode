@@ -2,13 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 // import axios from 'axios'; // No longer needed for checkWord here
 import { useDispatch } from 'react-redux'; // Import Redux hook
 import { fetchWordData } from '../features/wordCache/wordCacheSlice'; // Import the async thunk
-import { getApiUrl } from '../utils/environment';
 
 const WordInput = ({ 
   words, 
   setWords, 
-  setResponse, 
-  setLoading, 
   setError, 
   loading,
   setRelatedClusters,
@@ -83,20 +80,6 @@ const WordInput = ({
     // directly in the JSX below now.
   };
 
-  const handleNewWordKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === 'Tab') {
-      e.preventDefault();
-      if (wordInput.trim()) {
-        // Add the new word and clear the input
-        setWords([...words, wordInput.trim()]);
-        setWordInput('');
-        
-        // Trigger submit to update the visualization
-        handleSubmit(e);
-      }
-    }
-  };
-
   // Focus the input field when the component mounts
   useEffect(() => {
     if (inputRef.current) {
@@ -115,14 +98,6 @@ const WordInput = ({
     // Use requestAnimationFrame to ensure focus happens after DOM updates
     requestAnimationFrame(focusInput);
   }, [words, wordInput, loading]);
-
-  const removeWord = (indexToRemove) => {
-    const updatedWords = words.filter((_, index) => index !== indexToRemove);
-    setWords(updatedWords);
-    
-    // Trigger submit to update the visualization after removing a word
-    handleSubmit();
-  };
 
   return (
     <div className="word-input-container">

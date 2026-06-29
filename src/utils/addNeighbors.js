@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { findNeighbors } from '../api/embedding';
 
 /**

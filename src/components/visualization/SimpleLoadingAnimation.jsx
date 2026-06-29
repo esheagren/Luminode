@@ -18,7 +18,7 @@ const SimpleLoadingAnimation = ({ width = 200, height = 200 }) => {
     
     let time = 0;
     
-    const draw = (timestamp) => {
+    const draw = () => {
       // Clear canvas with a transparent background
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       

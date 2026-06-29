@@ -112,7 +112,7 @@ const drawAnalogyProjection = (sourcePoint, referencePoint1, referencePoint2, ct
       ctx.arc(sourcePoint.x, sourcePoint.y, 10, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(156, 39, 176, 0.5)';
       ctx.fill();
-    } catch (e) {
+    } catch {
       // Silent fail if even the fallback fails
     }
   }

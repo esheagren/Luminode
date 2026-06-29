@@ -1,9 +1,5 @@
 import { Pinecone } from '@pinecone-database/pinecone';
 import dotenv from 'dotenv';
-import { cosineSimilarity } from '../utils/mathHelpers.js';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 // Load environment variables
 dotenv.config();
@@ -20,10 +16,6 @@ function logEnvironmentInfo() {
   const envVars = Object.keys(process.env).filter(key => !key.includes('KEY') && !key.includes('SECRET'));
   console.log(envVars.join(', '));
 }
-
-// Get the directory name
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Constants
 const PINECONE_INDEX_NAME = 'quickstart';
@@ -54,7 +46,7 @@ class PineconeService {
     // Log environment info for debugging
     logEnvironmentInfo();
 
-    this.initialization = new Promise(async (resolve, reject) => {
+    this.initialization = (async () => {
       try {
         console.log('Initializing Pinecone service...');
         
@@ -110,15 +102,14 @@ class PineconeService {
         
         this.isInitialized = true;
         console.log('Pinecone service initialized successfully');
-        resolve();
       } catch (error) {
         console.error('Error initializing Pinecone service:', error);
         console.error(`Error details: ${error.message}, Type: ${error.name}, Stack: ${error.stack}`);
         this.isInitialized = false;
         this.initialization = null;
-        reject(error);
+        throw error;
       }
-    });
+    })();
 
     return this.initialization;
   }
@@ -144,8 +135,6 @@ class PineconeService {
       
       console.log(`[PineconeService] Fetching vector for word: "${word}"`);
       const result = await this.namespace.fetch([word]);
-      
-      console.log(`[PineconeService] Raw Pinecone response:`, JSON.stringify(result, null, 2));
       
       if (!result.records || !result.records[word]) {
         console.log(`[PineconeService] No records found for word "${word}"`);
@@ -187,7 +176,10 @@ class PineconeService {
   }
 
   // Find nearest neighbors for a vector
-  async findVectorNeighbors(vector, numResults = 5, excludeWords = []) {
+  // includeValues: request the stored vectors back from Pinecone (needed when the
+  // caller recomputes similarities locally, e.g. findMidpoint). Off by default to
+  // avoid shipping a 1024-float vector per match on queries that don't need them.
+  async findVectorNeighbors(vector, numResults = 5, excludeWords = [], includeValues = false) {
     try {
       await this.initialize();
       
@@ -209,6 +201,7 @@ class PineconeService {
           queryResponse = await this.namespace.query({
             topK: numResults + excludeWords.length, // Add extra results to account for excluded words
             includeMetadata: true,
+            includeValues: includeValues,
             vector: vector,
             filter: { "text": { "$exists": true } }
           });
@@ -298,7 +291,7 @@ class PineconeService {
       
       // Find nearest neighbors to midpoint
       console.log(`[PineconeService] Finding nearest neighbors to midpoint...`);
-      const neighbors = await this.findVectorNeighbors(midpoint, numResults, [word1, word2]);
+      const neighbors = await this.findVectorNeighbors(midpoint, numResults, [word1, word2], true);
       console.log(`[PineconeService] Found ${neighbors.length} neighbors`);
       
       // Calculate similarities between neighbors and midpoint
@@ -473,152 +466,6 @@ class PineconeService {
     }
   }
 
-  // Find slice through vector space using recursive midpoint calculations
-  async findSlice(word1, word2, numResults = 5, maxDepth = 20, distanceThreshold = 0.99) {
-    try {
-      await this.initialize();
-      
-      // Get vectors for both words
-      const vector1 = await this.getWordVector(word1);
-      const vector2 = await this.getWordVector(word2);
-      
-      if (!vector1 || !vector2) {
-        throw new Error(`One or both word vectors not found: '${word1}', '${word2}'`);
-      }
-      
-      // Import math helpers
-      const { cosineSimilarity } = await import('../utils/mathHelpers.js');
-      
-      // Fixed cosine similarity threshold (0.98) - we don't use the parameter anymore
-      const similarityThreshold = 0.98;
-      
-      // Implement the slice algorithm
-      const slicePoints = [];
-      const visited = new Set([word1, word2]);
-      
-      // Add the two endpoint words
-      slicePoints.push({
-        word: word1,
-        isEndpoint: true,
-        isMainPoint: true,
-        depth: 0,
-        index: 0,
-        fromWords: [word1],
-        path: [word1]
-      });
-      
-      slicePoints.push({
-        word: word2,
-        isEndpoint: true,
-        isMainPoint: true,
-        depth: 0,
-        index: 1,
-        fromWords: [word2],
-        path: [word2]
-      });
-      
-      // Start with the first pair of endpoints
-      let nodePairs = [{
-        node1: { word: word1, vector: vector1, depth: 0, path: [word1] },
-        node2: { word: word2, vector: vector2, depth: 0, path: [word2] }
-      }];
-      
-      let currentIndex = 2; // Start after the two endpoints
-      
-      // Process pairs recursively until we're done
-      while (nodePairs.length > 0 && slicePoints.length < 100 && currentIndex < maxDepth + 2) {
-        const { node1, node2 } = nodePairs.shift();
-        
-        // Calculate the cosine similarity between the two nodes
-        const similarity = cosineSimilarity(node1.vector, node2.vector);
-        
-        // If the similarity is above threshold, we're done with this pair
-        if (similarity >= similarityThreshold) {
-          continue;
-        }
-        
-        // Calculate midpoint
-        const midpointVector = this.calculateMidpoint(node1.vector, node2.vector);
-        
-        // Find nearest word to the midpoint
-        const midpointNeighbors = await this.findVectorNeighbors(
-          midpointVector, 
-          numResults, 
-          Array.from(visited)
-        );
-        
-        if (midpointNeighbors.length === 0) {
-          continue;
-        }
-        
-        // Get the word closest to the midpoint
-        const midpointWord = midpointNeighbors[0].word;
-        visited.add(midpointWord);
-        
-        // Get vector for the midpoint word
-        const midpointWordVector = await this.getWordVector(midpointWord);
-        
-        // Record this midpoint
-        const midpointNode = {
-          word: midpointWord,
-          vector: midpointWordVector,
-          depth: Math.max(node1.depth, node2.depth) + 1,
-          fromWords: [node1.word, node2.word],
-          path: [...new Set([...node1.path, ...node2.path, midpointWord])]
-        };
-        
-        // Add this midpoint to the results
-        slicePoints.push({
-          word: midpointWord,
-          isMainPoint: true,
-          depth: midpointNode.depth,
-          index: currentIndex++,
-          fromWords: [node1.word, node2.word],
-          path: midpointNode.path,
-          similarity: similarity
-        });
-        
-        // Add secondary neighbors
-        midpointNeighbors.slice(1).forEach((neighbor, idx) => {
-          if (!visited.has(neighbor.word)) {
-            visited.add(neighbor.word);
-            slicePoints.push({
-              word: neighbor.word,
-              isMainPoint: false,
-              depth: midpointNode.depth,
-              index: currentIndex++,
-              fromWords: [midpointWord],
-              path: [...midpointNode.path, neighbor.word]
-            });
-          }
-        });
-        
-        // Add new pairs to explore
-        if (midpointNode.depth < maxDepth) {
-          nodePairs.push({
-            node1: node1,
-            node2: midpointNode
-          });
-          
-          nodePairs.push({
-            node1: midpointNode,
-            node2: node2
-          });
-        }
-      }
-      
-      return {
-        word1,
-        word2,
-        similarityThreshold,
-        totalPoints: slicePoints.length,
-        slicePoints
-      };
-    } catch (error) {
-      console.error(`Error finding slice between '${word1}' and '${word2}':`, error);
-      throw error;
-    }
-  }
 }
 
 // Create a singleton instance

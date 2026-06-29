@@ -12,7 +12,6 @@ const VectorGraph = ({
   midpointWords, 
   numMidpoints, 
   viewMode = '2D', 
-  setViewMode,
   rulerActive,
   selectionMode = false,
   onPointSelected = null,
@@ -24,7 +23,6 @@ const VectorGraph = ({
   const [coordinates, setCoordinates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [midpointClusters, setMidpointClusters] = useState([]);
   
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
@@ -69,7 +67,8 @@ const VectorGraph = ({
         
         const response = await axios.post(apiUrl, { 
           words: uniqueWords,
-          dimensions: viewMode === '3D' ? 3 : 2
+          dimensions: viewMode === '3D' ? 3 : 2,
+          includeMeasureVectors: rulerActive
         });
         
         console.log('API response received:', {
@@ -277,7 +276,7 @@ const VectorGraph = ({
     };
     
     fetchCoordinates();
-  }, [words, viewMode, midpointWords, numMidpoints]);
+  }, [words, viewMode, midpointWords, numMidpoints, rulerActive]);
   
   // Handle point selection
   const handlePointSelected = (word) => {

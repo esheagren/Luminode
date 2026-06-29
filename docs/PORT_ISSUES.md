@@ -2,7 +2,7 @@
 
 ## Problem
 
-The VectorMind application can experience connectivity issues between the frontend and backend with errors like `ERR_CONNECTION_REFUSED` or `Network Error` when trying to add words or perform other API operations. This document explains the causes and how to resolve them.
+The Luminode application can experience connectivity issues between the frontend and backend with errors like `ERR_CONNECTION_REFUSED` or `Network Error` when trying to add words or perform other API operations. This document explains the causes and how to resolve them.
 
 ## Root Causes
 

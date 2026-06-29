@@ -9,32 +9,23 @@ export const isProduction = () => {
     return !window.location.hostname.includes('localhost');
   }
   
-  // Server-side check
-  return process.env.NODE_ENV === 'production' || 
-         process.env.VERCEL === '1' || 
-         !!process.env.VERCEL_URL;
+  return import.meta.env.PROD;
 };
 
 /**
  * Gets the API server URL based on the environment
  * @returns {string} The base API URL
  */
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   // Check for explicit API URL from environment
   const envApiUrl = import.meta.env.VITE_API_URL;
   if (envApiUrl) {
     return envApiUrl;
   }
-  
-  // In browser environment, use current origin for production
-  if (typeof window !== 'undefined') {
-    if (!window.location.hostname.includes('localhost')) {
-      return window.location.origin;
-    }
-  }
-  
-  // Default fallback for local development
-  return 'http://localhost:5001';
+
+  // Use same-origin by default so Vercel dev, production, and Vite proxying all
+  // share the same request path. Set VITE_API_URL when the API is on another origin.
+  return '';
 };
 
 /**

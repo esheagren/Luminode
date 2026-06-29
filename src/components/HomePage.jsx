@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { fetchWordData } from '../features/wordCache/wordCacheSlice';
 import VectorGraph from './VectorGraph';
@@ -7,14 +6,13 @@ import WordInput from './WordInput';
 import Tools from './Tools';
 import ViewButton from './ViewButton';
 import SuggestedWords from './SuggestedWords';
-import { getApiUrl } from '../utils/environment';
 import { Link, useLocation } from 'react-router-dom';
-import { hasPrecomputedEmbedding, createWordResult } from '../data/wordEmbeddings';
+import { hasPrecomputedEmbedding } from '../data/wordEmbeddings';
 import LearnPanel from './learn-panel/LearnPanel';
 import IntroModal from './IntroModal';
 import luminodeLogo from '../assets/luminodeLogoSmall.png';
 import HamburgerMenu from './common/HamburgerMenu';
-import { useIsMobile, useIsTablet } from '../hooks/useMediaQuery';
+import { useIsMobile } from '../hooks/useMediaQuery';
 
 // Add reset icon component
 const ResetIcon = () => (
@@ -49,7 +47,6 @@ const HomePage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const isTablet = useIsTablet();
 
   // Close sidebar when switching from mobile to desktop
   useEffect(() => {
@@ -57,6 +54,14 @@ const HomePage = () => {
       setSidebarOpen(false);
     }
   }, [isMobile]); // Removed sidebarOpen to prevent potential infinite loops
+
+  // Seed words handed off from the interactive textbook ("Open in explorer").
+  useEffect(() => {
+    const handoffWords = location.state?.words;
+    if (Array.isArray(handoffWords) && handoffWords.length > 0) {
+      setWords(handoffWords);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- run once on mount
 
   // Close sidebar on Escape key for accessibility
   useEffect(() => {
@@ -75,8 +80,11 @@ const HomePage = () => {
   // Check if this is the first visit and show intro modal
   useEffect(() => {
     const hasSeenIntro = localStorage.getItem('luminode_has_seen_intro');
+    // Don't interrupt an intentional handoff from the textbook ("Open in explorer")
+    // with onboarding — the user already arrived with words to explore.
+    const fromTextbookHandoff = location.state?.words?.length > 0;
     // Show intro modal if user hasn't seen it before or is coming from landing page
-    if (!hasSeenIntro || location.state?.fromLanding) {
+    if (!fromTextbookHandoff && (!hasSeenIntro || location.state?.fromLanding)) {
       setShowIntroModal(true);
       // Mark that the user has seen the intro
       localStorage.setItem('luminode_has_seen_intro', 'true');
@@ -249,14 +257,6 @@ const HomePage = () => {
     setIsSearchingAnalogy(isSearching);
   };
 
-  const triggerMidpointSelection = () => {
-    // Ensure other modes are off
-    setAnalogyMode(false);
-    setSliceMode(false);
-    // Turn on midpoint selection mode
-    setSelectionMode(true);
-  };
-
   // Handle Reset functionality
   const handleReset = () => {
     console.log('Resetting all words and visualization');
@@ -320,7 +320,6 @@ const HomePage = () => {
             midpointWords={relatedClusters}
             numMidpoints={numNeighbors}
             viewMode={viewMode}
-            setViewMode={setViewMode}
             rulerActive={rulerActive}
             selectionMode={selectionMode || sliceMode || linearPathMode || greedyPathMode || projectionMode}
             onPointSelected={handlePointSelected}
@@ -438,8 +437,6 @@ const HomePage = () => {
             <WordInput
               words={words}
               setWords={setWords}
-              setResponse={setError}
-              setLoading={() => {}}
               setError={setError}
               loading={false}
               setRelatedClusters={setRelatedClusters}
@@ -776,8 +773,6 @@ const HomePage = () => {
             <WordInput
               words={words}
               setWords={setWords}
-              setResponse={setError}
-              setLoading={() => {/* No-op to prevent loading state issues */}}
               setError={setError}
               loading={false}
               setRelatedClusters={setRelatedClusters}
@@ -877,7 +872,6 @@ const HomePage = () => {
                 midpointWords={relatedClusters}
                 numMidpoints={numNeighbors}
                 viewMode={viewMode}
-                setViewMode={setViewMode}
                 rulerActive={rulerActive}
                 selectionMode={selectionMode || sliceMode || linearPathMode || greedyPathMode || projectionMode} // Treat slice mode similar to selection mode
                 onPointSelected={handlePointSelected}

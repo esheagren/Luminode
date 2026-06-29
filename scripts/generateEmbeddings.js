@@ -30,7 +30,7 @@ async function loadExistingEmbeddings() {
     if (match) {
       return JSON.parse(match[1]);
     }
-  } catch (error) {
+  } catch {
     console.log('No existing embeddings file found, starting fresh');
   }
   return {};
@@ -47,7 +47,7 @@ async function processWord(word, retryCount = 0) {
     if (response.data?.data?.word?.vector) {
       const vectorStr = response.data.data.word.vector;
       const vector = vectorStr
-        .replace(/[\[\]]/g, '')
+        .replace(/\[|\]/g, '')
         .split(',')
         .map(x => parseFloat(x.trim()))
         .filter(x => !isNaN(x));

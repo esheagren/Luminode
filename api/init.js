@@ -7,7 +7,7 @@ dotenv.config();
 
 export default function handler(req, res) {
   // Log environment status (sanitized)
-  console.log('========= VectorMind API Environment Check =========');
+  console.log('========= Luminode API Environment Check =========');
   console.log(`Runtime environment: ${process.env.NODE_ENV || 'not set'}`);
   console.log(`Vercel deployment: ${process.env.VERCEL === '1' ? 'Yes' : 'No'}`);
   console.log(`PINECONE_API_KEY: ${process.env.PINECONE_API_KEY ? 'Set (masked)' : 'NOT SET'}`);

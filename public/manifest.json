@@ -1,6 +1,6 @@
 {
-  "short_name": "VectorMind",
-  "name": "VectorMind - Word Embedding Visualization",
+  "short_name": "Luminode",
+  "name": "Luminode - Vector Database Visualization",
   "icons": [
     {
       "src": "/luminode.svg",

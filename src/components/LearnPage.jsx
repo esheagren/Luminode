@@ -7,7 +7,7 @@ import LoadingAnimation from './visualization/LoadingAnimation';
 import EssayNavigation from './learn/EssayNavigation';
 import EssayContent from './learn/EssayContent';
 import DiagramComponent from './learn/DiagramComponent';
-import { ScrollProvider, useScroll } from './learn/ScrollContext';
+import { ScrollProvider } from './learn/ScrollContext';
 
 // Import essay utilities
 import { getEssayContent, getAvailableEssays } from './learn/essayUtils';
@@ -41,7 +41,6 @@ const LearnPage = () => {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [selectedEssay, setSelectedEssay] = useState('');
   const [essayContent, setEssayContent] = useState('');
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [showNotification, setShowNotification] = useState(false);
 
   // List of available essays - prioritize the structured data format
@@ -81,7 +80,6 @@ const LearnPage = () => {
   // Function to handle essay selection with proper state reset
   const handleEssaySelect = (essay) => {
     // First reset scroll and content to prevent DOM reconciliation issues
-    setScrollPosition(0);
     setEssayContent('');
     
     // Set the selected essay after a brief delay to allow DOM to update
@@ -109,12 +107,6 @@ const LearnPage = () => {
       setEssayContent(content);
     }
   }, [selectedEssay]);
-
-  // Handle scroll events in the essay content area
-  const handleScroll = (e) => {
-    const position = e.target.scrollTop;
-    setScrollPosition(position);
-  };
 
   // Close the notification
   const handleCloseNotification = () => {
@@ -151,7 +143,6 @@ const LearnPage = () => {
           <div className="learn-content">
             <div 
               className="essay-content-container" 
-              onScroll={handleScroll} 
               ref={essayContentRef}
             >
               <EssayContent 

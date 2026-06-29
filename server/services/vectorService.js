@@ -31,8 +31,8 @@ class VectorService {
   }
 
   // Find nearest neighbors for a vector
-  async findVectorNeighbors(vector, numResults = 5, excludeWords = []) {
-    return await this.service.findVectorNeighbors(vector, numResults, excludeWords);
+  async findVectorNeighbors(vector, numResults = 5, excludeWords = [], includeValues = false) {
+    return await this.service.findVectorNeighbors(vector, numResults, excludeWords, includeValues);
   }
 
   // Calculate midpoint between two vectors
@@ -55,20 +55,10 @@ class VectorService {
     return await this.service.getVectorCoordinates(words, dimensions);
   }
 
-  // Find slices through vector space
-  async findSlice(word1, word2, numResults = 5, maxDepth = 20, distanceThreshold = 0.99) {
+  // Find slices through vector space (recursive bisection between two words)
+  async findSlice(word1, word2, numResults = 5, maxDepth = 20) {
     console.log(`[Service findSlice] Starting for "${word1}" and "${word2}"`); // Log entry
-    // First implementation delegates to the underlying service if available
-    // This check might be incorrect if pineconeService doesn't have findSlice
-    // Assuming we are using the fallback implementation below
-    /*
-    if (this.service.findSlice) {
-      console.log(`[Service findSlice] Delegating to underlying service`);
-      return await this.service.findSlice(word1, word2, numResults, maxDepth);
-    }
-    */
-    console.log(`[Service findSlice] Using vectorService implementation`);
-    
+
     // If not available in underlying service, implement it here
     try {
       await this.initialize(); // Ensure service is initialized
@@ -124,8 +114,12 @@ class VectorService {
       
       let currentIndex = 2; // Start after the two endpoints
       
-      // Process pairs recursively until we're done
-      while (nodePairs.length > 0 && slicePoints.length < 100 && currentIndex < maxDepth + 2) {
+      // Process pairs recursively until we're done.
+      // Per-branch recursion depth is bounded below by the `midpointNode.depth < maxDepth`
+      // check before queueing children; the slicePoints cap is the overall safety bound.
+      // (The old `currentIndex < maxDepth + 2` guard counted points added, not depth, so
+      // it killed the loop after ~4 iterations regardless of maxDepth.)
+      while (nodePairs.length > 0 && slicePoints.length < 100) {
         const currentPairIndex = nodePairs.length;
         const { node1, node2 } = nodePairs.shift();
         console.log(`[Service findSlice] Processing pair ${currentPairIndex}: "${node1.word}" <-> "${node2.word}" at depth ${Math.max(node1.depth, node2.depth)}`);
@@ -133,7 +127,14 @@ class VectorService {
         // Calculate the cosine similarity between the two nodes
         const similarity = cosineSimilarity(node1.vector, node2.vector);
         console.log(`[Service findSlice] Pair similarity: ${similarity.toFixed(4)}`);
-        
+
+        // If the two endpoints are already nearly identical there is no meaningful
+        // concept "between" them — stop bisecting this branch (the converged gate).
+        if (similarity >= similarityThreshold) {
+          console.log(`[Service findSlice] Pair converged (similarity ${similarity.toFixed(4)} >= ${similarityThreshold}), skipping bisection.`);
+          continue;
+        }
+
         // Calculate midpoint
         const midpointVector = this.calculateMidpoint(node1.vector, node2.vector);
         console.log(`[Service findSlice] Calculated midpoint vector.`);
@@ -188,7 +189,7 @@ class VectorService {
         
         // Add secondary neighbors
         const addedNeighbors = [];
-        midpointNeighbors.slice(1).forEach((neighbor, idx) => {
+        midpointNeighbors.slice(1).forEach((neighbor) => {
           if (!visited.has(neighbor.word)) {
             visited.add(neighbor.word);
             slicePoints.push({
