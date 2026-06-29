@@ -149,12 +149,11 @@ const MiniVisualizer = () => {
   };
   
   // Handle canvas click
-  const handleClick = (e) => {
+  const handleClick = () => {
     if (hoveredWord) {
       const canvas = canvasRef.current;
       if (!canvas) return;
       
-      const rect = canvas.getBoundingClientRect();
       const [wordX, wordY] = scaleCoordinates(sampleWordVectors[hoveredWord]);
       
       // Calculate position for the details panel
@@ -220,7 +219,7 @@ const MiniVisualizer = () => {
         // Check if click is inside the canvas but outside any word
         if (x >= 0 && x <= canvasSize.width && y >= 0 && y <= canvasSize.height) {
           let clickedOnWord = false;
-          Object.entries(sampleWordVectors).forEach(([word, vector]) => {
+          Object.values(sampleWordVectors).forEach((vector) => {
             const [wordX, wordY] = scaleCoordinates(vector);
             const distance = Math.sqrt(Math.pow(x - wordX, 2) + Math.pow(y - wordY, 2));
             

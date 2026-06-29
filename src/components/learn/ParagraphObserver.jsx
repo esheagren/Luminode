@@ -7,12 +7,10 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   const [visibilityRatio, setVisibilityRatio] = useState(0);
   const { 
     scrollDirection, 
-    visibleParagraphs, 
     seenParagraphs, 
     furthestSeenPosition,
     highestVisiblePosition,
     getPositionFromId,
-    shouldUnhighlightWhenScrollingUp,
     paragraphThresholds,
     userHasScrolled
   } = useScroll();
@@ -30,11 +28,6 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   // Get this paragraph's section id
   const sectionId = getSectionId(id);
   
-  // Check if this specific paragraph is in the visible paragraphs list
-  const isParagraphVisible = () => {
-    return visibleParagraphs.some(p => p.id === id && p.ratio > 0);
-  };
-  
   // Check if this paragraph has been seen before
   const hasBeenSeen = () => {
     return seenParagraphs.includes(id);
@@ -43,11 +36,6 @@ const ParagraphObserver = ({ id, diagramId, diagramColor, onVisibilityChange, ch
   // Check if this paragraph is above any paragraph that has been seen when scrolling down
   const isParagraphAboveViewed = () => {
     return paragraphPosition <= furthestSeenPosition;
-  };
-  
-  // Check if this paragraph is above current visible paragraphs when scrolling up
-  const isParagraphAboveCurrentlyVisible = () => {
-    return paragraphPosition <= highestVisiblePosition;
   };
   
   // Get the threshold information for this paragraph

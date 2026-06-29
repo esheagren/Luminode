@@ -189,7 +189,7 @@ class VectorService {
         
         // Add secondary neighbors
         const addedNeighbors = [];
-        midpointNeighbors.slice(1).forEach((neighbor, idx) => {
+        midpointNeighbors.slice(1).forEach((neighbor) => {
           if (!visited.has(neighbor.word)) {
             visited.add(neighbor.word);
             slicePoints.push({

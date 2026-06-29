@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { fetchWordData } from '../features/wordCache/wordCacheSlice';
 import VectorGraph from './VectorGraph';
@@ -7,14 +6,13 @@ import WordInput from './WordInput';
 import Tools from './Tools';
 import ViewButton from './ViewButton';
 import SuggestedWords from './SuggestedWords';
-import { getApiUrl } from '../utils/environment';
 import { Link, useLocation } from 'react-router-dom';
-import { hasPrecomputedEmbedding, createWordResult } from '../data/wordEmbeddings';
+import { hasPrecomputedEmbedding } from '../data/wordEmbeddings';
 import LearnPanel from './learn-panel/LearnPanel';
 import IntroModal from './IntroModal';
 import luminodeLogo from '../assets/luminodeLogoSmall.png';
 import HamburgerMenu from './common/HamburgerMenu';
-import { useIsMobile, useIsTablet } from '../hooks/useMediaQuery';
+import { useIsMobile } from '../hooks/useMediaQuery';
 
 // Add reset icon component
 const ResetIcon = () => (
@@ -49,7 +47,6 @@ const HomePage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const isTablet = useIsTablet();
 
   // Close sidebar when switching from mobile to desktop
   useEffect(() => {
@@ -247,14 +244,6 @@ const HomePage = () => {
   // Updated set searching analogy state
   const setSearchingAnalogy = (isSearching) => {
     setIsSearchingAnalogy(isSearching);
-  };
-
-  const triggerMidpointSelection = () => {
-    // Ensure other modes are off
-    setAnalogyMode(false);
-    setSliceMode(false);
-    // Turn on midpoint selection mode
-    setSelectionMode(true);
   };
 
   // Handle Reset functionality

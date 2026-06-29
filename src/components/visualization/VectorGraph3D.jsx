@@ -542,7 +542,7 @@ const VectorGraph3D = ({ coordinates, words, containerRef, rulerActive }) => {
                 if (values.length >= 50 && values.every(v => !isNaN(v))) {
                   return values;
                 }
-              } catch (e) {
+              } catch {
                 // Parsing failed, return null
               }
             }

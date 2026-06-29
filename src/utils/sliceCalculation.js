@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { getApiUrl } from './environment';
-import { euclideanDistance } from './vectorUtils';
 
 /**
  * Finds a slice (cross-section) through the vector space using recursive midpoint calculations
@@ -17,6 +16,8 @@ export const findSlice = async (
   numResults = 5,
   maxDepth = 20
 ) => {
+  const apiUrl = getApiUrl('/api/findSlice');
+
   try {
     console.log(`Finding slice between "${word1}" and "${word2}"`);
     
@@ -26,7 +27,6 @@ export const findSlice = async (
       throw new Error('Both words are required for slice calculation');
     }
     
-    const apiUrl = getApiUrl('/api/findSlice');
     console.log('API URL:', apiUrl);
     
     // Log detailed request information for debugging
@@ -167,7 +167,7 @@ export const processSliceResults = (results, word1, word2) => {
     });
     
     // For each source, find the closest neighbor
-    neighborsBySource.forEach((neighbors, sourceWord) => {
+    neighborsBySource.forEach((neighbors) => {
       // Sort by distance (ascending)
       neighbors.sort((a, b) => (a.distance || 0) - (b.distance || 0));
       

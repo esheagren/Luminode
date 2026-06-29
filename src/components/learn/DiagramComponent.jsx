@@ -1,6 +1,5 @@
 import React from 'react';
 import { useScroll } from './ScrollContext';
-
 // Create an empty diagram component instead of the default "Vector Embeddings" stand-in
 const EmptyDiagram = () => {
   return (
@@ -20,20 +19,9 @@ const EmptyDiagram = () => {
 };
 
 // Create placeholder components for each diagram type
-const PlaceholderDiagram = ({ caption }) => (
+const PlaceholderDiagram = () => (
   <EmptyDiagram />
 );
-
-// Diagram section colors - should match the ones in EssayContent.jsx
-const diagramColors = {
-  dictionaryVsAssociation: 'rgba(153, 102, 255, 0.1)', // Purple
-  vectorIntroduction: 'rgba(83, 123, 196, 0.1)', // Blue
-  vectorDimensions: 'rgba(124, 179, 66, 0.15)', // Light green
-  vectorMeaning: 'rgba(76, 125, 196, 0.15)', // Light blue
-  embeddingAlgorithms: 'rgba(255, 142, 83, 0.1)', // Orange
-  embeddingApplications: 'rgba(76, 205, 196, 0.1)', // Teal
-  embeddingSummary: 'rgba(255, 165, 0, 0.1)', // Gold
-};
 
 // Mapping of diagram IDs to components and captions
 const diagramMap = {

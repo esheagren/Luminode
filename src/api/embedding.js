@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getBaseUrl, getApiUrl, isProduction, logEnvironmentInfo } from '../utils/environment';
+import { getBaseUrl, logEnvironmentInfo } from '../utils/environment';
 
 // Log environment information for debugging
 logEnvironmentInfo();

@@ -1,5 +1,3 @@
-import suggestedWords from './suggestedWords';
-
 /**
  * Pre-computed embeddings for suggested words
  * Format: { word: number[] }

@@ -1,5 +1,4 @@
 import vectorService from '../server/services/vectorService.js';
-import { performPCA } from '../server/utils/mathHelpers.js';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -33,7 +32,7 @@ export default async function handler(req, res) {
       });
     }
     
-    const { words, dimensions = 2 } = req.body;
+    const { words, dimensions = 2, includeMeasureVectors = false } = req.body;
     
     if (!words || !Array.isArray(words) || words.length === 0) {
       return res.status(400).json({ error: 'Invalid words array' });
@@ -69,9 +68,10 @@ export default async function handler(req, res) {
         // Include truncated vector in string format for display
         point.truncatedVector = `[${vector.slice(0, 5).join(', ')}...]`;
 
-        // Include FULL vector for accurate similarity calculations
-        // Using only partial vectors leads to misleading similarity values
-        point.measureVector = vector;
+        if (includeMeasureVectors) {
+          // Include full vectors only for tools that need exact similarity.
+          point.measureVector = vector;
+        }
 
         // Log vector information for debugging
         console.log(`[API] Vector for "${word}": ${point.truncatedVector} (${vector.length} dimensions)`);

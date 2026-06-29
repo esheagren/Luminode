@@ -1,9 +1,5 @@
 import { Pinecone } from '@pinecone-database/pinecone';
 import dotenv from 'dotenv';
-import { cosineSimilarity } from '../utils/mathHelpers.js';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 // Load environment variables
 dotenv.config();
@@ -20,10 +16,6 @@ function logEnvironmentInfo() {
   const envVars = Object.keys(process.env).filter(key => !key.includes('KEY') && !key.includes('SECRET'));
   console.log(envVars.join(', '));
 }
-
-// Get the directory name
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Constants
 const PINECONE_INDEX_NAME = 'quickstart';
@@ -54,7 +46,7 @@ class PineconeService {
     // Log environment info for debugging
     logEnvironmentInfo();
 
-    this.initialization = new Promise(async (resolve, reject) => {
+    this.initialization = (async () => {
       try {
         console.log('Initializing Pinecone service...');
         
@@ -110,15 +102,14 @@ class PineconeService {
         
         this.isInitialized = true;
         console.log('Pinecone service initialized successfully');
-        resolve();
       } catch (error) {
         console.error('Error initializing Pinecone service:', error);
         console.error(`Error details: ${error.message}, Type: ${error.name}, Stack: ${error.stack}`);
         this.isInitialized = false;
         this.initialization = null;
-        reject(error);
+        throw error;
       }
-    });
+    })();
 
     return this.initialization;
   }
@@ -144,8 +135,6 @@ class PineconeService {
       
       console.log(`[PineconeService] Fetching vector for word: "${word}"`);
       const result = await this.namespace.fetch([word]);
-      
-      console.log(`[PineconeService] Raw Pinecone response:`, JSON.stringify(result, null, 2));
       
       if (!result.records || !result.records[word]) {
         console.log(`[PineconeService] No records found for word "${word}"`);

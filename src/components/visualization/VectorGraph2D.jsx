@@ -400,7 +400,7 @@ const VectorGraph2D = ({
             if (values.length >= 50 && values.every(v => !isNaN(v))) {
               return values;
             }
-          } catch (e) {
+          } catch {
             // Parsing failed, return null
           }
         }

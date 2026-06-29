@@ -61,9 +61,10 @@ const EssayContent = ({ content, title }) => {
     // Render different content types appropriately
     const renderContentItem = (item, index) => {
       switch (item.type) {
-        case 'heading':
+        case 'heading': {
           const HeadingTag = `h${item.level}`;
           return <HeadingTag key={item.id || index} id={item.id}>{item.text}</HeadingTag>;
+        }
           
         case 'paragraph':
           return (
