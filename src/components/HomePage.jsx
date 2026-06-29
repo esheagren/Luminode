@@ -309,7 +309,6 @@ const HomePage = () => {
             midpointWords={relatedClusters}
             numMidpoints={numNeighbors}
             viewMode={viewMode}
-            setViewMode={setViewMode}
             rulerActive={rulerActive}
             selectionMode={selectionMode || sliceMode || linearPathMode || greedyPathMode || projectionMode}
             onPointSelected={handlePointSelected}
@@ -427,8 +426,6 @@ const HomePage = () => {
             <WordInput
               words={words}
               setWords={setWords}
-              setResponse={setError}
-              setLoading={() => {}}
               setError={setError}
               loading={false}
               setRelatedClusters={setRelatedClusters}
@@ -765,8 +762,6 @@ const HomePage = () => {
             <WordInput
               words={words}
               setWords={setWords}
-              setResponse={setError}
-              setLoading={() => {/* No-op to prevent loading state issues */}}
               setError={setError}
               loading={false}
               setRelatedClusters={setRelatedClusters}
@@ -866,7 +861,6 @@ const HomePage = () => {
                 midpointWords={relatedClusters}
                 numMidpoints={numNeighbors}
                 viewMode={viewMode}
-                setViewMode={setViewMode}
                 rulerActive={rulerActive}
                 selectionMode={selectionMode || sliceMode || linearPathMode || greedyPathMode || projectionMode} // Treat slice mode similar to selection mode
                 onPointSelected={handlePointSelected}
